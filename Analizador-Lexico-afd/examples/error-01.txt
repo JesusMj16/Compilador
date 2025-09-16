@@ -1,0 +1,2 @@
+let mi_variable$ = 10; 
+let otra_variable = ¿5;  

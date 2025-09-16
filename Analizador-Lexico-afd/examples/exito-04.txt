@@ -1,0 +1,7 @@
+fn sumar(a: i32, b: i32) -> i32 {
+    return a + b;
+}
+
+fn principal() {
+    let resultado_suma = sumar(10, 20);
+}

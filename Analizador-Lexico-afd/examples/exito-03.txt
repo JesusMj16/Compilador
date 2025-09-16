@@ -1,0 +1,19 @@
+fn ciclos_ejemplo() {
+    let mut i: i32 = 0;
+    while i < 5 {
+        i = i + 1;
+        if i == 3 {
+            continue; 
+        }
+    }
+
+    for j in 0..10 {
+        if j == 8 {
+            break; 
+        }
+    }
+
+    loop {
+        break;
+    }
+}

@@ -1,0 +1,10 @@
+fn verificar_edad(edad: i32) {
+    if edad >= 18 {
+        let mensaje = "Es mayor de edad";
+    } else {
+        let mensaje_alternativo = "Es menor de edad";
+    }
+    
+    if !true { 
+    }
+}

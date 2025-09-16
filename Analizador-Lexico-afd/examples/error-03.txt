@@ -1,0 +1,3 @@
+let numero_invalido = 1.2.3; 
+let hexadecimal_malo = 0xFG; 
+let binario_malo = 0b102;  
