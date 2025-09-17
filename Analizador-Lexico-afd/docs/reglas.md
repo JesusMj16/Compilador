@@ -1,3 +1,5 @@
+Este documento define las reglas léxicas del lenguaje utilizando dos formatos complementarios: EBNF y expresiones regulares. La notación EBNF se emplea para describir de manera clara y estructurada la forma general de los tokens, lo que facilita la lectura y el entendimiento de la gramática. Las expresiones regulares, en cambio, ofrecen una representación práctica de esas mismas reglas, pensada para su implementación directa en analizadores léxicos.
+
 ## Identificadores
 ### Forma EBNF
 ```ebnf
