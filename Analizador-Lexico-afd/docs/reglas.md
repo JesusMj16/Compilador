@@ -54,7 +54,7 @@ exponente -> ( 'e' | 'E' ) signo? dígito+
 ```ebnf
 cadena   -> '"' ( caracter | escape )* '"'
 caracter -> cualquier símbolo excepto " o \
-escape   -> '\\' ( 'n' | 't' | '"' | '\'' | '\\' )
+escape   -> '\' ( 'n' | 't' | '"' | '\'' | '\\' )
 ```
 
 ### Forma REGEX
@@ -80,7 +80,7 @@ caracter_literal -> "'" ( caracter | escape ) "'"
 ## Comentarios
 ### Forma EBNF
 ```ebnf
-comentario_linea   -> "//" ( cualquier_caracter )*
+comentario_linea   -> "//" ( cualquier_caracter )* "\n"
 comentario_bloque  -> "/*" ( cualquier_caracter | salto_linea )* "*/"
 ```
 
