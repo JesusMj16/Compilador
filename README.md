@@ -1,6 +1,6 @@
 # Analizador Léxico con AFD
 
-## 📌 Descripción
+## Descripción
 Este proyecto corresponde a la materia de **Compiladores**.  
 El objetivo es **diseñar e implementar un analizador léxico utilizando un Autómata Finito Determinista (AFD)**.  
 
@@ -11,10 +11,11 @@ El analizador recibirá un archivo fuente escrito en un mini-lenguaje definido p
 
 ---
 
-## 🛠️ Tecnologías utilizadas
+## Tecnologías utilizadas
 - Lenguaje: **C++**.  
 - Control de versiones: **Git y GitHub**.  
 - Documentación: Markdown y PDF.  
+- Modelado de automatas: Jflap
 
 ---
 
