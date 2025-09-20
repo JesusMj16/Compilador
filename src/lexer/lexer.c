@@ -79,57 +79,31 @@ typedef enum {
 
 
 
-CharType get_char_type(char c) {
-    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-        return CHAR_LETTER;
-    } else if (c >= '0' && c <= '9') {
-        return CHAR_DIGIT;
-    } else if (c == '_') {
-        return CHAR_UNDERSCORE;
-    } else if (c == '"') {
-        return CHAR_QUOTE;
-    } else if (c == '\'') {
-        return CHAR_APOSTROPHE;
-    } else if (c == '\\') {
-        return CHAR_BACKSLASH;
-    } else if (c == '+') {
-        return CHAR_PLUS;
-    } else if (c == '-') {
-        return CHAR_MINUS;
-    } else if (c == '*') {
-        return CHAR_STAR;
-    } else if (c == '/') {
-        return CHAR_SLASH;
-    } else if (c == '%') {
-        return CHAR_PERCENT;
-    } else if (c == '=') {
-        return CHAR_EQUAL;
-    } else if (c == '!') {
-        return CHAR_EXCLAMATION;
-    } else if (c == '&') {
-        return CHAR_AMPERSAND;
-    } else if (c == '|') {
-        return CHAR_PIPE;
-    } else if (c == '<') {
-        return CHAR_LT;
-    } else if (c == '>') {
-        return CHAR_GT;
-    } else if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
-        return CHAR_HEXLETTER;
-    } else if (c == '.') {
-        return CHAR_DOT;
-    } else if(c == ";" || c == ',' || c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']') {
-        return CHAR_DELIMITER;
-    }
-    else if (c == ' ' || c == '\t') {
-        return CHAR_WHITESPACE;
-    } else if (c == '\n') {
-        return CHAR_NEWLINE;
-    } else if (c == EOF) {
-        return CHAR_EOF;
-    } else {
-        return CHAR_UNKNOWN;
-    } 
+CharType get_char_type(int c) {
+    if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) { return CHAR_HEXLETTER;}
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) { return CHAR_LETTER; }
+    if (c >= '0' && c <= '9') { return CHAR_DIGIT;}
+    if (c == '_') { return CHAR_UNDERSCORE;} 
+    if (c == '"') { return CHAR_QUOTE;}
+    if (c == '\'') { return CHAR_APOSTROPHE;}
+    if (c == '\\') { return CHAR_BACKSLASH;}
+    if (c == '+') { return CHAR_PLUS;}
+    if (c == '-') { return CHAR_MINUS;}
+    if (c == '*') { return CHAR_STAR;}
+    if (c == '/') { return CHAR_SLASH;}
+    if (c == '%') { return CHAR_PERCENT;}
+    if (c == '=') { return CHAR_EQUAL;}
+    if (c == '!') { return CHAR_EXCLAMATION;}
+    if (c == '&') { return CHAR_AMPERSAND;}
+    if (c == '|') { return CHAR_PIPE;}
+    if (c == '<') { return CHAR_LT;}
+    if (c == '>') { return CHAR_GT;}
+    if (c == '.') { return CHAR_DOT;}
+    if (c == ';' || c == ',' || c == '(' || c == ')'|| c == '{' || c == '}' || c == '[' || c == ']') { return CHAR_DELIMITER;}
+    if (c == ' ' || c == '\t') { return CHAR_WHITESPACE;}
+    if (c == '\n') { return CHAR_NEWLINE;}
+    if (c == EOF) { return CHAR_EOF;}
+    return CHAR_UNKNOWN;
 }
 
 
