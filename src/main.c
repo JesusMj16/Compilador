@@ -1,3 +1,11 @@
+/**
+ * @file main.c
+ * @brief Punto de entrada del compilador
+ * 
+ * Este archivo contiene la función principal del compilador que inicializa el lexer,
+ * procesa el archivo fuente y maneja los tokens generados.
+ */
+
 #include <stdio.h>
 #include "lexer.h"
 

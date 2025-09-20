@@ -1,0 +1,49 @@
+\doxysection{lexer.\+h}
+\hypertarget{lexer_8h_source}{}\label{lexer_8h_source}\index{include/lexer.h@{include/lexer.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00002\ \textcolor{comment}{*\ @file\ lexer.h}}
+\DoxyCodeLine{00003\ \textcolor{comment}{*\ @brief\ Definición\ del\ enum\ TokenType}}
+\DoxyCodeLine{00004\ \textcolor{comment}{*}}
+\DoxyCodeLine{00005\ \textcolor{comment}{*\ Contiene\ la\ definición\ del\ enum\ TokenType\ que\ representa\ los\ diferentes\ tipos\ de\ tokens}}
+\DoxyCodeLine{00006\ \textcolor{comment}{*\ que\ el\ lexer\ puede\ identificar\ en\ el\ código\ fuente.}}
+\DoxyCodeLine{00007\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#ifndef\ LEXER\_H}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#define\ LEXER\_H}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <stddef.h>}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <stdint.h>}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00015\ \textcolor{comment}{*\ @brief\ Definición\ del\ enum\ TokenType}}
+\DoxyCodeLine{00016\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00017\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ TokenType\ \{}
+\DoxyCodeLine{00018\ \ \ \ \ TOKEN\_IDENTIFIER,\ \ }
+\DoxyCodeLine{00019\ \ \ \ \ TOKEN\_NUMBER,\ \ \ \ \ \ }
+\DoxyCodeLine{00020\ \ \ \ \ TOKEN\_STRING,\ \ \ \ \ \ }
+\DoxyCodeLine{00021\ \ \ \ \ TOKEN\_OPERATOR,\ \ \ \ }
+\DoxyCodeLine{00022\ \ \ \ \ TOKEN\_DELIMITER,\ \ \ }
+\DoxyCodeLine{00023\ \ \ \ \ TOKEN\_KEYWORD,\ \ \ \ \ }
+\DoxyCodeLine{00024\ \ \ \ \ TOKEN\_UNKNOWN,\ \ \ \ \ \ }
+\DoxyCodeLine{00025\ \ \ \ \ TOKEN\_EOF\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00026\ \}\ TokenType;}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00029\ \textcolor{comment}{*\ @brief\ Definición\ de\ la\ estructura\ Token}}
+\DoxyCodeLine{00030\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00031\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structtoken__t}{token\_t}}\{}
+\DoxyCodeLine{00032\ \ \ \ \ TokenType\ \mbox{\hyperlink{structtoken__t_a8a0050a12b68536deafc72c0a107ec41}{type}};\ \ \ \ \ \ \ }
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{structtoken__t_a1136bc648e5c3e4677de8c6b5cca8baf}{lexeme}};\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00034\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{structtoken__t_a4ea1869ed4a5394ab12919762f679a9f}{line}};\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{structtoken__t_aac5185c8f09ce35af6929e71afc4b57c}{column}};\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structtoken__t}{token\_t}}\ *\mbox{\hyperlink{structtoken__t_a99cfdcd2840f15d3a38a266d30330085}{next}};\ }
+\DoxyCodeLine{00037\ \}\ \mbox{\hyperlink{structtoken__t}{token\_t}};}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \mbox{\hyperlink{structtoken__t}{token\_t}}\ *create\_token(TokenType\ \mbox{\hyperlink{structtoken__t_a8a0050a12b68536deafc72c0a107ec41}{type}},\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{structtoken__t_a1136bc648e5c3e4677de8c6b5cca8baf}{lexeme}},\textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{structtoken__t_a4ea1869ed4a5394ab12919762f679a9f}{line}},\ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{structtoken__t_aac5185c8f09ce35af6929e71afc4b57c}{column}});}
+\DoxyCodeLine{00040\ \textcolor{keywordtype}{void}\ free\_token(\mbox{\hyperlink{structtoken__t}{token\_t}}\ *token);}
+\DoxyCodeLine{00041\ \mbox{\hyperlink{structtoken__t}{token\_t}}\ *get\_next\_token(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *source);}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ LEXER\_H}}
+
+\end{DoxyCode}

@@ -1,4 +1,4 @@
-/*
+/**
 * @file lexer.h
 * @brief Definición del enum TokenType
 *
@@ -11,7 +11,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/*
+/**
 * @brief Definición del enum TokenType
 */
 typedef enum TokenType {
@@ -25,7 +25,7 @@ typedef enum TokenType {
     TOKEN_EOF         /**< Fin de archivo */
 } TokenType;
 
-/*
+/**
 * @brief Definición de la estructura Token
 */
 typedef struct token_t{

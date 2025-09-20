@@ -36,3 +36,13 @@ vgcore.*
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Documentación generada por Doxygen
+/docs/html/
+/docs/latex/
+/docs/man/
+/docs/rtf/
+/docs/xml/
+/docs/rtf/
+/docs/chm/
+/docs/doxygen_sqlite3.db

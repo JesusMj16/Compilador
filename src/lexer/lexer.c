@@ -1,11 +1,10 @@
-/*
+/**
  * @file lexer.c
  * @brief Implementación de estructuras y funciones del lexer
  * 
  * Contiene la implementación de las funciones para crear y liberar tokens,
  * así como la definición de la estructura token_t.
  */
-
 #include "lexer.h"
 #include <stdlib.h>
 #include <string.h>
@@ -125,12 +124,7 @@ void free_token(token_t *token);
  */
 token_t *get_next_token(const char *source);
 
-/**
- * @brief Lee el contenido de un archivo y lo devuelve como una cadena
- * 
- * @param filename Nombre del archivo a leer
- * @return Cadena con el contenido del archivo, o NULL si hubo un error
- */
+
 char *read_file(const char *filename);
 
 /*
@@ -215,12 +209,6 @@ CharType get_char_type(int c) {
     return CHAR_UNKNOWN;
 }
 
-/*
-*@brief Crea un nuevo token
-*
-* @param type Tipo de token
-* @return Puntero al token creado
-*/
 token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t column) {
     token_t *new_token = (token_t *) malloc(sizeof(token_t));
     if (new_token == NULL) {
@@ -245,19 +233,18 @@ token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t col
     return new_token;
 }
 
-/*
- * @brief Libera un token
- *
- * @param token Puntero al token a liberar
- * @return void
- */
 void free_token(token_t *token) {
     if( token != NULL) {
         free(token ->lexeme);
         free(token);
     }
 }
-
+/**
+ * @brief Lee el contenido de un archivo y lo devuelve como una cadena
+ * 
+ * @param filename Nombre del archivo a leer
+ * @return Cadena con el contenido del archivo, o NULL si hubo un error
+ */
 char *read_file(const char *filename){
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -279,12 +266,7 @@ char *read_file(const char *filename){
     fclose(file);
     return buffer;
 }
-/*
- * @brief Función principal del lexer que procesa la fuente y devuelve el siguiente token
- *
- * @param source Fuente de código a analizar
- * @return Puntero al siguiente token encontrado
- */
+
 token_t *get_next_token(const char *source){
     for (size_t i = 0; source[i]; i++) {
     printf("Char[%zu] = '%c' Type = %s\n", i, source[i], char_type_to_string(get_char_type(source[i])));
