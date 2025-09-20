@@ -14,6 +14,9 @@
 #define NUM_STATES 31
 #define NUM_CHAR_TYPES 24
 
+/*
+ * @brief Definición de los estados del autómata
+ */
 typedef enum {
     STATE_START,
     STATE_IDENTIFIER,
@@ -48,6 +51,9 @@ typedef enum {
     STATE_EOF
 } State;
 
+/*
+ * @brief Definición de los tipos de caracteres
+ */
 typedef enum CharType{
     CHAR_LETTER,       
     CHAR_DIGIT,        
@@ -72,16 +78,67 @@ typedef enum CharType{
     CHAR_WHITESPACE,   
     CHAR_NEWLINE,       
     CHAR_EOF,
-    CHAR_UNKNOWN
+    CHAR_UNKNOWN    
 } CharType;
 
-const char* char_type_to_string(CharType type);
-CharType get_char_type(int c);
+/**
+ * @brief Convierte un CharType a su representación en cadena
+ * 
+ * @param type Tipo de carácter
+ * @return Cadena que representa el tipo de carácter
+ */
+ const char* char_type_to_string(CharType type);
+
+/**
+ * @brief Obtiene el tipo de carácter de un carácter dado
+ * 
+ * @param c Carácter a evaluar
+ * @return Tipo de carácter correspondiente
+ */
+
+ CharType get_char_type(int c);
+
+ /**
+  * @brief Crea un nuevo token
+  * 
+  * @param type Tipo de token
+  * @param lexeme Lexema del token
+  * @param line Línea donde se encontró el token
+  * @param column Columna donde se encontró el token
+  * @return Puntero al token creado
+  */
 token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t column);
+
+/**
+ * @brief Libera un token
+ * 
+ * @param token Puntero al token a liberar
+ * @return void
+ */
 void free_token(token_t *token);
+
+/**
+ * @brief Función principal del lexer que procesa la fuente y devuelve el siguiente token
+ * 
+ * @param source Fuente de código a analizar
+ * @return Puntero al siguiente token encontrado
+ */
 token_t *get_next_token(const char *source);
+
+/**
+ * @brief Lee el contenido de un archivo y lo devuelve como una cadena
+ * 
+ * @param filename Nombre del archivo a leer
+ * @return Cadena con el contenido del archivo, o NULL si hubo un error
+ */
 char *read_file(const char *filename);
 
+/*
+ * @brief Función principal del analizador léxico
+ *
+ * @param source Fuente de código a analizar
+ * @return Puntero al siguiente token encontrado
+ */
 int main() {
     char *source = read_file("src/lexer/test.txt");
     if (source == NULL) {
