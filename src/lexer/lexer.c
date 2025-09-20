@@ -76,102 +76,25 @@ typedef enum CharType{
 } CharType;
 
 const char* char_type_to_string(CharType type);
-
-CharType get_char_type(int c) {
-    if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) { return CHAR_HEXLETTER;}
-    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) { return CHAR_LETTER; }
-    if (c >= '0' && c <= '9') { return CHAR_DIGIT;}
-    if (c == '_') { return CHAR_UNDERSCORE;} 
-    if (c == '"') { return CHAR_QUOTE;}
-    if (c == '\'') { return CHAR_APOSTROPHE;}
-    if (c == '\\') { return CHAR_BACKSLASH;}
-    if (c == '+') { return CHAR_PLUS;}
-    if (c == '-') { return CHAR_MINUS;}
-    if (c == '*') { return CHAR_STAR;}
-    if (c == '/') { return CHAR_SLASH;}
-    if (c == '%') { return CHAR_PERCENT;}
-    if (c == '=') { return CHAR_EQUAL;}
-    if (c == '!') { return CHAR_EXCLAMATION;}
-    if (c == '&') { return CHAR_AMPERSAND;}
-    if (c == '|') { return CHAR_PIPE;}
-    if (c == '<') { return CHAR_LT;}
-    if (c == '>') { return CHAR_GT;}
-    if (c == '.') { return CHAR_DOT;}
-    if (c == ';' || c == ',' || c == '(' || c == ')'|| c == '{' || c == '}' || c == '[' || c == ']') { return CHAR_DELIMITER;}
-    if (c == ' ' || c == '\t') { return CHAR_WHITESPACE;}
-    if (c == '\n') { return CHAR_NEWLINE;}
-    if (c == EOF) { return CHAR_EOF;}
-    return CHAR_UNKNOWN;
-}
-
-
-/*
-*@brief Crea un nuevo token
-*
-* @param type Tipo de token
-* @return Puntero al token creado
-*/
-token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t column) {
-    token_t *new_token = (token_t *) malloc(sizeof(token_t));
-    if (new_token == NULL) {
-        printf("Error: No se pudo agregar un nuevo elemento por falta de memoria.\n");
-        return NULL;
-    }
-    
-    new_token-> type = type;
-    new_token-> line = line;
-    new_token-> column = column;
-    new_token-> next = NULL;
-
-    if (lexeme != NULL) {
-        new_token->lexeme = malloc(strlen(lexeme) + 1);
-        if (new_token->lexeme) {
-            strcpy(new_token->lexeme, lexeme);
-        } else {
-            printf("Error: No se pudo reservar memoria para el token.\n");
-        }
-    }
-    
-    return new_token;
-}
-
-
-/*
- * @brief Libera un token
- *
- * @param token Puntero al token a liberar
- * @return void
- */
-void free_token(token_t *token) {
-    if( token != NULL) {
-        free(token ->lexeme);
-        free(token);
-    }
-}
-
-
-token_t *get_next_token(const char *source){
-    (void)source;
-    return NULL;
-}
+CharType get_char_type(int c);
+token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t column);
+void free_token(token_t *token);
+token_t *get_next_token(const char *source);
+char *read_file(const char *filename);
 
 int main() {
-    char test_chars[] = {
-        'a', 'Z', '5', '_', '"', '\'', '\\',
-        '+', '-', '*', '/', '%', '=', '!', '&', '|',
-        '<', '>', 'f', 'B', '.', ';', '{', '}', 
-        ' ', '\t', '\n', '$'
-    };
-
-    int n = sizeof(test_chars) / sizeof(test_chars[0]);
-
-    for (int i = 0; i < n; i++) {
-        int c = test_chars[i];
-        printf("Char '%c' -> %s\n", (char)((c >= 32 && c < 127) ? c : '?'), char_type_to_string(get_char_type(c)));
+    char *source = read_file("src/lexer/test.txt");
+    if (source == NULL) {
+        return 1;
     }
 
-    printf("EOF -> %s\n", char_type_to_string(get_char_type(EOF)));
-
+    token_t *token;
+    while ((token = get_next_token(source)) != NULL){
+        printf("[%zu,%zu] Type: %d, Lexeme: %s\n", token->line, token->column, token->type, token->lexeme);
+        free_token(token);
+    }
+    
+    free(source);
     return 0;
 }
 
@@ -208,3 +131,106 @@ const char* char_type_to_string(CharType type) {
     return "CHAR_INVALID";
 }
 
+CharType get_char_type(int c) {
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) { return CHAR_LETTER; }
+    if (c >= '0' && c <= '9') { return CHAR_DIGIT;}
+    if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) { return CHAR_HEXLETTER;}
+    if (c == '_') { return CHAR_UNDERSCORE;} 
+    if (c == '"') { return CHAR_QUOTE;}
+    if (c == '\'') { return CHAR_APOSTROPHE;}
+    if (c == '\\') { return CHAR_BACKSLASH;}
+    if (c == '+') { return CHAR_PLUS;}
+    if (c == '-') { return CHAR_MINUS;}
+    if (c == '*') { return CHAR_STAR;}
+    if (c == '/') { return CHAR_SLASH;}
+    if (c == '%') { return CHAR_PERCENT;}
+    if (c == '=') { return CHAR_EQUAL;}
+    if (c == '!') { return CHAR_EXCLAMATION;}
+    if (c == '&') { return CHAR_AMPERSAND;}
+    if (c == '|') { return CHAR_PIPE;}
+    if (c == '<') { return CHAR_LT;}
+    if (c == '>') { return CHAR_GT;}
+    if (c == '.') { return CHAR_DOT;}
+    if (c == ';' || c == ',' || c == '(' || c == ')'|| c == '{' || c == '}' || c == '[' || c == ']') { return CHAR_DELIMITER;}
+    if (c == ' ' || c == '\t') { return CHAR_WHITESPACE;}
+    if (c == '\n') { return CHAR_NEWLINE;}
+    if (c == EOF) { return CHAR_EOF;}
+    return CHAR_UNKNOWN;
+}
+
+/*
+*@brief Crea un nuevo token
+*
+* @param type Tipo de token
+* @return Puntero al token creado
+*/
+token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t column) {
+    token_t *new_token = (token_t *) malloc(sizeof(token_t));
+    if (new_token == NULL) {
+        printf("Error: No se pudo agregar un nuevo elemento por falta de memoria.\n");
+        return NULL;
+    }
+
+    new_token-> type = type;
+    new_token-> line = line;
+    new_token-> column = column;
+    new_token-> next = NULL;
+
+    if (lexeme != NULL) {
+        new_token->lexeme = malloc(strlen(lexeme) + 1);
+        if (new_token->lexeme) {
+            strcpy(new_token->lexeme, lexeme);
+        } else {
+            printf("Error: No se pudo reservar memoria para el token.\n");
+        }
+    }
+    
+    return new_token;
+}
+
+/*
+ * @brief Libera un token
+ *
+ * @param token Puntero al token a liberar
+ * @return void
+ */
+void free_token(token_t *token) {
+    if( token != NULL) {
+        free(token ->lexeme);
+        free(token);
+    }
+}
+
+char *read_file(const char *filename){
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Ocurrio un error al abrir el archivo '%s' o no existe.",filename);
+        return NULL;
+    }
+
+    fseek(file,0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+
+    char *buffer = malloc(size + 1);
+    if (buffer == NULL) {
+        printf("Error al asignar memoria.\n");
+        fclose(file);
+        return NULL;
+    }
+    fread(buffer,1,size,file);
+    fclose(file);
+    return buffer;
+}
+/*
+ * @brief Función principal del lexer que procesa la fuente y devuelve el siguiente token
+ *
+ * @param source Fuente de código a analizar
+ * @return Puntero al siguiente token encontrado
+ */
+token_t *get_next_token(const char *source){
+    for (size_t i = 0; source[i]; i++) {
+    printf("Char[%zu] = '%c' Type = %s\n", i, source[i], char_type_to_string(get_char_type(source[i])));
+}
+    return NULL;
+}
