@@ -11,8 +11,10 @@
 #include <string.h>
 #include <stdio.h>
 
-#define NUM_STATES 15
-#define NUM_CHAR_TYPES 10
+#define NUM_STATES 31
+#define NUM_CHAR_TYPES 24
+
+const char* char_type_to_string(CharType type);
 
 typedef enum {
     STATE_START,
@@ -48,9 +50,7 @@ typedef enum {
     STATE_EOF
 } State;
 
-
-
-typedef enum {
+typedef enum CharType{
     CHAR_LETTER,       
     CHAR_DIGIT,        
     CHAR_UNDERSCORE,   
@@ -76,8 +76,6 @@ typedef enum {
     CHAR_EOF,
     CHAR_UNKNOWN
 } CharType;
-
-
 
 CharType get_char_type(int c) {
     if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) { return CHAR_HEXLETTER;}
@@ -126,11 +124,12 @@ token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t col
     new_token-> next = NULL;
 
     if (lexeme != NULL) {
-        new_token->lexeme = strdup(lexeme);
-        if (new_token->lexeme == NULL) {
+        new_token->lexeme = malloc(strlen(lexeme) + 1);
+        if (new_token->lexeme) {
+            strcpy(new_token->lexeme, lexeme);
+        } else {
             printf("Error: No se pudo reservar memoria para el token.\n");
         }
-        
     }
     
     return new_token;
@@ -150,7 +149,62 @@ void free_token(token_t *token) {
     }
 }
 
+
 token_t *get_next_token(const char *source){
-    
+    (void)source;
+    return NULL;
+}
+
+int main() {
+    char test_chars[] = {
+        'a', 'Z', '5', '_', '"', '\'', '\\',
+        '+', '-', '*', '/', '%', '=', '!', '&', '|',
+        '<', '>', 'f', 'B', '.', ';', '{', '}', 
+        ' ', '\t', '\n', '$'
+    };
+
+    int n = sizeof(test_chars) / sizeof(test_chars[0]);
+
+    for (int i = 0; i < n; i++) {
+        int c = test_chars[i];
+        printf("Char '%c' -> %s\n", (char)((c >= 32 && c < 127) ? c : '?'), char_type_to_string(get_char_type(c)));
+    }
+
+    printf("EOF -> %s\n", char_type_to_string(get_char_type(EOF)));
+
+    return 0;
+}
+
+const char* char_type_to_string(CharType type) {
+    static const char *names[] = {
+        [CHAR_LETTER]       = "CHAR_LETTER",
+        [CHAR_DIGIT]        = "CHAR_DIGIT",
+        [CHAR_UNDERSCORE]   = "CHAR_UNDERSCORE",
+        [CHAR_QUOTE]        = "CHAR_QUOTE",
+        [CHAR_APOSTROPHE]   = "CHAR_APOSTROPHE",
+        [CHAR_BACKSLASH]    = "CHAR_BACKSLASH",
+        [CHAR_PLUS]         = "CHAR_PLUS",
+        [CHAR_MINUS]        = "CHAR_MINUS",
+        [CHAR_STAR]         = "CHAR_STAR",
+        [CHAR_SLASH]        = "CHAR_SLASH",
+        [CHAR_PERCENT]      = "CHAR_PERCENT",
+        [CHAR_EQUAL]        = "CHAR_EQUAL",
+        [CHAR_EXCLAMATION]  = "CHAR_EXCLAMATION",
+        [CHAR_AMPERSAND]    = "CHAR_AMPERSAND",
+        [CHAR_PIPE]         = "CHAR_PIPE",
+        [CHAR_LT]           = "CHAR_LT",
+        [CHAR_GT]           = "CHAR_GT",
+        [CHAR_HEXLETTER]    = "CHAR_HEXLETTER",
+        [CHAR_DOT]          = "CHAR_DOT",
+        [CHAR_DELIMITER]    = "CHAR_DELIMITER",
+        [CHAR_WHITESPACE]   = "CHAR_WHITESPACE",
+        [CHAR_NEWLINE]      = "CHAR_NEWLINE",
+        [CHAR_EOF]          = "CHAR_EOF",
+        [CHAR_UNKNOWN]      = "CHAR_UNKNOWN"
+    };
+
+    if (type >= 0 && type <= CHAR_UNKNOWN)
+        return names[type];
+    return "CHAR_INVALID";
 }
 
