@@ -21,14 +21,13 @@ typedef enum TokenType {
     TOKEN_OPERATOR,    /**< Operador */
     TOKEN_DELIMITER,   /**< Delimitador */
     TOKEN_KEYWORD,     /**< Palabra clave */
-    TOKEN_EOF,         /**< Fin de archivo */
-    TOKEN_UNKNOWN      /**< Token desconocido */
+    TOKEN_UNKNOWN,      /**< Token desconocido */
+    TOKEN_EOF         /**< Fin de archivo */
 } TokenType;
 
 /*
 * @brief Definición de la estructura Token
 */
-
 typedef struct token_t{
     TokenType type;       /**< Tipo de token */
     char *lexeme;         /**< Lexema del token */

@@ -11,6 +11,32 @@
 #include <string.h>
 #include <stdio.h>
 
+typedef enum {
+    STATE_START,
+    STATE_IDENTIFIER,
+    STATE_NUMBER,
+    STATE_STRING,
+    STATE_OPERATOR,
+    STATE_DELIMITER,
+    STATE_COMMENT,
+    STATE_WHITESPACE,
+    STATE_FINAL,
+    STATE_UNKNOWN,
+    STATE_EOF
+}State;
+
+typedef enum {
+    CHAR_LETTER,
+    CHAR_DIGIT,
+    CHAR_QUOTE,
+    CHAR_OPERATOR,
+    CHAR_DELIMITER,
+    CHAR_WHITESPACE,
+    CHAR_NEWLINE,
+    CHAR_EOF,
+    CHAR_UNKNOWN
+};
+
 
 /*
 *@brief Crea un nuevo token
@@ -55,4 +81,7 @@ void free_token(token_t *token) {
     }
 }
 
+token_t *get_next_token(const char *source){
+    
+}
 
