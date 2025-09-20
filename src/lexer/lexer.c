@@ -11,6 +11,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#define NUM_STATES 11
+#define NUM_CHAR_TYPES 9
+
 typedef enum {
     STATE_START,
     STATE_IDENTIFIER,
@@ -21,7 +24,7 @@ typedef enum {
     STATE_COMMENT,
     STATE_WHITESPACE,
     STATE_FINAL,
-    STATE_UNKNOWN,
+    STATE_ERROR,
     STATE_EOF
 }State;
 
@@ -35,7 +38,19 @@ typedef enum {
     CHAR_NEWLINE,
     CHAR_EOF,
     CHAR_UNKNOWN
-};
+}CharType;
+
+CharType get_char_type(char c) {
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) { return CHAR_LETTER; }
+    if (c >= 0 && c <= '9') { return CHAR_DIGIT; }
+    if (c == '"') { return CHAR_QUOTE; }
+    if (c == '+' && c == '-' && c == '*' && c == '/' && c == '=' && c == '<' && c == '>') { return CHAR_OPERATOR; }
+    if (c == '(' || c == ')' || c == '{' || c == '}' || c == ',' || c == ';' || c == '[' || c == ']') { return CHAR_DELIMITER; }
+    if (c == ' ' || c == '\t' ) { return CHAR_WHITESPACE; }
+    if (c == '\n') { return CHAR_NEWLINE; }
+    if (c == '\0') { return CHAR_EOF; }
+    return CHAR_UNKNOWN;
+}
 
 
 /*
