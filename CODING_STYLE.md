@@ -7,7 +7,7 @@ Este documento define las reglas de estilo de código para garantizar **consiste
 ## 🔹 1. Formato general
 
 * Codificación de archivos: **UTF-8**.
-* Longitud máxima de línea: **80 caracteres**.
+* Longitud máxima de línea: **90 caracteres**.
 * Indentación: **Tabulacion**
 * Una declaración por línea.
 * Evitar espacios en blanco innecesarios (al final de línea o antes de saltos).
@@ -95,7 +95,7 @@ Token scan_token(Lexer *lexer);
 
 ## 🔹 6. Estructuras y enums
 
-* Cada campo en línea nueva, con 2 espacios de indentación.
+* Cada campo en línea nueva, con un TAB de indentación.
 * Usar `typedef` para simplificar.
 
 ```c
