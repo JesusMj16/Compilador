@@ -14,8 +14,6 @@
 #define NUM_STATES 31
 #define NUM_CHAR_TYPES 24
 
-const char* char_type_to_string(CharType type);
-
 typedef enum {
     STATE_START,
     STATE_IDENTIFIER,
@@ -76,6 +74,8 @@ typedef enum CharType{
     CHAR_EOF,
     CHAR_UNKNOWN
 } CharType;
+
+const char* char_type_to_string(CharType type);
 
 CharType get_char_type(int c) {
     if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) { return CHAR_HEXLETTER;}
