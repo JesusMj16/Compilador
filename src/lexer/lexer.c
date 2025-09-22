@@ -100,6 +100,7 @@ typedef enum CharType{
 } CharType;
 
 /* Utilidad opcional para depuración */
+#ifdef LEXER_DEBUG
 static const char* char_type_to_string(CharType type) {
     static const char *names[] = {
         [CHAR_LETTER]       = "CHAR_LETTER",
@@ -130,6 +131,7 @@ static const char* char_type_to_string(CharType type) {
     if (type >= 0 && type <= CHAR_UNKNOWN) return names[type];
     return "CHAR_INVALID";
 }
+#endif
 
 /* Clasificación de caracteres: importante reconocer '\0' como EOF */
 static CharType get_char_type(int c) {
@@ -543,6 +545,20 @@ token_t *get_next_token(const char *source){
 }
 
 
+static const char* token_type_name(TokenType t) {
+    switch (t) {
+        case TOKEN_IDENTIFIER: return "IDENTIFIER";
+        case TOKEN_NUMBER:     return "NUMBER";
+        case TOKEN_STRING:     return "STRING";
+        case TOKEN_OPERATOR:   return "OPERATOR";
+        case TOKEN_DELIMITER:  return "DELIMITER";
+        case TOKEN_KEYWORD:    return "KEYWORD";
+        case TOKEN_UNKNOWN:    return "UNKNOWN";
+        case TOKEN_EOF:        return "EOF";
+        default:               return "INVALID";
+    }
+}
+
 int main(void) {
     char *source = read_file("src/lexer/test.txt");
     if (source == NULL) {
@@ -557,7 +573,8 @@ int main(void) {
             printf("Error al obtener el siguiente token.\n");
             break;
         }
-        printf("[%zu,%zu] Type: %d Lexeme: %s\n", token->line, token->column, token->type, token->lexeme ? token->lexeme : "NULL");
+        printf("[%zu,%zu] Type: %s Lexeme: %s\n",token->line, token->column,token_type_name(token->type), token->lexeme ? token->lexeme : "NULL");
+
         if (token->type == TOKEN_EOF) {
             free_token(token);
             break;

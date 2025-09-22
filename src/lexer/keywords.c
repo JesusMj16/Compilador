@@ -32,7 +32,7 @@ static const char *keywords[] = {
     NULL
 };
 
-/*
+/**
  * @brief Verifica si un lexema es una palabra clave.
  * 
  * @param lexeme El lexema a verificar.
