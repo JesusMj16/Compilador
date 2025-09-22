@@ -1,0 +1,515 @@
+\doxysection{Referencia del archivo src/lexer/lexer.c}
+\hypertarget{lexer_8c}{}\label{lexer_8c}\index{src/lexer/lexer.c@{src/lexer/lexer.c}}
+
+
+Implementación de estructuras y funciones del lexer.  
+
+
+{\ttfamily \#include "{}lexer.\+h"{}}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+\doxysubsubsection*{defines}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{lexer_8c_a6e67a587012cd0570839daca590cf822}{NUM\+\_\+\+STATES}}~31
+\item 
+\#define \mbox{\hyperlink{lexer_8c_af28660fd5586938c1b71e03fe821598e}{NUM\+\_\+\+CHAR\+\_\+\+TYPES}}~24
+\end{DoxyCompactItemize}
+\doxysubsubsection*{typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef enum \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0}{Char\+Type}} \mbox{\hyperlink{lexer_8c_a04a6ee63b7d75089801fe814f5d0409c}{Char\+Type}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumeraciones}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8}{State}} \{ \newline
+\mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a1844f314039d713261df43a309145446}{STATE\+\_\+\+START}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8aa32a5c6d54613f0ffb2a047efdf30bf0}{STATE\+\_\+\+IDENTIFIER}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a0303a773c5ac4ecf942519d6e2f1a160}{STATE\+\_\+\+INT}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8af26d3173eea26946689d7538033b7c12}{STATE\+\_\+\+SIGN}}
+, \newline
+\mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a93a1138a6f0d735146b6f683fbc808be}{STATE\+\_\+\+BIN\+\_\+\+PREFIX}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a78b5e61636be55c0666a83bce5bacd34}{STATE\+\_\+\+BIN}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a756e6c88ff6432458c01feab845a809d}{STATE\+\_\+\+HEX\+\_\+\+PREFIX}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8aa6f4c3c43919ef5e220fe52ee4de178a}{STATE\+\_\+\+HEX}}
+, \newline
+\mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a9a07d73f7d329e12a786716b39da3508}{STATE\+\_\+\+REAL}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8aa6352a1294146c1e39825b55e2caf498}{STATE\+\_\+\+REAL\+\_\+\+FRACTION}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a4d0c1734c8c1ea9cb6633c55983a16c2}{STATE\+\_\+\+EXPONENT\+\_\+\+MARK}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a3a79450d3dd6d10ffa2308c7433c54e7}{STATE\+\_\+\+EXPONENT\+\_\+\+SIGN}}
+, \newline
+\mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a553163a1f1d2095c32b9637d52d11cc4}{STATE\+\_\+\+EXPONENT}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8afd4949461895b03bbb1200e0c349d818}{STATE\+\_\+\+STRING}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a5067b1d743db85c137c946a67aa6e1a9}{STATE\+\_\+\+STRING\+\_\+\+ESCAPE}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a4cd2f432c6108c2ceed5a1aaed62fecb}{STATE\+\_\+\+CHAR}}
+, \newline
+\mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a65d0efc8e898a6af8134b11708667b02}{STATE\+\_\+\+CHAR\+\_\+\+ESCAPE}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8ac01aef41c4867e565b2cac0ebc777afc}{STATE\+\_\+\+CHAR\+\_\+\+END}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a0d15cc14df5481149a1cb18245e81f84}{STATE\+\_\+\+SLASH}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a91b98e52ebf9391ec15f6b09a11cc7e1}{STATE\+\_\+\+COMMENT\+\_\+\+LINE}}
+, \newline
+\mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a8408c263638765a0852418a0f03eb61d}{STATE\+\_\+\+COMMENT\+\_\+\+BLOCK}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a59c210253899d9eb2a07ad53f892558c}{STATE\+\_\+\+COMMENT\+\_\+\+BLOCK\+\_\+\+END}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a80ef914a73346c1056d95281ca2144ef}{STATE\+\_\+\+OPERATOR}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a140e556f23df58e7ba0d2572629063c6}{STATE\+\_\+\+OPERATOR\+\_\+\+EQ}}
+, \newline
+\mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a304088c12ac364fb214ea65f8b67d52b}{STATE\+\_\+\+OPERATOR\+\_\+\+AND}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a09360087d87854cf4663916c861fd2ad}{STATE\+\_\+\+OPERATOR\+\_\+\+OR}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8aa290cc56385d9574264584c0565cfaa5}{STATE\+\_\+\+DELIMITER}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a507dc58111f97a5b9d3e4a4cf138c2a7}{STATE\+\_\+\+WHITESPACE}}
+, \newline
+\mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a8caeff0700000831e36da9658f278f65}{STATE\+\_\+\+FINAL}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8ad55c0bfe3a7d3ae983e81a98e3384d6c}{STATE\+\_\+\+ERROR}}
+, \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a9f3f0f3bc2ba0831b14c93278ed61e46}{STATE\+\_\+\+EOF}}
+ \}
+\item 
+enum \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0}{Char\+Type}} \{ \newline
+\mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a3bbbac12ca0084ab42a94108f025172f}{CHAR\+\_\+\+LETTER}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a4ffa3bbdbf339988270fa16597af5740}{CHAR\+\_\+\+DIGIT}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aa7bf3f7a7f82e42ae0617d49e9aa8e3a}{CHAR\+\_\+\+UNDERSCORE}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a714b8e4f53506c8b61cd50641e189bbe}{CHAR\+\_\+\+QUOTE}}
+, \newline
+\mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a73019285e003f37b4681227fd75c1d65}{CHAR\+\_\+\+APOSTROPHE}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aead0ae2678ac5951314396ace859076e}{CHAR\+\_\+\+BACKSLASH}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aa06e4949f2a7470cfd8236f707648b7f}{CHAR\+\_\+\+PLUS}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a6d055e7c50b7a7be484346d80e97c1ff}{CHAR\+\_\+\+MINUS}}
+, \newline
+\mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aae4f037f6301a5f5d8de2751f9558ddd}{CHAR\+\_\+\+STAR}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ad1bf57ba37b3cea208c2870b3901b511}{CHAR\+\_\+\+SLASH}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a80aff20e1f9db88c5b51d1de3e17639f}{CHAR\+\_\+\+PERCENT}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a5145fb51dcbac5a0db047500a3ce9b2f}{CHAR\+\_\+\+EQUAL}}
+, \newline
+\mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ae7d9276bb2e1c1ab06264e30a89aae80}{CHAR\+\_\+\+EXCLAMATION}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a7ccbd8824f1bbc2a73a31031c3fbdcd1}{CHAR\+\_\+\+AMPERSAND}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0adaf4bdc4719ce01813d24bed22791ce5}{CHAR\+\_\+\+PIPE}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ade9d5b9b395ec9f0b784bae0d4ba016b}{CHAR\+\_\+\+LT}}
+, \newline
+\mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a2faa75f928ffc4b9e9d0dcf606c5965f}{CHAR\+\_\+\+GT}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a4ec5d6f6fea468da83e7593a1ef0457b}{CHAR\+\_\+\+HEXLETTER}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0adfa014560dae2205b80853ba0fd87ff5}{CHAR\+\_\+\+DOT}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a62d9d726bfe3cee71b246bc510674188}{CHAR\+\_\+\+DELIMITER}}
+, \newline
+\mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ad1ff2fa21ca0b83f829a46b82056678f}{CHAR\+\_\+\+WHITESPACE}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a2740ed80fd9519f2bd86bb7c7d76ddd7}{CHAR\+\_\+\+NEWLINE}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aa789af26129087c2a5ec96d17a204b05}{CHAR\+\_\+\+EOF}}
+, \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ab5bb08f593813bfc7ba0631aabd20608}{CHAR\+\_\+\+UNKNOWN}}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Funciones}
+\begin{DoxyCompactItemize}
+\item 
+const char \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{lexer_8c_a5be34ab1069f72b0d8fc16406ddba410}{char\+\_\+type\+\_\+to\+\_\+string}} (\mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0}{Char\+Type}} type)
+\begin{DoxyCompactList}\small\item\em Convierte un \doxylink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0}{Char\+Type} a su representación en cadena. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0}{Char\+Type}} \mbox{\hyperlink{lexer_8c_a4e074708c7e62d1fad050b9fbb7e8155}{get\+\_\+char\+\_\+type}} (int c)
+\begin{DoxyCompactList}\small\item\em Obtiene el tipo de carácter de un carácter dado. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structtoken__t}{token\+\_\+t}} \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{lexer_8c_a33201e96cfb52c1be47b06f5dd716091}{create\+\_\+token}} (\mbox{\hyperlink{lexer_8h_aa520fbf142ba1e7e659590c07da31921}{Token\+Type}} type, const char \texorpdfstring{$\ast$}{*}lexeme, size\+\_\+t line, size\+\_\+t column)
+\begin{DoxyCompactList}\small\item\em Crea un nuevo token. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{lexer_8c_a6c9affc7a10370c06312044ae067ed04}{free\+\_\+token}} (\mbox{\hyperlink{structtoken__t}{token\+\_\+t}} \texorpdfstring{$\ast$}{*}token)
+\begin{DoxyCompactList}\small\item\em Libera un token. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structtoken__t}{token\+\_\+t}} \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{lexer_8c_ac6764a58ed5d9029bace498ac059c096}{get\+\_\+next\+\_\+token}} (const char \texorpdfstring{$\ast$}{*}source)
+\begin{DoxyCompactList}\small\item\em Función principal del lexer que procesa la fuente y devuelve el siguiente token. \end{DoxyCompactList}\item 
+char \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{lexer_8c_ab5e8b6289c8d0f065872cbe531443692}{read\+\_\+file}} (const char \texorpdfstring{$\ast$}{*}filename)
+\begin{DoxyCompactList}\small\item\em Lee el contenido de un archivo y lo devuelve como una cadena. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{lexer_8c_ae66f6b31b5ad750f1fe042a706a4e3d4}{main}} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Descripción detallada}
+Implementación de estructuras y funciones del lexer. 
+
+Contiene la implementación de las funciones para crear y liberar tokens, así como la definición de la estructura \doxylink{structtoken__t}{token\+\_\+t}. 
+
+\label{doc-define-members}
+\Hypertarget{lexer_8c_doc-define-members}
+\doxysubsection{Documentación de «define»}
+\Hypertarget{lexer_8c_af28660fd5586938c1b71e03fe821598e}\index{lexer.c@{lexer.c}!NUM\_CHAR\_TYPES@{NUM\_CHAR\_TYPES}}
+\index{NUM\_CHAR\_TYPES@{NUM\_CHAR\_TYPES}!lexer.c@{lexer.c}}
+\doxysubsubsection{\texorpdfstring{NUM\_CHAR\_TYPES}{NUM\_CHAR\_TYPES}}
+{\footnotesize\ttfamily \label{lexer_8c_af28660fd5586938c1b71e03fe821598e} 
+\#define NUM\+\_\+\+CHAR\+\_\+\+TYPES~24}
+
+\Hypertarget{lexer_8c_a6e67a587012cd0570839daca590cf822}\index{lexer.c@{lexer.c}!NUM\_STATES@{NUM\_STATES}}
+\index{NUM\_STATES@{NUM\_STATES}!lexer.c@{lexer.c}}
+\doxysubsubsection{\texorpdfstring{NUM\_STATES}{NUM\_STATES}}
+{\footnotesize\ttfamily \label{lexer_8c_a6e67a587012cd0570839daca590cf822} 
+\#define NUM\+\_\+\+STATES~31}
+
+
+
+\label{doc-typedef-members}
+\Hypertarget{lexer_8c_doc-typedef-members}
+\doxysubsection{Documentación de «typedef»}
+\Hypertarget{lexer_8c_a04a6ee63b7d75089801fe814f5d0409c}\index{lexer.c@{lexer.c}!CharType@{CharType}}
+\index{CharType@{CharType}!lexer.c@{lexer.c}}
+\doxysubsubsection{\texorpdfstring{CharType}{CharType}}
+{\footnotesize\ttfamily \label{lexer_8c_a04a6ee63b7d75089801fe814f5d0409c} 
+typedef enum \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0}{Char\+Type}} \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0}{Char\+Type}}}
+
+
+
+\label{doc-enum-members}
+\Hypertarget{lexer_8c_doc-enum-members}
+\doxysubsection{Documentación de enumeraciones}
+\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0}\index{lexer.c@{lexer.c}!CharType@{CharType}}
+\index{CharType@{CharType}!lexer.c@{lexer.c}}
+\doxysubsubsection{\texorpdfstring{CharType}{CharType}}
+{\footnotesize\ttfamily \label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0} 
+enum \mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0}{Char\+Type}}}
+
+\begin{DoxyEnumFields}[2]{Valores de enumeraciones}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_LETTER@{CHAR\_LETTER}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_LETTER@{CHAR\_LETTER}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a3bbbac12ca0084ab42a94108f025172f}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a3bbbac12ca0084ab42a94108f025172f} 
+CHAR\+\_\+\+LETTER&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_DIGIT@{CHAR\_DIGIT}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_DIGIT@{CHAR\_DIGIT}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a4ffa3bbdbf339988270fa16597af5740}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a4ffa3bbdbf339988270fa16597af5740} 
+CHAR\+\_\+\+DIGIT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_UNDERSCORE@{CHAR\_UNDERSCORE}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_UNDERSCORE@{CHAR\_UNDERSCORE}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aa7bf3f7a7f82e42ae0617d49e9aa8e3a}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aa7bf3f7a7f82e42ae0617d49e9aa8e3a} 
+CHAR\+\_\+\+UNDERSCORE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_QUOTE@{CHAR\_QUOTE}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_QUOTE@{CHAR\_QUOTE}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a714b8e4f53506c8b61cd50641e189bbe}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a714b8e4f53506c8b61cd50641e189bbe} 
+CHAR\+\_\+\+QUOTE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_APOSTROPHE@{CHAR\_APOSTROPHE}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_APOSTROPHE@{CHAR\_APOSTROPHE}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a73019285e003f37b4681227fd75c1d65}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a73019285e003f37b4681227fd75c1d65} 
+CHAR\+\_\+\+APOSTROPHE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_BACKSLASH@{CHAR\_BACKSLASH}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_BACKSLASH@{CHAR\_BACKSLASH}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aead0ae2678ac5951314396ace859076e}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aead0ae2678ac5951314396ace859076e} 
+CHAR\+\_\+\+BACKSLASH&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_PLUS@{CHAR\_PLUS}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_PLUS@{CHAR\_PLUS}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aa06e4949f2a7470cfd8236f707648b7f}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aa06e4949f2a7470cfd8236f707648b7f} 
+CHAR\+\_\+\+PLUS&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_MINUS@{CHAR\_MINUS}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_MINUS@{CHAR\_MINUS}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a6d055e7c50b7a7be484346d80e97c1ff}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a6d055e7c50b7a7be484346d80e97c1ff} 
+CHAR\+\_\+\+MINUS&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_STAR@{CHAR\_STAR}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_STAR@{CHAR\_STAR}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aae4f037f6301a5f5d8de2751f9558ddd}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aae4f037f6301a5f5d8de2751f9558ddd} 
+CHAR\+\_\+\+STAR&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_SLASH@{CHAR\_SLASH}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_SLASH@{CHAR\_SLASH}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ad1bf57ba37b3cea208c2870b3901b511}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ad1bf57ba37b3cea208c2870b3901b511} 
+CHAR\+\_\+\+SLASH&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_PERCENT@{CHAR\_PERCENT}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_PERCENT@{CHAR\_PERCENT}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a80aff20e1f9db88c5b51d1de3e17639f}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a80aff20e1f9db88c5b51d1de3e17639f} 
+CHAR\+\_\+\+PERCENT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_EQUAL@{CHAR\_EQUAL}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_EQUAL@{CHAR\_EQUAL}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a5145fb51dcbac5a0db047500a3ce9b2f}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a5145fb51dcbac5a0db047500a3ce9b2f} 
+CHAR\+\_\+\+EQUAL&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_EXCLAMATION@{CHAR\_EXCLAMATION}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_EXCLAMATION@{CHAR\_EXCLAMATION}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ae7d9276bb2e1c1ab06264e30a89aae80}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ae7d9276bb2e1c1ab06264e30a89aae80} 
+CHAR\+\_\+\+EXCLAMATION&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_AMPERSAND@{CHAR\_AMPERSAND}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_AMPERSAND@{CHAR\_AMPERSAND}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a7ccbd8824f1bbc2a73a31031c3fbdcd1}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a7ccbd8824f1bbc2a73a31031c3fbdcd1} 
+CHAR\+\_\+\+AMPERSAND&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_PIPE@{CHAR\_PIPE}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_PIPE@{CHAR\_PIPE}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0adaf4bdc4719ce01813d24bed22791ce5}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0adaf4bdc4719ce01813d24bed22791ce5} 
+CHAR\+\_\+\+PIPE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_LT@{CHAR\_LT}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_LT@{CHAR\_LT}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ade9d5b9b395ec9f0b784bae0d4ba016b}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ade9d5b9b395ec9f0b784bae0d4ba016b} 
+CHAR\+\_\+\+LT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_GT@{CHAR\_GT}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_GT@{CHAR\_GT}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a2faa75f928ffc4b9e9d0dcf606c5965f}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a2faa75f928ffc4b9e9d0dcf606c5965f} 
+CHAR\+\_\+\+GT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_HEXLETTER@{CHAR\_HEXLETTER}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_HEXLETTER@{CHAR\_HEXLETTER}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a4ec5d6f6fea468da83e7593a1ef0457b}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a4ec5d6f6fea468da83e7593a1ef0457b} 
+CHAR\+\_\+\+HEXLETTER&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_DOT@{CHAR\_DOT}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_DOT@{CHAR\_DOT}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0adfa014560dae2205b80853ba0fd87ff5}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0adfa014560dae2205b80853ba0fd87ff5} 
+CHAR\+\_\+\+DOT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_DELIMITER@{CHAR\_DELIMITER}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_DELIMITER@{CHAR\_DELIMITER}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a62d9d726bfe3cee71b246bc510674188}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a62d9d726bfe3cee71b246bc510674188} 
+CHAR\+\_\+\+DELIMITER&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_WHITESPACE@{CHAR\_WHITESPACE}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_WHITESPACE@{CHAR\_WHITESPACE}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ad1ff2fa21ca0b83f829a46b82056678f}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ad1ff2fa21ca0b83f829a46b82056678f} 
+CHAR\+\_\+\+WHITESPACE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_NEWLINE@{CHAR\_NEWLINE}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_NEWLINE@{CHAR\_NEWLINE}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a2740ed80fd9519f2bd86bb7c7d76ddd7}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0a2740ed80fd9519f2bd86bb7c7d76ddd7} 
+CHAR\+\_\+\+NEWLINE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_EOF@{CHAR\_EOF}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_EOF@{CHAR\_EOF}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aa789af26129087c2a5ec96d17a204b05}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0aa789af26129087c2a5ec96d17a204b05} 
+CHAR\+\_\+\+EOF&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHAR\_UNKNOWN@{CHAR\_UNKNOWN}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!CHAR\_UNKNOWN@{CHAR\_UNKNOWN}}}\Hypertarget{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ab5bb08f593813bfc7ba0631aabd20608}\label{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0ab5bb08f593813bfc7ba0631aabd20608} 
+CHAR\+\_\+\+UNKNOWN&\\
+\hline
+
+\end{DoxyEnumFields}
+\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8}\index{lexer.c@{lexer.c}!State@{State}}
+\index{State@{State}!lexer.c@{lexer.c}}
+\doxysubsubsection{\texorpdfstring{State}{State}}
+{\footnotesize\ttfamily \label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8} 
+enum \mbox{\hyperlink{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8}{State}}}
+
+\begin{DoxyEnumFields}[2]{Valores de enumeraciones}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_START@{STATE\_START}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_START@{STATE\_START}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a1844f314039d713261df43a309145446}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a1844f314039d713261df43a309145446} 
+STATE\+\_\+\+START&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_IDENTIFIER@{STATE\_IDENTIFIER}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_IDENTIFIER@{STATE\_IDENTIFIER}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8aa32a5c6d54613f0ffb2a047efdf30bf0}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8aa32a5c6d54613f0ffb2a047efdf30bf0} 
+STATE\+\_\+\+IDENTIFIER&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_INT@{STATE\_INT}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_INT@{STATE\_INT}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a0303a773c5ac4ecf942519d6e2f1a160}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a0303a773c5ac4ecf942519d6e2f1a160} 
+STATE\+\_\+\+INT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_SIGN@{STATE\_SIGN}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_SIGN@{STATE\_SIGN}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8af26d3173eea26946689d7538033b7c12}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8af26d3173eea26946689d7538033b7c12} 
+STATE\+\_\+\+SIGN&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_BIN\_PREFIX@{STATE\_BIN\_PREFIX}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_BIN\_PREFIX@{STATE\_BIN\_PREFIX}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a93a1138a6f0d735146b6f683fbc808be}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a93a1138a6f0d735146b6f683fbc808be} 
+STATE\+\_\+\+BIN\+\_\+\+PREFIX&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_BIN@{STATE\_BIN}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_BIN@{STATE\_BIN}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a78b5e61636be55c0666a83bce5bacd34}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a78b5e61636be55c0666a83bce5bacd34} 
+STATE\+\_\+\+BIN&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_HEX\_PREFIX@{STATE\_HEX\_PREFIX}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_HEX\_PREFIX@{STATE\_HEX\_PREFIX}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a756e6c88ff6432458c01feab845a809d}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a756e6c88ff6432458c01feab845a809d} 
+STATE\+\_\+\+HEX\+\_\+\+PREFIX&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_HEX@{STATE\_HEX}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_HEX@{STATE\_HEX}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8aa6f4c3c43919ef5e220fe52ee4de178a}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8aa6f4c3c43919ef5e220fe52ee4de178a} 
+STATE\+\_\+\+HEX&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_REAL@{STATE\_REAL}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_REAL@{STATE\_REAL}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a9a07d73f7d329e12a786716b39da3508}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a9a07d73f7d329e12a786716b39da3508} 
+STATE\+\_\+\+REAL&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_REAL\_FRACTION@{STATE\_REAL\_FRACTION}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_REAL\_FRACTION@{STATE\_REAL\_FRACTION}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8aa6352a1294146c1e39825b55e2caf498}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8aa6352a1294146c1e39825b55e2caf498} 
+STATE\+\_\+\+REAL\+\_\+\+FRACTION&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_EXPONENT\_MARK@{STATE\_EXPONENT\_MARK}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_EXPONENT\_MARK@{STATE\_EXPONENT\_MARK}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a4d0c1734c8c1ea9cb6633c55983a16c2}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a4d0c1734c8c1ea9cb6633c55983a16c2} 
+STATE\+\_\+\+EXPONENT\+\_\+\+MARK&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_EXPONENT\_SIGN@{STATE\_EXPONENT\_SIGN}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_EXPONENT\_SIGN@{STATE\_EXPONENT\_SIGN}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a3a79450d3dd6d10ffa2308c7433c54e7}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a3a79450d3dd6d10ffa2308c7433c54e7} 
+STATE\+\_\+\+EXPONENT\+\_\+\+SIGN&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_EXPONENT@{STATE\_EXPONENT}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_EXPONENT@{STATE\_EXPONENT}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a553163a1f1d2095c32b9637d52d11cc4}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a553163a1f1d2095c32b9637d52d11cc4} 
+STATE\+\_\+\+EXPONENT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_STRING@{STATE\_STRING}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_STRING@{STATE\_STRING}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8afd4949461895b03bbb1200e0c349d818}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8afd4949461895b03bbb1200e0c349d818} 
+STATE\+\_\+\+STRING&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_STRING\_ESCAPE@{STATE\_STRING\_ESCAPE}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_STRING\_ESCAPE@{STATE\_STRING\_ESCAPE}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a5067b1d743db85c137c946a67aa6e1a9}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a5067b1d743db85c137c946a67aa6e1a9} 
+STATE\+\_\+\+STRING\+\_\+\+ESCAPE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_CHAR@{STATE\_CHAR}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_CHAR@{STATE\_CHAR}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a4cd2f432c6108c2ceed5a1aaed62fecb}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a4cd2f432c6108c2ceed5a1aaed62fecb} 
+STATE\+\_\+\+CHAR&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_CHAR\_ESCAPE@{STATE\_CHAR\_ESCAPE}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_CHAR\_ESCAPE@{STATE\_CHAR\_ESCAPE}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a65d0efc8e898a6af8134b11708667b02}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a65d0efc8e898a6af8134b11708667b02} 
+STATE\+\_\+\+CHAR\+\_\+\+ESCAPE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_CHAR\_END@{STATE\_CHAR\_END}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_CHAR\_END@{STATE\_CHAR\_END}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8ac01aef41c4867e565b2cac0ebc777afc}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8ac01aef41c4867e565b2cac0ebc777afc} 
+STATE\+\_\+\+CHAR\+\_\+\+END&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_SLASH@{STATE\_SLASH}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_SLASH@{STATE\_SLASH}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a0d15cc14df5481149a1cb18245e81f84}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a0d15cc14df5481149a1cb18245e81f84} 
+STATE\+\_\+\+SLASH&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_COMMENT\_LINE@{STATE\_COMMENT\_LINE}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_COMMENT\_LINE@{STATE\_COMMENT\_LINE}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a91b98e52ebf9391ec15f6b09a11cc7e1}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a91b98e52ebf9391ec15f6b09a11cc7e1} 
+STATE\+\_\+\+COMMENT\+\_\+\+LINE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_COMMENT\_BLOCK@{STATE\_COMMENT\_BLOCK}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_COMMENT\_BLOCK@{STATE\_COMMENT\_BLOCK}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a8408c263638765a0852418a0f03eb61d}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a8408c263638765a0852418a0f03eb61d} 
+STATE\+\_\+\+COMMENT\+\_\+\+BLOCK&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_COMMENT\_BLOCK\_END@{STATE\_COMMENT\_BLOCK\_END}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_COMMENT\_BLOCK\_END@{STATE\_COMMENT\_BLOCK\_END}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a59c210253899d9eb2a07ad53f892558c}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a59c210253899d9eb2a07ad53f892558c} 
+STATE\+\_\+\+COMMENT\+\_\+\+BLOCK\+\_\+\+END&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_OPERATOR@{STATE\_OPERATOR}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_OPERATOR@{STATE\_OPERATOR}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a80ef914a73346c1056d95281ca2144ef}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a80ef914a73346c1056d95281ca2144ef} 
+STATE\+\_\+\+OPERATOR&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_OPERATOR\_EQ@{STATE\_OPERATOR\_EQ}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_OPERATOR\_EQ@{STATE\_OPERATOR\_EQ}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a140e556f23df58e7ba0d2572629063c6}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a140e556f23df58e7ba0d2572629063c6} 
+STATE\+\_\+\+OPERATOR\+\_\+\+EQ&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_OPERATOR\_AND@{STATE\_OPERATOR\_AND}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_OPERATOR\_AND@{STATE\_OPERATOR\_AND}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a304088c12ac364fb214ea65f8b67d52b}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a304088c12ac364fb214ea65f8b67d52b} 
+STATE\+\_\+\+OPERATOR\+\_\+\+AND&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_OPERATOR\_OR@{STATE\_OPERATOR\_OR}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_OPERATOR\_OR@{STATE\_OPERATOR\_OR}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a09360087d87854cf4663916c861fd2ad}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a09360087d87854cf4663916c861fd2ad} 
+STATE\+\_\+\+OPERATOR\+\_\+\+OR&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_DELIMITER@{STATE\_DELIMITER}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_DELIMITER@{STATE\_DELIMITER}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8aa290cc56385d9574264584c0565cfaa5}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8aa290cc56385d9574264584c0565cfaa5} 
+STATE\+\_\+\+DELIMITER&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_WHITESPACE@{STATE\_WHITESPACE}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_WHITESPACE@{STATE\_WHITESPACE}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a507dc58111f97a5b9d3e4a4cf138c2a7}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a507dc58111f97a5b9d3e4a4cf138c2a7} 
+STATE\+\_\+\+WHITESPACE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_FINAL@{STATE\_FINAL}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_FINAL@{STATE\_FINAL}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a8caeff0700000831e36da9658f278f65}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a8caeff0700000831e36da9658f278f65} 
+STATE\+\_\+\+FINAL&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_ERROR@{STATE\_ERROR}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_ERROR@{STATE\_ERROR}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8ad55c0bfe3a7d3ae983e81a98e3384d6c}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8ad55c0bfe3a7d3ae983e81a98e3384d6c} 
+STATE\+\_\+\+ERROR&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_EOF@{STATE\_EOF}!lexer.c@{lexer.c}}\index{lexer.c@{lexer.c}!STATE\_EOF@{STATE\_EOF}}}\Hypertarget{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a9f3f0f3bc2ba0831b14c93278ed61e46}\label{lexer_8c_a5d74787dedbc4e11c1ab15bf487e61f8a9f3f0f3bc2ba0831b14c93278ed61e46} 
+STATE\+\_\+\+EOF&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\label{doc-func-members}
+\Hypertarget{lexer_8c_doc-func-members}
+\doxysubsection{Documentación de funciones}
+\Hypertarget{lexer_8c_a5be34ab1069f72b0d8fc16406ddba410}\index{lexer.c@{lexer.c}!char\_type\_to\_string@{char\_type\_to\_string}}
+\index{char\_type\_to\_string@{char\_type\_to\_string}!lexer.c@{lexer.c}}
+\doxysubsubsection{\texorpdfstring{char\_type\_to\_string()}{char\_type\_to\_string()}}
+{\footnotesize\ttfamily \label{lexer_8c_a5be34ab1069f72b0d8fc16406ddba410} 
+const char \texorpdfstring{$\ast$}{*} char\+\_\+type\+\_\+to\+\_\+string (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0}{Char\+Type}}}]{type}{}\end{DoxyParamCaption})}
+
+
+
+Convierte un \doxylink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0}{Char\+Type} a su representación en cadena. 
+
+
+\begin{DoxyParams}{Parámetros}
+{\em type} & Tipo de carácter \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Devuelve}
+Cadena que representa el tipo de carácter 
+\end{DoxyReturn}
+\Hypertarget{lexer_8c_a33201e96cfb52c1be47b06f5dd716091}\index{lexer.c@{lexer.c}!create\_token@{create\_token}}
+\index{create\_token@{create\_token}!lexer.c@{lexer.c}}
+\doxysubsubsection{\texorpdfstring{create\_token()}{create\_token()}}
+{\footnotesize\ttfamily \label{lexer_8c_a33201e96cfb52c1be47b06f5dd716091} 
+\mbox{\hyperlink{structtoken__t}{token\+\_\+t}} \texorpdfstring{$\ast$}{*} create\+\_\+token (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{lexer_8h_aa520fbf142ba1e7e659590c07da31921}{Token\+Type}}}]{type}{, }\item[{const char \texorpdfstring{$\ast$}{*}}]{lexeme}{, }\item[{size\+\_\+t}]{line}{, }\item[{size\+\_\+t}]{column}{}\end{DoxyParamCaption})}
+
+
+
+Crea un nuevo token. 
+
+
+\begin{DoxyParams}{Parámetros}
+{\em type} & Tipo de token \\
+\hline
+{\em lexeme} & Lexema del token \\
+\hline
+{\em line} & Línea donde se encontró el token \\
+\hline
+{\em column} & Columna donde se encontró el token \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Devuelve}
+Puntero al token creado 
+\end{DoxyReturn}
+\Hypertarget{lexer_8c_a6c9affc7a10370c06312044ae067ed04}\index{lexer.c@{lexer.c}!free\_token@{free\_token}}
+\index{free\_token@{free\_token}!lexer.c@{lexer.c}}
+\doxysubsubsection{\texorpdfstring{free\_token()}{free\_token()}}
+{\footnotesize\ttfamily \label{lexer_8c_a6c9affc7a10370c06312044ae067ed04} 
+void free\+\_\+token (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structtoken__t}{token\+\_\+t}} \texorpdfstring{$\ast$}{*}}]{token}{}\end{DoxyParamCaption})}
+
+
+
+Libera un token. 
+
+
+\begin{DoxyParams}{Parámetros}
+{\em token} & Puntero al token a liberar \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Devuelve}
+void 
+\end{DoxyReturn}
+\Hypertarget{lexer_8c_a4e074708c7e62d1fad050b9fbb7e8155}\index{lexer.c@{lexer.c}!get\_char\_type@{get\_char\_type}}
+\index{get\_char\_type@{get\_char\_type}!lexer.c@{lexer.c}}
+\doxysubsubsection{\texorpdfstring{get\_char\_type()}{get\_char\_type()}}
+{\footnotesize\ttfamily \label{lexer_8c_a4e074708c7e62d1fad050b9fbb7e8155} 
+\mbox{\hyperlink{lexer_8c_a29966b9994a4b4e8c250133a79f4a2e0}{Char\+Type}} get\+\_\+char\+\_\+type (\begin{DoxyParamCaption}\item[{int}]{c}{}\end{DoxyParamCaption})}
+
+
+
+Obtiene el tipo de carácter de un carácter dado. 
+
+
+\begin{DoxyParams}{Parámetros}
+{\em c} & Carácter a evaluar \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Devuelve}
+Tipo de carácter correspondiente 
+\end{DoxyReturn}
+\Hypertarget{lexer_8c_ac6764a58ed5d9029bace498ac059c096}\index{lexer.c@{lexer.c}!get\_next\_token@{get\_next\_token}}
+\index{get\_next\_token@{get\_next\_token}!lexer.c@{lexer.c}}
+\doxysubsubsection{\texorpdfstring{get\_next\_token()}{get\_next\_token()}}
+{\footnotesize\ttfamily \label{lexer_8c_ac6764a58ed5d9029bace498ac059c096} 
+\mbox{\hyperlink{structtoken__t}{token\+\_\+t}} \texorpdfstring{$\ast$}{*} get\+\_\+next\+\_\+token (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{source}{}\end{DoxyParamCaption})}
+
+
+
+Función principal del lexer que procesa la fuente y devuelve el siguiente token. 
+
+
+\begin{DoxyParams}{Parámetros}
+{\em source} & Fuente de código a analizar \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Devuelve}
+Puntero al siguiente token encontrado 
+\end{DoxyReturn}
+\Hypertarget{lexer_8c_ae66f6b31b5ad750f1fe042a706a4e3d4}\index{lexer.c@{lexer.c}!main@{main}}
+\index{main@{main}!lexer.c@{lexer.c}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily \label{lexer_8c_ae66f6b31b5ad750f1fe042a706a4e3d4} 
+int main (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{lexer_8c_ab5e8b6289c8d0f065872cbe531443692}\index{lexer.c@{lexer.c}!read\_file@{read\_file}}
+\index{read\_file@{read\_file}!lexer.c@{lexer.c}}
+\doxysubsubsection{\texorpdfstring{read\_file()}{read\_file()}}
+{\footnotesize\ttfamily \label{lexer_8c_ab5e8b6289c8d0f065872cbe531443692} 
+char \texorpdfstring{$\ast$}{*} read\+\_\+file (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{filename}{}\end{DoxyParamCaption})}
+
+
+
+Lee el contenido de un archivo y lo devuelve como una cadena. 
+
+
+\begin{DoxyParams}{Parámetros}
+{\em filename} & Nombre del archivo a leer \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Devuelve}
+Cadena con el contenido del archivo, o NULL si hubo un error 
+\end{DoxyReturn}

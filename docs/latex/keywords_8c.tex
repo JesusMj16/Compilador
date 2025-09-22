@@ -1,0 +1,73 @@
+\doxysection{Referencia del archivo src/lexer/keywords.c}
+\hypertarget{keywords_8c}{}\label{keywords_8c}\index{src/lexer/keywords.c@{src/lexer/keywords.c}}
+
+
+Implementación de la verificación de palabras clave.  
+
+
+{\ttfamily \#include "{}keywords.\+h"{}}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+\doxysubsubsection*{Funciones}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{keywords_8c_aabda76fed33c6e65d7375ce0e832d158}{is\+\_\+keyword}} (const char \texorpdfstring{$\ast$}{*}lexeme)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+static const char \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{keywords_8c_a414565604fa67d57608632afa7b65a87}{keywords}} \mbox{[}$\,$\mbox{]}
+\begin{DoxyCompactList}\small\item\em Lista de palabras clave del lenguaje. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Descripción detallada}
+Implementación de la verificación de palabras clave. 
+
+Contiene la implementación de la función para verificar si un lexema es una palabra clave. 
+
+\label{doc-func-members}
+\Hypertarget{keywords_8c_doc-func-members}
+\doxysubsection{Documentación de funciones}
+\Hypertarget{keywords_8c_aabda76fed33c6e65d7375ce0e832d158}\index{keywords.c@{keywords.c}!is\_keyword@{is\_keyword}}
+\index{is\_keyword@{is\_keyword}!keywords.c@{keywords.c}}
+\doxysubsubsection{\texorpdfstring{is\_keyword()}{is\_keyword()}}
+{\footnotesize\ttfamily \label{keywords_8c_aabda76fed33c6e65d7375ce0e832d158} 
+bool is\+\_\+keyword (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{lexeme}{}\end{DoxyParamCaption})}
+
+
+
+\label{doc-var-members}
+\Hypertarget{keywords_8c_doc-var-members}
+\doxysubsection{Documentación de variables}
+\Hypertarget{keywords_8c_a414565604fa67d57608632afa7b65a87}\index{keywords.c@{keywords.c}!keywords@{keywords}}
+\index{keywords@{keywords}!keywords.c@{keywords.c}}
+\doxysubsubsection{\texorpdfstring{keywords}{keywords}}
+{\footnotesize\ttfamily \label{keywords_8c_a414565604fa67d57608632afa7b65a87} 
+const char\texorpdfstring{$\ast$}{*} keywords\mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily [static]}}
+
+{\bfseries Valor inicial\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}fn"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}let"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}mut"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}if"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}else"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}match"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}while"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}loop"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}for"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}in"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}break"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}continue"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}return"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}true"{}},}
+\DoxyCodeLine{\ \ \ \ \textcolor{stringliteral}{"{}false"{}},}
+\DoxyCodeLine{\ \ \ \ NULL}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+Lista de palabras clave del lenguaje. 
+
+La lista debe coincidir con las definidas en el lexer. 
