@@ -572,7 +572,7 @@ int main(void) {
             printf("Error al obtener el siguiente token.\n");
             break;
         }
-        printf("[%zu,%zu] Type: %s Lexeme: %s\n",token->line, token->column,token_type_name(token->type), token->lexeme ? token->lexeme : "NULL");
+        printf("line: %zu, column: %zu, Type: %s Lexeme: %s\n",token->line, token->column,token_type_name(token->type), token->lexeme ? token->lexeme : "NULL");
 
         if (token->type == TOKEN_EOF) {
             free_token(token);
