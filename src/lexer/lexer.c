@@ -99,7 +99,6 @@ typedef enum CharType{
     CHAR_UNKNOWN    
 } CharType;
 
-/* Utilidad opcional para depuración */
 #ifdef LEXER_DEBUG
 static const char* char_type_to_string(CharType type) {
     static const char *names[] = {
