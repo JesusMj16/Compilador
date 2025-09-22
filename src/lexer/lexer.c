@@ -13,7 +13,7 @@
 #define NUM_STATES 31
 #define NUM_CHAR_TYPES 24
 
-/*
+/**
  * @brief Definición de los estados del autómata
  */
 typedef enum {
@@ -50,7 +50,7 @@ typedef enum {
     STATE_EOF
 } State;
 
-/*
+/**
  * @brief Definición de los tipos de caracteres
  */
 typedef enum CharType{
@@ -80,54 +80,15 @@ typedef enum CharType{
     CHAR_UNKNOWN    
 } CharType;
 
-/**
- * @brief Convierte un CharType a su representación en cadena
- * 
- * @param type Tipo de carácter
- * @return Cadena que representa el tipo de carácter
- */
+
  const char* char_type_to_string(CharType type);
-
-/**
- * @brief Obtiene el tipo de carácter de un carácter dado
- * 
- * @param c Carácter a evaluar
- * @return Tipo de carácter correspondiente
- */
-
  CharType get_char_type(int c);
-
- /**
-  * @brief Crea un nuevo token
-  * 
-  * @param type Tipo de token
-  * @param lexeme Lexema del token
-  * @param line Línea donde se encontró el token
-  * @param column Columna donde se encontró el token
-  * @return Puntero al token creado
-  */
 token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t column);
-
-/**
- * @brief Libera un token
- * 
- * @param token Puntero al token a liberar
- * @return void
- */
 void free_token(token_t *token);
-
-/**
- * @brief Función principal del lexer que procesa la fuente y devuelve el siguiente token
- * 
- * @param source Fuente de código a analizar
- * @return Puntero al siguiente token encontrado
- */
 token_t *get_next_token(const char *source);
-
-
 char *read_file(const char *filename);
 
-/*
+/**
  * @brief Función principal del analizador léxico
  *
  * @param source Fuente de código a analizar
@@ -148,7 +109,12 @@ int main() {
     free(source);
     return 0;
 }
-
+/**
+ * @brief Convierte un CharType a su representación en cadena
+ * 
+ * @param type Tipo de carácter
+ * @return Cadena que representa el tipo de carácter
+ */
 const char* char_type_to_string(CharType type) {
     static const char *names[] = {
         [CHAR_LETTER]       = "CHAR_LETTER",
@@ -181,7 +147,12 @@ const char* char_type_to_string(CharType type) {
         return names[type];
     return "CHAR_INVALID";
 }
-
+/**
+ * @brief Obtiene el tipo de carácter de un carácter dado
+ * 
+ * @param c Carácter a evaluar
+ * @return Tipo de carácter correspondiente
+ */
 CharType get_char_type(int c) {
     if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) { return CHAR_LETTER; }
     if (c >= '0' && c <= '9') { return CHAR_DIGIT;}
@@ -208,7 +179,15 @@ CharType get_char_type(int c) {
     if (c == EOF) { return CHAR_EOF;}
     return CHAR_UNKNOWN;
 }
-
+ /**
+  * @brief Crea un nuevo token
+  * 
+  * @param type Tipo de token
+  * @param lexeme Lexema del token
+  * @param line Línea donde se encontró el token
+  * @param column Columna donde se encontró el token
+  * @return Puntero al token creado
+  */
 token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t column) {
     token_t *new_token = (token_t *) malloc(sizeof(token_t));
     if (new_token == NULL) {
@@ -232,7 +211,12 @@ token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t col
     
     return new_token;
 }
-
+/**
+ * @brief Libera un token
+ * 
+ * @param token Puntero al token a liberar
+ * @return void
+ */
 void free_token(token_t *token) {
     if( token != NULL) {
         free(token ->lexeme);
@@ -266,7 +250,12 @@ char *read_file(const char *filename){
     fclose(file);
     return buffer;
 }
-
+/**
+ * @brief Función principal del lexer que procesa la fuente y devuelve el siguiente token
+ * 
+ * @param source Fuente de código a analizar
+ * @return Puntero al siguiente token encontrado
+ */
 token_t *get_next_token(const char *source){
     for (size_t i = 0; source[i]; i++) {
     printf("Char[%zu] = '%c' Type = %s\n", i, source[i], char_type_to_string(get_char_type(source[i])));
