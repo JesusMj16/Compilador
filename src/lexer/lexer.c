@@ -11,7 +11,7 @@
 #define NUM_STATES 31
 #define NUM_CHAR_TYPES 24
 
-/*
+/**
  * @brief Definición de los estados del autómata
  */
 typedef enum {
@@ -48,7 +48,7 @@ typedef enum {
     STATE_EOF
 } State;
 
-/*
+/**
  * @brief Tabla de operadores de dos caracteres
  */
 static const char *two_char_operators[] = {
@@ -69,7 +69,7 @@ static const char *two_char_operators[] = {
 };
 
 
-/*
+/**
  * @brief Definición de los tipos de caracteres
  */
 typedef enum CharType{
@@ -132,7 +132,12 @@ static const char* char_type_to_string(CharType type) {
 }
 #endif
 
-/* Clasificación de caracteres: importante reconocer '\0' como EOF */
+/**
+ * @brief Clasifica un carácter y devuelve su tipo correspondiente.
+ * 
+ * @param c El carácter a clasificar.
+ * @return El tipo de carácter (CharType) correspondiente.
+ */
 static CharType get_char_type(int c) {
     if (c == '\0') { return CHAR_EOF; }
     if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) { return CHAR_LETTER; }
@@ -160,6 +165,15 @@ static CharType get_char_type(int c) {
     return CHAR_UNKNOWN;
 }
 
+/**
+ * @brief Crea un nuevo token con los parámetros especificados.
+ * 
+ * @param type El tipo de token.
+ * @param lexeme El lexema del token.
+ * @param line El número de línea donde se encontró el token.
+ * @param column El número de columna donde se encontró el token.
+ * @return Un puntero al nuevo token creado, o NULL si hay error de memoria.
+ */
 token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t column) {
     token_t *new_token = (token_t *) malloc(sizeof(token_t));
     if (new_token == NULL) {
@@ -184,6 +198,11 @@ token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t col
     return new_token;
 }
 
+/**
+ * @brief Libera la memoria ocupada por un token.
+ * 
+ * @param token El token a liberar.
+ */
 void free_token(token_t *token) {
     if (token != NULL) {
         free(token->lexeme);
@@ -192,7 +211,10 @@ void free_token(token_t *token) {
 }
 
 /**
- * @brief Lee el contenido de un archivo y lo devuelve como una cadena
+ * @brief Lee el contenido de un archivo y lo devuelve como una cadena.
+ * 
+ * @param filename El nombre del archivo a leer.
+ * @return El contenido del archivo como cadena, o NULL si hay error.
  */
 char *read_file(const char *filename){
     FILE *file = fopen(filename, "r");
@@ -216,11 +238,22 @@ char *read_file(const char *filename){
     return buffer;
 }
 
-
+/**
+ * @brief Obtiene el carácter actual sin avanzar el puntero del lexer.
+ * 
+ * @param lxr El lexer.
+ * @return El carácter actual.
+ */
 static inline char lxr_peek(const Lexer *lxr) {
     return *(lxr->p);
 }
 
+/**
+ * @brief Obtiene el siguiente carácter sin avanzar el puntero del lexer.
+ * 
+ * @param lxr El lexer.
+ * @return El siguiente carácter.
+ */
 static inline char lxr_peek_next(const Lexer *lxr) {
     if (lxr->p[0] != '\0') {
         return lxr->p[1];
@@ -228,6 +261,11 @@ static inline char lxr_peek_next(const Lexer *lxr) {
     return '\0';
 }
 
+/**
+ * @brief Avanza el puntero del lexer al siguiente carácter y actualiza posición.
+ * 
+ * @param lxr El lexer.
+ */
 static inline void lxr_advance(Lexer *lxr) {
     char c = *(lxr->p);
     if (c == '\0')
@@ -241,7 +279,13 @@ static inline void lxr_advance(Lexer *lxr) {
     }
 }
 
-
+/**
+ * @brief Crea un lexema a partir de un rango de caracteres.
+ * 
+ * @param start Puntero al inicio del lexema.
+ * @param end Puntero al final del lexema.
+ * @return Una copia del lexema como cadena, o NULL si hay error de memoria.
+ */
 static char* make_lexeme(const char *start, const char *end) {
     size_t length = (size_t)(end - start);
     char *s = (char *) malloc(length + 1);
@@ -254,7 +298,11 @@ static char* make_lexeme(const char *start, const char *end) {
     return s;
 }
 
-
+/**
+ * @brief Omite caracteres ignorables como espacios en blanco y comentarios.
+ * 
+ * @param lxr El lexer.
+ */
 static void skip_ignorable(Lexer *lxr){
     for (;;) {
         CharType type = get_char_type(lxr_peek(lxr));
@@ -290,7 +338,14 @@ static void skip_ignorable(Lexer *lxr){
     }
 }
 
-
+/**
+ * @brief Analiza y crea un token para identificadores o palabras clave.
+ * 
+ * @param lxr El lexer.
+ * @param sl Línea de inicio del token.
+ * @param sc Columna de inicio del token.
+ * @return El token creado (TOKEN_IDENTIFIER o TOKEN_KEYWORD).
+ */
 static token_t* lex_identifier_or_keyword(Lexer *lxr, size_t sl, size_t sc){
     const char *start = lxr->p;
     lxr_advance(lxr); 
@@ -312,6 +367,12 @@ static token_t* lex_identifier_or_keyword(Lexer *lxr, size_t sl, size_t sc){
     return token;
 }
 
+/**
+ * @brief Verifica si un carácter es un dígito hexadecimal.
+ * 
+ * @param c El carácter a verificar.
+ * @return 1 si es un dígito hexadecimal, 0 en caso contrario.
+ */
 static int is_hex_digit(char c) {
     if (c >= '0' && c <= '9') {
         return 1;
@@ -323,11 +384,24 @@ static int is_hex_digit(char c) {
     return 0;
 }
 
+/**
+ * @brief Verifica si un carácter es un dígito binario.
+ * 
+ * @param c El carácter a verificar.
+ * @return 1 si es un dígito binario (0 o 1), 0 en caso contrario.
+ */
 static int is_bin_digit(char c) {
     return c == '0' || c == '1';
 }
 
-
+/**
+ * @brief Analiza y crea un token para números (enteros, reales, hexadecimales, binarios).
+ * 
+ * @param lxr El lexer.
+ * @param sl Línea de inicio del token.
+ * @param sc Columna de inicio del token.
+ * @return El token creado (TOKEN_NUMBER o TOKEN_UNKNOWN).
+ */
 static token_t* lex_number(Lexer *lxr, size_t sl, size_t sc){
     const char  *start  = lxr->p;
 
@@ -396,6 +470,14 @@ static token_t* lex_number(Lexer *lxr, size_t sl, size_t sc){
     return token_num;
 }
 
+/**
+ * @brief Analiza y crea un token para cadenas de texto.
+ * 
+ * @param lxr El lexer.
+ * @param sl Línea de inicio del token.
+ * @param sc Columna de inicio del token.
+ * @return El token creado (TOKEN_STRING o TOKEN_UNKNOWN).
+ */
 static token_t* lex_string(Lexer *lxr, size_t sl, size_t sc){
     const char *start = lxr->p;
     lxr_advance(lxr); 
@@ -421,7 +503,13 @@ static token_t* lex_string(Lexer *lxr, size_t sl, size_t sc){
     return token_str;
 }
 
-
+/**
+ * @brief Verifica si los siguientes dos caracteres coinciden con un operador específico.
+ * 
+ * @param lxr El lexer.
+ * @param op El operador de dos caracteres a verificar.
+ * @return 1 si coincide, 0 en caso contrario.
+ */
 static int lxr_match2(const Lexer *lxr, const char *op) {
     // Verificar que tenemos un operador válido de exactamente 2 caracteres
     if (!op || strlen(op) != 2) {
@@ -437,7 +525,14 @@ static int lxr_match2(const Lexer *lxr, const char *op) {
     return 0; 
 }
 
-
+/**
+ * @brief Analiza y crea un token para operadores o delimitadores.
+ * 
+ * @param lxr El lexer.
+ * @param sl Línea de inicio del token.
+ * @param sc Columna de inicio del token.
+ * @return El token creado (TOKEN_OPERATOR, TOKEN_DELIMITER o TOKEN_UNKNOWN).
+ */
 static token_t* lex_operator_or_delimiter(Lexer *lxr, size_t sl, size_t sc){
     const char *start = lxr->p;
 
@@ -479,7 +574,12 @@ static token_t* lex_operator_or_delimiter(Lexer *lxr, size_t sl, size_t sc){
     return tok;
 }
 
-
+/**
+ * @brief Inicializa un lexer con el código fuente dado.
+ * 
+ * @param lxr El lexer a inicializar.
+ * @param source El código fuente a analizar.
+ */
 void lexer_init(Lexer *lxr, const char *source){
     lxr->source = source ? source : "";
     lxr->p = lxr->source;
@@ -487,6 +587,12 @@ void lexer_init(Lexer *lxr, const char *source){
     lxr->col = 1;
 }
 
+/**
+ * @brief Obtiene el siguiente token del código fuente.
+ * 
+ * @param lxr El lexer.
+ * @return El siguiente token encontrado, o NULL si hay error.
+ */
 token_t* lexer_next_token(Lexer *lxr){
     if (!lxr || !lxr->p) {
         return NULL;
@@ -528,7 +634,12 @@ token_t* lexer_next_token(Lexer *lxr){
     return lex_operator_or_delimiter(lxr, start_line, start_col);
 }
 
-
+/**
+ * @brief Función de conveniencia para obtener tokens usando un lexer estático.
+ * 
+ * @param source El código fuente a analizar.
+ * @return El siguiente token, o NULL si hay error.
+ */
 token_t *get_next_token(const char *source){
     static Lexer lexer;
     static int initialized = 0;
@@ -543,7 +654,12 @@ token_t *get_next_token(const char *source){
     return token;
 }
 
-
+/**
+ * @brief Convierte un tipo de token a su representación en cadena.
+ * 
+ * @param t El tipo de token.
+ * @return El nombre del tipo de token como cadena.
+ */
 static const char* token_type_name(TokenType t) {
     switch (t) {
         case TOKEN_IDENTIFIER: return "IDENTIFIER";
@@ -558,6 +674,11 @@ static const char* token_type_name(TokenType t) {
     }
 }
 
+/**
+ * @brief Función principal que prueba el analizador léxico.
+ * 
+ * @return 0 si la ejecución fue exitosa, 1 si hubo error.
+ */
 int main(void) {
     char *source = read_file("src/lexer/test.txt");
     if (source == NULL) {
