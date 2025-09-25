@@ -21,7 +21,7 @@ El analizador recibirá un archivo fuente escrito en un mini-lenguaje y generar�
 
 ---
 
-## 🚀 Instalación y Configuración
+## Instalación y Configuración
 
 ### Prerrequisitos
 Para compilar y ejecutar este proyecto en una máquina Linux, necesitas:
