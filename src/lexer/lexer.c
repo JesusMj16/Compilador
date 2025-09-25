@@ -719,3 +719,81 @@ token_t *tokenize_all(const char *source) {
     
     return head;
 }
+
+/**
+ * @brief Escribe los tokens de un archivo fuente a un archivo de salida con formato numérico.
+ * 
+ * @param source_file El archivo fuente a tokenizar.
+ * @param output_file El archivo donde escribir los tokens.
+ * @return 0 si es exitoso, 1 si hay error.
+ */
+int write_tokens_to_file(const char *source_file, const char *output_file) {
+    if (!source_file || !output_file) return 1;
+    
+    // Leer el archivo fuente
+    char *source = read_file(source_file);
+    if (!source) {
+        printf("Error: No se pudo leer el archivo '%s'\n", source_file);
+        return 1;
+    }
+    
+    // Abrir archivo de salida
+    FILE *output = fopen(output_file, "w");
+    if (!output) {
+        printf("Error: No se pudo crear el archivo '%s'\n", output_file);
+        free(source);
+        return 1;
+    }
+    
+    // Escribir header con información del formato
+    fprintf(output, "# Tokens generados desde: %s\n", source_file);
+    fprintf(output, "# Formato: tipo_token lexema linea columna [indice_palabra_clave]\n");
+    fprintf(output, "# Tipos: IDENTIFIER=0, NUMBER=1, STRING=2, OPERATOR=3, DELIMITER=4, KEYWORD=5, UNKNOWN=6, EOF=7\n");
+    fprintf(output, "# Palabras clave: fn=0, let=1, mut=2, if=3, else=4, match=5, while=6, loop=7, for=8, in=9, break=10, continue=11, return=12, true=13, false=14\n");
+    fprintf(output, "\n");
+    
+    Lexer lexer;
+    lexer_init(&lexer, source);
+    
+    int token_count = 0;
+    for (;;) {
+        token_t *token = lexer_next_token(&lexer);
+        if (!token) {
+            fprintf(output, "# Error: No se pudo obtener el siguiente token\n");
+            break;
+        }
+    
+    // Escribir en formato: tipo lexema linea columna [indice_keyword]
+        if (token->type == TOKEN_KEYWORD) {
+            int keyword_index = get_keyword_index(token->lexeme);
+            fprintf(output, "%d %s %zu %zu %d\n", 
+                   token->type, 
+                   token->lexeme ? token->lexeme : "NULL",
+                   token->line, 
+                   token->column,
+                   keyword_index);
+        } else {
+            fprintf(output, "%d %s %zu %zu\n", 
+                   token->type, 
+                   token->lexeme ? token->lexeme : "NULL",
+                   token->line, 
+                   token->column);
+        }
+        
+        token_count++;
+        
+        if (token->type == TOKEN_EOF) {
+            free_token(token);
+            break;
+        }
+        free_token(token);
+    }
+    
+    fprintf(output, "\n# Total de tokens: %d\n", token_count);
+    
+    fclose(output);
+    free(source);
+    
+    printf("✓ Tokens escritos en: %s (%d tokens)\n", output_file, token_count);
+    return 0;
+}

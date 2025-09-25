@@ -55,5 +55,6 @@ char *read_file(const char *filename);
 token_t *get_next_token(const char *source);
 token_t *tokenize_all(const char *source);
 const char* token_type_name(TokenType t);
+int write_tokens_to_file(const char *source_file, const char *output_file);
 
 #endif // LEXER_H

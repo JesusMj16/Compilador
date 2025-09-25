@@ -1,0 +1,41 @@
+# Tokens generados desde: docs/Analizador-Lexico/examples/exito-02.txt
+# Formato: tipo_token lexema linea columna [indice_palabra_clave]
+# Tipos: IDENTIFIER=0, NUMBER=1, STRING=2, OPERATOR=3, DELIMITER=4, KEYWORD=5, UNKNOWN=6, EOF=7
+# Palabras clave: fn=0, let=1, mut=2, if=3, else=4, match=5, while=6, loop=7, for=8, in=9, break=10, continue=11, return=12, true=13, false=14
+
+5 fn 1 1 0
+0 verificar_edad 1 4
+4 ( 1 18
+0 edad 1 19
+6 : 1 23
+0 i32 1 25
+4 ) 1 28
+4 { 1 30
+5 if 2 5 3
+0 edad 2 8
+3 >= 2 13
+1 18 2 16
+4 { 2 19
+5 let 3 9 1
+0 mensaje 3 13
+3 = 3 21
+2 "Es mayor de edad" 3 23
+4 ; 3 41
+4 } 4 5
+5 else 4 7 4
+4 { 4 12
+5 let 5 9 1
+0 mensaje_alternativo 5 13
+3 = 5 33
+2 "Es menor de edad" 5 35
+4 ; 5 53
+4 } 6 5
+5 if 8 5 3
+3 ! 8 8
+5 true 8 9 13
+4 { 8 14
+4 } 9 5
+4 } 10 1
+7 EOF 10 2
+
+# Total de tokens: 34

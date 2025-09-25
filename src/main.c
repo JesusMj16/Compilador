@@ -17,27 +17,15 @@
 static void print_usage(const char *program_name) {
     printf("Uso: %s [opciones] <archivo>\n", program_name);
     printf("Opciones:\n");
-    printf("  -l, --lex      Solo ejecutar el análisis léxico\n");
-    printf("  -p, --parse    Ejecutar análisis léxico y sintáctico\n");
+    printf("  -t             Generar archivo de tokens\n");
     printf("  -h, --help     Mostrar esta ayuda\n");
-    printf("  -v, --version  Mostrar información de versión\n");
     printf("\nEjemplos:\n");
-    printf("  %s programa.lang                  # Compilación completa\n", program_name);
-    printf("  %s -l programa.lang              # Solo análisis léxico\n", program_name);
-    printf("  %s -p programa.lang              # Análisis léxico y sintáctico\n", program_name);
+    printf("  %s programa.lang              # Análisis léxico en terminal\n", program_name);
+    printf("  %s -t programa.lang           # Generar archivo de tokens\n", program_name);
 }
 
 /**
- * @brief Imprime la información de versión del compilador.
- */
-static void print_version() {
-    printf("Compilador v1.0.0\n");
-    printf("Desarrollado como proyecto académico\n");
-    printf("Análisis Léxico: AFD con funciones especializadas\n");
-}
-
-/**
- * @brief Ejecuta solo el análisis léxico de un archivo.
+ * @brief Ejecuta el análisis léxico y muestra los tokens en terminal.
  * 
  * @param filename El nombre del archivo a analizar.
  * @return 0 si es exitoso, 1 si hay error.
@@ -81,104 +69,49 @@ static int run_lexical_analysis(const char *filename) {
         free_token(token);
     }
     
-    printf("\nResumen:\n");
-    printf("- Total de tokens: %d\n", token_count);
-    printf("- Análisis léxico completado exitosamente\n");
+    printf("\nTotal de tokens: %d\n", token_count);
     
     free(source);
     return 0;
 }
 
 /**
- * @brief Ejecuta análisis léxico y sintáctico (placeholder).
+ * @brief Genera un archivo de tokens para el parser.
  * 
  * @param filename El nombre del archivo a analizar.
  * @return 0 si es exitoso, 1 si hay error.
  */
-static int run_lexical_and_syntax_analysis(const char *filename) {
-    printf("=== ANÁLISIS LÉXICO Y SINTÁCTICO ===\n");
-    printf("Archivo: %s\n\n", filename);
+static int generate_tokens_file(const char *filename) {
+    printf("=== GENERACIÓN DE ARCHIVO DE TOKENS ===\n");
+    printf("Archivo fuente: %s\n", filename);
     
-    // Primero ejecutamos el análisis léxico
-    char *source = read_file(filename);
-    if (source == NULL) {
-        fprintf(stderr, "Error: No se pudo leer el archivo '%s'\n", filename);
-        return 1;
+    // Generar nombre de archivo de salida en la carpeta docs/Analizador-sintactico/archivos_parser
+    char default_output[512];
+    
+    // Crear nombre basado en el archivo fuente
+    const char *base = strrchr(filename, '/');
+    base = base ? base + 1 : filename;
+    
+    // Encontrar el punto de la extensión
+    const char *dot = strrchr(base, '.');
+    if (dot) {
+        size_t len = dot - base;
+        snprintf(default_output, sizeof(default_output), "docs/Analizador-sintactico/archivos_parser/%.*s_tokens.txt", (int)len, base);
+    } else {
+        snprintf(default_output, sizeof(default_output), "docs/Analizador-sintactico/archivos_parser/%s_tokens.txt", base);
     }
     
-    // Obtenemos TO-DOs los tokens
-    token_t *tokens = tokenize_all(source);
-    if (!tokens) {
-        fprintf(stderr, "Error: No se pudieron obtener tokens del archivo\n");
-        free(source);
-        return 1;
+    printf("Archivo de salida: %s\n\n", default_output);
+    
+    int result = write_tokens_to_file(filename, default_output);
+    
+    if (result == 0) {
+        printf("\n✓ Archivo de tokens generado exitosamente\n");
+        printf("  - Formato: tipo_token lexema linea columna [indice_palabra_clave]\n");
+        printf("  - Listo para ser usado por el parser\n");
     }
     
-    printf("Tokens generados:\n");
-    printf("%-6s %-8s %-12s %s\n", "Línea", "Columna", "Tipo", "Lexema");
-    printf("%-6s %-8s %-12s %s\n", "-----", "-------", "----", "------");
-    
-    int token_count = 0;
-    token_t *current = tokens;
-    while (current) {
-        printf("%-6zu %-8zu %-12s %s\n", 
-               current->line, 
-               current->column, 
-               token_type_name(current->type), 
-               current->lexeme ? current->lexeme : "NULL");
-        token_count++;
-        current = current->next;
-    }
-    
-    printf("\n=== ANÁLISIS SINTÁCTICO ===\n");
-    printf("TO-DO: Implementar parser\n");
-    printf("- Los tokens están listos para ser procesados por el parser\n");
-    printf("- Total de tokens para el parser: %d\n", token_count);
-    
-    free_token_list(tokens);
-    free(source);
-    return 0;
-}
-
-/**
- * @brief Ejecuta la compilación completa (placeholder).
- * 
- * @param filename El nombre del archivo a compilar.
- * @return 0 si es exitoso, 1 si hay error.
- */
-static int run_full_compilation(const char *filename) {
-    printf("=== COMPILACIÓN COMPLETA ===\n");
-    printf("Archivo: %s\n\n", filename);
-    
-    printf("1. Análisis Léxico...\n");
-    char *source = read_file(filename);
-    if (source == NULL) {
-        fprintf(stderr, "Error: No se pudo leer el archivo '%s'\n", filename);
-        return 1;
-    }
-    
-    token_t *tokens = tokenize_all(source);
-    if (!tokens) {
-        fprintf(stderr, "Error en el análisis léxico\n");
-        free(source);
-        return 1;
-    }
-    printf("   ✓ Análisis léxico completado\n");
-    
-    printf("2. Análisis Sintáctico...\n");
-    printf("   TO-DO: Implementar parser\n");
-    
-    printf("3. Análisis Semántico...\n");
-    printf("   TO-DO: Implementar análisis semántico\n");
-    
-    printf("4. Generación de Código...\n");
-    printf("   TO-DO: Implementar generador de código\n");
-    
-    printf("\nEstado actual: Solo análisis léxico implementado\n");
-    
-    free_token_list(tokens);
-    free(source);
-    return 0;
+    return result;
 }
 
 /**
@@ -195,21 +128,16 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    // Procesar argumentos
-    int lex_only = 0;
-    int parse_only = 0;
+    // Variables simples
+    int generate_tokens = 0;
     const char *filename = NULL;
     
+    // Procesar argumentos
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-l") == 0 || strcmp(argv[i], "--lex") == 0) {
-            lex_only = 1;
-        } else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--parse") == 0) {
-            parse_only = 1;
+        if (strcmp(argv[i], "-t") == 0) {
+            generate_tokens = 1;
         } else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             print_usage(argv[0]);
-            return 0;
-        } else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
-            print_version();
             return 0;
         } else if (argv[i][0] != '-') {
             filename = argv[i];
@@ -226,12 +154,10 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    // Ejecutar según las opciones
-    if (lex_only) {
-        return run_lexical_analysis(filename);
-    } else if (parse_only) {
-        return run_lexical_and_syntax_analysis(filename);
+    // Ejecutar según la opción
+    if (generate_tokens) {
+        return generate_tokens_file(filename);
     } else {
-        return run_full_compilation(filename);
+        return run_lexical_analysis(filename);
     }
 }
