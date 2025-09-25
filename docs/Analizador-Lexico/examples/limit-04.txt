@@ -1,6 +1,206 @@
 // Programa extenso que implementa diferentes algoritmos y estructuras de datos
 // para probar el analizador léxico con un archivo de 200 líneas
 
+@fn main() {#
+    // Declaraciones de variables básicas
+    let mut contador: i32 = 0;
+    let limite: i32 = 100;
+    let pi: f64 = 3.14159;
+    let nombre: str = "Analizador Léxico";
+    let activo: bool = true;
+    
+    // Estructuras de control - Bucle while
+    while contador < limite {
+        if contador % 2 == 0 {
+            contador = contador + 1;
+        } else {
+            contador = contador * 2;
+        }
+        
+        // Operaciones matemáticas
+        let resultado = contador + limite * 2;
+        let division = resultado / 3;
+        let modulo = division % 7;
+    }
+    
+    // Estructura de control - Bucle for
+    for i in 0..50 {
+        let cuadrado = i * i;
+        let cubo = cuadrado * i;
+        
+        if cubo > 1000 {
+            break;
+        }
+        
+        if cuadrado < 10 {
+            continue;
+        }
+    }
+    
+    // Llamadas a funciones
+    let fib_resultado = fibonacci(20);
+    let factorial_resultado = factorial(10);
+    let array_ordenado = bubble_sort();
+    let busqueda = binary_search(array_ordenado, 42);
+    
+    // Más variables y operaciones
+    let mut suma: i32 = 0;
+    let mut producto: i32 = 1;
+    let mut promedio: f64 = 0.0;
+    
+    // Operaciones con arrays
+    let numeros = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let mut indice: i32 = 0;
+    
+    while indice < 10 {
+        suma = suma + numeros[indice];
+        producto = producto * numeros[indice];
+        indice = indice + 1;
+    }
+    
+    promedio = suma / 10.0;
+    
+    // Estructuras de control anidadas
+    for x in 1..20 {
+        for y in 1..20 {
+            let multiplicacion = x * y;
+            
+            if multiplicacion % 3 == 0 {
+                if multiplicacion % 5 == 0 {
+                    let especial = multiplicacion / 15;
+                } else {
+                    let normal = multiplicacion / 3;
+                }
+            }
+        }
+    }
+    
+    // Más operaciones complejas
+    let mut matriz: i32 = 0;
+    let filas: i32 = 5;
+    let columnas: i32 = 5;
+    
+    for i in 0..filas {
+        for j in 0..columnas {
+            matriz = i * columnas + j;
+            let valor = matriz * 2 + 1;
+        }
+    }
+    
+    // Operaciones con strings y caracteres
+    let cadena1: str = "Hola";
+    let cadena2: str = "Mundo";
+    let longitud1 = len(cadena1);
+    let longitud2 = len(cadena2);
+    
+    // Más estructuras de control
+    match contador {
+        0 => let cero = true,
+        1 => let uno = true,
+        2 => let dos = true,
+        _ => let otro = true,
+    }
+    
+    // Bucle loop con break
+    loop {
+        contador = contador - 1;
+        
+        if contador <= 0 {
+            break;
+        }
+        
+        let temporal = contador * 3;
+        
+        if temporal > 200 {
+            continue;
+        }
+    }
+    
+    // Funciones anidadas y más variables
+    let resultado_complejo = calcular_complejo();
+    let mut acumulador: f64 = 0.0;
+    let precision: f64 = 0.001;
+    
+    // Algoritmo iterativo
+    for iteracion in 1..100 {
+        let valor_actual = iteracion * pi;
+        acumulador = acumulador + valor_actual;
+        
+        if acumulador > 1000.0 {
+            let diferencia = acumulador - 1000.0;
+            
+            if diferencia < precision {
+                break;
+            }
+        }
+    }
+}
+
+fn fibonacci(n: i32) -> i32 {
+    if n <= 1 {
+        return n;
+    }
+    
+    let mut a: i32 = 0;
+    let mut b: i32 = 1;
+    let mut temp: i32 = 0;
+    
+    for i in 2..n+1 {
+        temp = a + b;
+        a = b;
+        b = temp;
+    }
+    
+    return b;
+}
+
+fn factorial(n: i32) -> i32 {
+    if n <= 1 {
+        return 1;
+    }
+    
+    let mut resultado: i32 = 1;
+    let mut i: i32 = 2;
+    
+    while i <= n {
+        resultado = resultado * i;
+        i = i + 1;
+    }
+    
+    return resultado;
+}
+
+fn bubble_sort() -> i32 {
+    let mut arr = [64, 34, 25, 12, 22, 11, 90];
+    let n: i32 = 7;
+    
+    for i in 0..n-1 {
+        for j in 0..n-i-1 {
+            if arr[j] > arr[j+1] {
+                let temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+            }
+        }
+    }
+    
+    return 0;
+}
+
+fn binary_search(arr: i32, target: i32) -> i32 {
+    let mut left: i32 = 0;
+    let mut right: i32 = 9;
+    
+    while left <= right {
+        let mid = left + (right - left) / 2;
+        
+        if arr == target {
+            return mid;
+        }
+        
+// Programa extenso que implementa diferentes algoritmos y estructuras de datos
+// para probar el analizador léxico con un archivo de 200 líneas
+
 fn main() {
     // Declaraciones de variables básicas
     let mut contador: i32 = 0;
@@ -198,3 +398,603 @@ fn binary_search(arr: i32, target: i32) -> i32 {
             return mid;
         }
         
+// Programa extenso que implementa diferentes algoritmos y estructuras de datos
+// para probar el analizador léxico con un archivo de 200 líneas
+
+fn main() {
+    // Declaraciones de variables básicas
+    let mut contador: i32 = 0;
+    let limite: i32 = 100;
+    let pi: f64 = 3.14159;
+    let nombre: str = "Analizador Léxico";
+    let activo: bool = true;
+    
+    // Estructuras de control - Bucle while
+    while contador < limite {
+        if contador % 2 == 0 {
+            contador = contador + 1;
+        } else {
+            contador = contador * 2;
+        }
+        
+        // Operaciones matemáticas
+        let resultado = contador + limite * 2;
+        let division = resultado / 3;
+        let modulo = division % 7;
+    }
+    
+    // Estructura de control - Bucle for
+    for i in 0..50 {
+        let cuadrado = i * i;
+        let cubo = cuadrado * i;
+        
+        if cubo > 1000 {
+            break;
+        }
+        
+        if cuadrado < 10 {
+            continue;
+        }
+    }
+    
+    // Llamadas a funciones
+    let fib_resultado = fibonacci(20);
+    let factorial_resultado = factorial(10);
+    let array_ordenado = bubble_sort();
+    let busqueda = binary_search(array_ordenado, 42);
+    
+    // Más variables y operaciones
+    let mut suma: i32 = 0;
+    let mut producto: i32 = 1;
+    let mut promedio: f64 = 0.0;
+    
+    // Operaciones con arrays
+    let numeros = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let mut indice: i32 = 0;
+    
+    while indice < 10 {
+        suma = suma + numeros[indice];
+        producto = producto * numeros[indice];
+        indice = indice + 1;
+    }
+    
+    promedio = suma / 10.0;
+    
+    // Estructuras de control anidadas
+    for x in 1..20 {
+        for y in 1..20 {
+            let multiplicacion = x * y;
+            
+            if multiplicacion % 3 == 0 {
+                if multiplicacion % 5 == 0 {
+                    let especial = multiplicacion / 15;
+                } else {
+                    let normal = multiplicacion / 3;
+                }
+            }
+        }
+    }
+    
+    // Más operaciones complejas
+    let mut matriz: i32 = 0;
+    let filas: i32 = 5;
+    let columnas: i32 = 5;
+    
+    for i in 0..filas {
+        for j in 0..columnas {
+            matriz = i * columnas + j;
+            let valor = matriz * 2 + 1;
+        }
+    }
+    
+    // Operaciones con strings y caracteres
+    let cadena1: str = "Hola";
+    let cadena2: str = "Mundo";
+    let longitud1 = len(cadena1);
+    let longitud2 = len(cadena2);
+    
+    // Más estructuras de control
+    match contador {
+        0 => let cero = true,
+        1 => let uno = true,
+        2 => l#et dos = true,
+        _ => let otro = true,
+    }
+    
+    // Bucle loop con break
+    loop {
+        @contador = contador - 1;#
+        
+        if contador <= 0 {
+            break;
+        }
+        
+        let temporal = contador * 3;
+        
+        if temporal > 200 {
+            continue;
+        }
+    }
+    
+    // Funciones anidadas y más variables
+    let resultado_complejo = calcular_complejo();
+    let mut acumulador: f64 = 0.0;
+    let precision: f64 = 0.001;
+    
+    // Algoritmo iterativo
+    for iteracion in 1..100 {
+        let valor_actual = iteracion * pi;
+        acumulador = acumulador + valor_actual;
+        
+        if acumulador > 1000.0 {
+            let diferencia = acumulador - 1000.0;
+            
+            if diferencia < precision {
+                break;
+            }
+        }
+    }
+}
+
+fn fibonacci(n: i32) -> i32 {
+    if n <= 1 {
+        return n;
+    }
+    
+    let mut a: i32 = 0;
+    let mut b: i32 = 1;
+    let mut temp: i32 = 0;
+    
+    for i in 2..n+1 {
+        temp = a + b;
+        a = b;
+        b = temp;
+    }
+    
+    return b;
+}
+
+fn factorial(n: i32) -> i32 {
+    if n <= 1 {
+        return 1;
+    }
+    
+    let mut resultado: i32 = 1;
+    let mut i: i32 = 2;
+    
+    while i <= n {
+        resultado = resultado * i;
+        i = i + 1;
+    }
+    
+    return resultado;
+}
+
+fn bubble_sort() -> i32 {
+    let mut arr = [64, 34, 25, 12, 22, 11, 90];
+    let n: i32 = 7;
+    
+    for i in 0..n-1 {
+        for j in 0..n-i-1 {
+            if arr[j] > arr[j+1] {
+                let temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+            }
+        }
+    }
+    
+    return 0;
+}
+
+fn binary_search(arr: i32, target: i32) -> i32 {
+    let mut left: i32 = 0;
+    let mut right: i32 = 9;
+    
+    while left <= right {
+        let mid = left + (right - left) / 2;
+        
+        if arr == target {
+            return mid;
+        }
+        
+// Programa extenso que implementa diferentes algoritmos y estructuras de datos
+// para probar el analizador léxico con un archivo de 200 líneas
+
+fn main() {
+    // Declaraciones de variables básicas
+    let mut contador: i32 = 0;
+    let limite: i32 = 100;
+    let pi: f64 = 3.14159;
+    let nombre: str = "Analizador Léxico";
+    let activo: bool = true;
+    
+    // Estructuras de control - Bucle while
+    while contador < limite {
+        if contador % 2 == 0 {
+            contador = contador + 1;
+        } else {
+            contador = contador * 2;
+        }
+        
+        // Operaciones matemáticas
+        let resultado = contador + limite * 2;
+        let division = resultado / 3;
+        let modulo = division % 7;
+    }
+    
+    // Estructura de control - Bucle for
+    for i in 0..50 {
+        let cuadrado = i * i;
+        let cubo = cuadrado * i;
+        
+        if cubo > 1000 {
+            break;
+        }
+        
+        if cuadrado < 10 {
+            continue;
+        }
+    }
+    
+    // Llamadas a funciones
+    let fib_resultado = fibonacci(20);
+    let factorial_resultado = factorial(10);
+    let array_ordenado = bubble_sort();
+    let busqueda = binary_search(array_ordenado, 42);
+    
+    // Más variables y operaciones
+    let mut suma: i32 = 0;
+    let mut producto: i32 = 1;
+    let mut promedio: f64 = 0.0;
+    
+    // Operaciones con arrays
+    let numeros = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let mut indice: i32 = 0;
+    
+    while indice < 10 {
+        suma = suma + numeros[indice];
+        producto = producto * numeros[indice];
+        indice = indice + 1;
+    }
+    
+    promedio = suma / 10.0;
+    
+    // Estructuras de control anidadas
+    for x in 1..20 {
+        for y in 1..20 {
+            let multiplicacion = x * y;
+            
+            if multiplicacion % 3 == 0 {
+                if multiplicacion % 5 == 0 {
+                    let especial = multiplicacion / 15;
+                } else {
+                    let normal = multiplicacion / 3;
+                }
+            }
+        }
+    }
+    
+    // Más operaciones complejas
+    let mut matriz: i32 = 0;
+    let filas: i32 = 5;
+    let columnas: i32 = 5;
+    
+    for i in 0..filas {
+        for j in 0..columnas {
+            matriz = i * columnas + j;
+            let valor = matriz * 2 + 1;
+        }
+    }
+    
+    // Operaciones con strings y caracteres
+    let cadena1: str = "Hola";
+    let cadena2: str = "Mundo";
+    let longitud1 = len(cadena1);
+    let longitud2 = len(cadena2);
+    
+    // Más estructuras de control
+    match contador {
+        0 => let cero = true,
+        1 => let uno = true,
+        2 => let dos = true,
+        _ => let otro = true,
+    }
+    
+    // Bucle loop con break
+    loop {
+        contador = contador - 1;
+        
+        if contador <= 0 {
+            break;
+        }
+        
+        let temporal = contador * 3;
+        
+        if temporal > 200 {
+            continue;
+        }
+    }
+    
+    // Funciones anidadas y más variables
+    let resultado_complejo = calcular_complejo();
+    let mut acumulador: f64 = 0.0;
+    let precision: f64 = 0.001;
+    
+    // Algoritmo iterativo
+    for iteracion in 1..100 {
+        let valor_actual = iteracion * pi;
+        acumulador = acumulador + valor_actual;
+        
+        if acumulador > 1000.0 {
+            let diferencia = acumulador - 1000.0;
+            
+            if diferencia < precision {
+                break;
+            }
+        }
+    }
+}
+
+fn fibonacci(n: i32) -> i32 {
+    if n <= 1 {
+        return n;
+    }
+    
+    let mut a: i32 = 0;
+    let mut b: i32 = 1;
+    let mut temp: i32 = 0;
+    
+    for i in 2..n+1 {
+        temp = a + b;
+        a = b;
+        b = temp;
+    }
+    
+    return b;
+}
+
+fn factorial(n: i32) -> i32 {
+    if n <= 1 {
+        return 1;
+    }
+    
+    let mut resultado: i32 = 1;
+    let mut i: i32 = 2;
+    
+    while i <= n {
+        resultado = resultado * i;
+        i = i + 1;
+    }
+    
+    return resultado;
+}
+
+fn bubble_sort() -> i32 {
+    let mut arr = [64, 34, 25, 12, 22, 11, 90];
+    let n: i32 = 7;
+    
+    for i in 0..n-1 {
+        for j in 0..n-i-1 {
+            if arr[j] > arr[j+1] {
+                let temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+            }
+        }
+    }
+    
+    return 0;
+}
+
+fn binary_search(arr: i32, target: i32) -> i32 {
+    let mut left: i32 = 0;
+    let mut right: i32 = 9;
+    
+    while left <= right {
+        let mid = left + (right - left) / 2;
+        
+        if arr == target {
+            return mid;
+        }
+        
+// Programa extenso que implementa diferentes algoritmos y estructuras de datos
+// para probar el analizador léxico con un archivo de 200 líneas
+
+fn main() {
+    // Declaraciones de variables básicas
+    let mut contador: i32 = 0;
+    let limite: i32 = 100;
+    let pi: f64 = 3.14159;
+    let nombre: str = "Analizador Léxico";
+    let activo: bool = true;
+    
+    // Estructuras de control - Bucle while
+    while contador < limite {
+        if contador % 2 == 0 {
+            contador = contador + 1;
+        } else {
+            contador = contador * 2;
+        }
+        
+        // Operaciones matemáticas
+        let resultado = contador + limite * 2;
+        let division = resultado / 3;
+        let modulo = division % 7;
+    }
+    
+    // Estructura de control - Bucle for
+    for i in 0..50 {
+        let cuadrado = i * i;
+        let cubo = cuadrado * i;
+        
+        if cubo > 1000 {
+            break;
+        }
+        
+        if cuadrado < 10 {
+            continue;
+        }
+    }
+    
+    // Llamadas a funciones
+    let fib_resultado = fibonacci(20);
+    let factorial_resultado = factorial(10);
+    let array_ordenado = bubble_sort();
+    let busqueda = binary_search(array_ordenado, 42);
+    
+    // Más variables y operaciones
+    let mut suma: i32 = 0;
+    let mut producto: i32 = 1;
+    let mut promedio: f64 = 0.0;
+    
+    // Operaciones con arrays
+    let numeros = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let mut indice: i32 = 0;
+    
+    while indice < 10 {
+        suma = suma + numeros[indice];
+        producto = producto * numeros[indice];
+        indice = indice + 1;
+    }
+    
+    promedio = suma / 10.0;
+    
+    // Estructuras de control anidadas
+    for x in 1..20 {
+        for y in 1..20 {
+            let multiplicacion = x * y;
+            
+            if multiplicacion % 3 == 0 {
+                if multiplicacion % 5 == 0 {
+                    let especial = multiplicacion / 15;
+                } else {
+                    let normal = multiplicacion / 3;
+                }
+            }
+        }
+    }
+    
+    // Más operaciones complejas
+    let mut matriz: i32 = 0;
+    let filas: i32 = 5;
+    let columnas: i32 = 5;
+    
+    for i in 0..filas {
+        for j in 0..columnas {
+            matriz = i * columnas + j;
+            let valor = matriz * 2 + 1;
+        }
+    }
+    
+    // Operaciones con strings y caracteres
+    let cadena1: str = "Hola";
+    let cadena2: str = "Mundo";
+    let longitud1 = len(cadena1);
+    let longitud2 = len(cadena2);
+    
+    // Más estructuras de control
+    match contador {
+        0 => let cero = true,
+        1 => let uno = true,
+        2 => let dos = true,
+        _ => let otro = true,
+    }
+    
+    // Bucle loop con break
+    loop {
+        contador = contador - 1;
+        
+        if contador <= 0 {
+            break;
+        }
+        
+        let temporal = contador * 3;
+        
+        if temporal > 200 {
+            continue;
+        }
+    }
+    
+    // Funciones anidadas y más variables
+    let resultado_complejo = calcular_complejo();
+    let mut acumulador: f64 = 0.0;
+    let precision: f64 = 0.001;
+    
+    // Algoritmo iterativo
+    for iteracion in 1..100 {
+        let valor_actual = iteracion * pi;
+        acumulador = acumulador + valor_actual;
+        
+        if acumulador > 1000.0 {
+            let diferencia = acumulador - 1000.0;
+            
+            if diferencia < precision {
+                break;
+            }
+        }
+    }
+}
+
+fn fibonacci(n: i32) -> i32 {
+    if n <= 1 {
+        return n;
+    }
+    
+    let mut a: i32 = 0;
+    let mut b: i32 = 1;
+    let mut temp: i32 = 0;
+    
+    for i in 2..n+1 {
+        temp = a + b;
+        a = b;
+        b = temp;
+    }
+    
+    return b;
+}
+
+fn factorial(n: i32) -> i32 {
+    if n <= 1 {
+        return 1;
+    }
+    
+    let mut resultado: i32 = 1;
+    let mut i: i32 = 2;
+    
+    while i <= n {
+        resultado = resultado * i;
+        i = i + 1;
+    }
+    
+    return resultado;
+}
+
+fn bubble_sort() -> i32 {
+    let mut arr = [64, 34, 25, 12, 22, 11, 90];
+    let n: i32 = 7;
+    
+    for i in 0..n-1 {
+        for j in 0..n-i-1 {
+            if arr[j] > arr[j+1] {
+                let temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+            }
+        }
+    }
+    
+    return 0;
+}
+
+fn binary_search(arr: i32, target: i32) -> i32 {
+    let mut left: i32 = 0;
+    let mut right: i32 = 9;
+    
+    while left <= right {
+        let mid = left + (right - left) / 2;
+        
+        if arr == target {#
+            return mid;
+        }
+        @
