@@ -36,8 +36,24 @@ typedef struct token_t{
     struct token_t *next; /**< Puntero al siguiente token (para lista enlazada) */
 } token_t;
 
+/*
+* @brief Estructura del lexer
+*/
+typedef struct Lexer {
+    const char *source;   /**< Código fuente a analizar */
+    const char *p;        /**< Puntero actual en el código fuente */
+    size_t line;          /**< Línea actual */
+    size_t col;           /**< Columna actual */
+} Lexer;
+
 token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t column);
 void free_token(token_t *token);
+void free_token_list(token_t *head);
+void lexer_init(Lexer *lxr, const char *source);
+token_t* lexer_next_token(Lexer *lxr);
+char *read_file(const char *filename);
 token_t *get_next_token(const char *source);
+token_t *tokenize_all(const char *source);
+const char* token_type_name(TokenType t);
 
 #endif // LEXER_H
