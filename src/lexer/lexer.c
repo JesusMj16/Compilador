@@ -354,27 +354,82 @@ static void skip_ignorable(Lexer *lxr){
 /**
  * @brief Analiza y crea un token para identificadores o palabras clave.
  * 
+ * Reglas para identificadores válidos:
+ * - Debe empezar con una letra (a-z, A-Z)
+ * - Puede contener letras, dígitos (0-9) y guiones bajos (_)
+ * - No puede tener guiones bajos consecutivos (__) 
+ * - No puede empezar ni terminar con guión bajo
+ * 
  * @param lxr El lexer.
  * @param sl Línea de inicio del token.
  * @param sc Columna de inicio del token.
- * @return El token creado (TOKEN_IDENTIFIER o TOKEN_KEYWORD).
+ * @return El token creado (TOKEN_IDENTIFIER, TOKEN_KEYWORD o TOKEN_UNKNOWN).
  */
 static token_t* lex_identifier_or_keyword(Lexer *lxr, size_t sl, size_t sc){
     const char *start = lxr->p;
-    lxr_advance(lxr); 
+    int is_valid = 1;
+    
+    // El primer carácter debe ser una letra
+    if (get_char_type(lxr_peek(lxr)) != CHAR_LETTER) {
+        is_valid = 0;
+    }
+    
+    // Consumir todo el identificador completo (válido o inválido)
+    lxr_advance(lxr);
+    char prev_char = *(lxr->p - 1);
+    
     while (1) {
-        CharType type = get_char_type(lxr_peek(lxr));
-        if (type == CHAR_LETTER || type == CHAR_DIGIT || type == CHAR_UNDERSCORE) {
+        char current_char = lxr_peek(lxr);
+        CharType type = get_char_type(current_char);
+        
+        if (type == CHAR_LETTER || type == CHAR_DIGIT) {
             lxr_advance(lxr);
+            prev_char = current_char;
+        } else if (type == CHAR_UNDERSCORE) {
+            // Detectar guiones bajos consecutivos pero seguir consumiendo
+            if (prev_char == '_') {
+                is_valid = 0;
+            }
+            lxr_advance(lxr);
+            prev_char = current_char;
         } else {
             break;
         }
     }
+    
     char *lexeme = make_lexeme(start, lxr->p);
     if (lexeme == NULL) {
         return create_token(TOKEN_UNKNOWN, NULL, sl, sc);
     }
-    TokenType ttype = is_keyword(lexeme) ? TOKEN_KEYWORD : TOKEN_IDENTIFIER;
+    
+    // Verificar reglas adicionales
+    size_t len = strlen(lexeme);
+    
+    // No puede empezar con guión bajo
+    if (len > 0 && lexeme[0] == '_') {
+        is_valid = 0;
+    }
+    
+    // No puede terminar con guión bajo
+    if (len > 0 && lexeme[len - 1] == '_') {
+        is_valid = 0;
+    }
+    
+    // Verificar guiones bajos consecutivos
+    for (size_t i = 0; i < len - 1; i++) {
+        if (lexeme[i] == '_' && lexeme[i + 1] == '_') {
+            is_valid = 0;
+            break;
+        }
+    }
+    
+    TokenType ttype;
+    if (!is_valid) {
+        ttype = TOKEN_UNKNOWN;
+    } else {
+        ttype = is_keyword(lexeme) ? TOKEN_KEYWORD : TOKEN_IDENTIFIER;
+    }
+    
     token_t *token = create_token(ttype, lexeme, sl, sc);
     free(lexeme);
     return token;
