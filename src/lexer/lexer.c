@@ -354,44 +354,39 @@ static void skip_ignorable(Lexer *lxr){
 /**
  * @brief Analiza y crea un token para identificadores o palabras clave.
  * 
- * Reglas para identificadores válidos:
- * - Debe empezar con una letra (a-z, A-Z)
+ * Reglas según reglas.md:
+ * - EBNF: identificador -> ( letra | '_' ) ( letra | dígito | '_' )*
+ * - REGEX: [_a-zA-Z][_a-zA-Z0-9]*
+ * - Puede empezar con letra (a-z, A-Z) o guión bajo (_)
  * - Puede contener letras, dígitos (0-9) y guiones bajos (_)
- * - No puede tener guiones bajos consecutivos (__) 
- * - No puede empezar ni terminar con guión bajo
+ * - Permite múltiples guiones bajos consecutivos
  * 
  * @param lxr El lexer.
  * @param sl Línea de inicio del token.
  * @param sc Columna de inicio del token.
- * @return El token creado (TOKEN_IDENTIFIER, TOKEN_KEYWORD o TOKEN_UNKNOWN).
+ * @return El token creado (TOKEN_IDENTIFIER o TOKEN_KEYWORD).
  */
 static token_t* lex_identifier_or_keyword(Lexer *lxr, size_t sl, size_t sc){
     const char *start = lxr->p;
-    int is_valid = 1;
     
-    // El primer carácter debe ser una letra
-    if (get_char_type(lxr_peek(lxr)) != CHAR_LETTER) {
-        is_valid = 0;
+    // El primer carácter debe ser una letra o guión bajo
+    CharType first_type = get_char_type(lxr_peek(lxr));
+    if (first_type != CHAR_LETTER && first_type != CHAR_UNDERSCORE) {
+        lxr_advance(lxr);
+        char *lexeme = make_lexeme(start, lxr->p);
+        token_t *token = create_token(TOKEN_UNKNOWN, lexeme, sl, sc);
+        if (lexeme) free(lexeme);
+        return token;
     }
     
-    // Consumir todo el identificador completo (válido o inválido)
+    // Consumir el primer carácter
     lxr_advance(lxr);
-    char prev_char = *(lxr->p - 1);
     
+    // Continuar con letras, dígitos o guiones bajos
     while (1) {
-        char current_char = lxr_peek(lxr);
-        CharType type = get_char_type(current_char);
-        
-        if (type == CHAR_LETTER || type == CHAR_DIGIT) {
+        CharType type = get_char_type(lxr_peek(lxr));
+        if (type == CHAR_LETTER || type == CHAR_DIGIT || type == CHAR_UNDERSCORE) {
             lxr_advance(lxr);
-            prev_char = current_char;
-        } else if (type == CHAR_UNDERSCORE) {
-            // Detectar guiones bajos consecutivos pero seguir consumiendo
-            if (prev_char == '_') {
-                is_valid = 0;
-            }
-            lxr_advance(lxr);
-            prev_char = current_char;
         } else {
             break;
         }
@@ -402,34 +397,7 @@ static token_t* lex_identifier_or_keyword(Lexer *lxr, size_t sl, size_t sc){
         return create_token(TOKEN_UNKNOWN, NULL, sl, sc);
     }
     
-    // Verificar reglas adicionales
-    size_t len = strlen(lexeme);
-    
-    // No puede empezar con guión bajo
-    if (len > 0 && lexeme[0] == '_') {
-        is_valid = 0;
-    }
-    
-    // No puede terminar con guión bajo
-    if (len > 0 && lexeme[len - 1] == '_') {
-        is_valid = 0;
-    }
-    
-    // Verificar guiones bajos consecutivos
-    for (size_t i = 0; i < len - 1; i++) {
-        if (lexeme[i] == '_' && lexeme[i + 1] == '_') {
-            is_valid = 0;
-            break;
-        }
-    }
-    
-    TokenType ttype;
-    if (!is_valid) {
-        ttype = TOKEN_UNKNOWN;
-    } else {
-        ttype = is_keyword(lexeme) ? TOKEN_KEYWORD : TOKEN_IDENTIFIER;
-    }
-    
+    TokenType ttype = is_keyword(lexeme) ? TOKEN_KEYWORD : TOKEN_IDENTIFIER;
     token_t *token = create_token(ttype, lexeme, sl, sc);
     free(lexeme);
     return token;
@@ -687,17 +655,30 @@ token_t* lexer_next_token(Lexer *lxr){
     if (type == CHAR_APOSTROPHE) {
         const char *start = lxr->p;
         lxr_advance(lxr); // '
+        
+        // Manejar caracter con escape
         if (lxr_peek(lxr) == '\\') {
             lxr_advance(lxr);
             if (lxr_peek(lxr) != '\0') lxr_advance(lxr);
         } else if (lxr_peek(lxr) != '\0' && lxr_peek(lxr) != '\'' && lxr_peek(lxr) != '\n') {
+            // Caracter normal
             lxr_advance(lxr);
         }
-        if (lxr_peek(lxr) == '\'') lxr_advance(lxr);
-        char *lex = make_lexeme(start, lxr->p);
-        token_t *token = create_token(TOKEN_UNKNOWN, lex, start_line, start_col);
-        free(lex);
-        return token;
+        
+        // Debe terminar con '
+        if (lxr_peek(lxr) == '\'') {
+            lxr_advance(lxr);
+            char *lex = make_lexeme(start, lxr->p);
+            token_t *token = create_token(TOKEN_STRING, lex, start_line, start_col);
+            free(lex);
+            return token;
+        } else {
+            // Caracter mal formado
+            char *lex = make_lexeme(start, lxr->p);
+            token_t *token = create_token(TOKEN_UNKNOWN, lex, start_line, start_col);
+            free(lex);
+            return token;
+        }
     }
 
     return lex_operator_or_delimiter(lxr, start_line, start_col);
