@@ -4,7 +4,39 @@
 Este proyecto corresponde a la materia de **Compiladores**.  
 El objetivo es **diseñar e implementar un analizador léxico utilizando un Autómata Finito Determinista (AFD)**.  
 
-El analizador recibirá un archivo fuente escrito en un mini-lenguaje y generará como salida:  
+El analizador recibirá un archivo fuente escrito en un mini## ❓ Solución de Problemas
+
+### Error: "make: command not found" o "No rule to make target"
+```bash
+# Verificar que el Makefile existe
+ls -la Makefile
+
+# Si no existe, el .gitignore puede estar excluyéndolo
+git status | grep Makefile
+
+# Verificar instalación de make
+sudo apt install build-essential  # Ubuntu/Debian
+sudo dnf install make gcc          # Fedora/RHEL
+```
+
+### Error: "command not found"
+```bash
+# Verificar que el ejecutable existe
+ls -la bin/compilador
+
+# Usar ruta relativa o absoluta
+./bin/compilador archivo.txt
+```
+
+### Error de Compilación
+```bash
+# Verificar dependencias
+gcc --version
+make --version
+
+# Limpiar y recompilar
+make clean && make
+``` como salida:  
 - Lista de tokens reconocidos (con lexema, tipo de token, línea y columna).  
 - Archivos de tokens en formato numérico para el analizador sintáctico.
 - Manejo robusto de errores léxicos.
@@ -50,6 +82,12 @@ cd Compilador
 ```bash
 ls -la
 # Deberías ver: src/, include/, docs/, Makefile, README.md, etc.
+```
+
+3. **Verificar que el Makefile está presente**:
+```bash
+ls -la Makefile
+# Si no aparece, el repositorio puede estar corrupto
 ```
 
 ---
