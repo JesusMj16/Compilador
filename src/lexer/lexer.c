@@ -2,8 +2,8 @@
  * @file lexer.c
  * @brief Implementación de estructuras y funciones del lexer
  */
-#include "lexer.h"
-#include "keywords.h"
+#include "../include/lexer.h"
+#include "../include/keywords.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -140,9 +140,8 @@ static const char* char_type_to_string(CharType type) {
  */
 static CharType get_char_type(int c) {
     if (c == '\0') { return CHAR_EOF; }
-    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) { return CHAR_LETTER; }
     if (c >= '0' && c <= '9') { return CHAR_DIGIT; }
-    if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) { return CHAR_HEXLETTER; }
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) { return CHAR_LETTER; }
     if (c == '_') { return CHAR_UNDERSCORE; } 
     if (c == '"') { return CHAR_QUOTE; }
     if (c == '\'') { return CHAR_APOSTROPHE; }
@@ -207,6 +206,20 @@ void free_token(token_t *token) {
     if (token != NULL) {
         free(token->lexeme);
         free(token);
+    }
+}
+
+/**
+ * @brief Libera una lista enlazada completa de tokens.
+ * 
+ * @param head El primer token de la lista.
+ */
+void free_token_list(token_t *head) {
+    token_t *current = head;
+    while (current != NULL) {
+        token_t *next = current->next;
+        free_token(current);
+        current = next;
     }
 }
 
@@ -419,6 +432,7 @@ static token_t* lex_number(Lexer *lxr, size_t sl, size_t sc){
         return tok;
     }
 
+    // Números binarios (0b o 0B)
     if (lxr_peek(lxr) == '0' && (lxr_peek_next(lxr) == 'b' || lxr_peek_next(lxr) == 'B')) {
         lxr_advance(lxr);
         lxr_advance(lxr); 
@@ -660,7 +674,7 @@ token_t *get_next_token(const char *source){
  * @param t El tipo de token.
  * @return El nombre del tipo de token como cadena.
  */
-static const char* token_type_name(TokenType t) {
+const char* token_type_name(TokenType t) {
     switch (t) {
         case TOKEN_IDENTIFIER: return "IDENTIFIER";
         case TOKEN_NUMBER:     return "NUMBER";
@@ -675,32 +689,111 @@ static const char* token_type_name(TokenType t) {
 }
 
 /**
- * @brief Función principal que prueba el analizador léxico.
+ * @brief Tokeniza todo el código fuente y devuelve una lista enlazada de tokens.
  * 
- * @return 0 si la ejecución fue exitosa, 1 si hubo error.
+ * @param source El código fuente a tokenizar.
+ * @return El primer token de la lista enlazada, o NULL si hay error.
  */
-int main(void) {
-    char *source = read_file("src/lexer/test.txt");
-    if (source == NULL) {
-        return 1;
-    }
+token_t *tokenize_all(const char *source) {
+    if (!source) return NULL;
+    
     Lexer lexer;
     lexer_init(&lexer, source);
+    
+    token_t *head = NULL;
+    token_t *tail = NULL;
+    
+    for (;;) {
+        token_t *token = lexer_next_token(&lexer);
+        if (!token) break;
+        
+        if (!head) {
+            head = tail = token;
+        } else {
+            tail->next = token;
+            tail = token;
+        }
+        
+        if (token->type == TOKEN_EOF) break;
+    }
+    
+    return head;
+}
 
+/**
+ * @brief Escribe los tokens de un archivo fuente a un archivo de salida con formato numérico.
+ * 
+ * @param source_file El archivo fuente a tokenizar.
+ * @param output_file El archivo donde escribir los tokens.
+ * @return 0 si es exitoso, 1 si hay error.
+ */
+int write_tokens_to_file(const char *source_file, const char *output_file) {
+    if (!source_file || !output_file) return 1;
+    
+    // Leer el archivo fuente
+    char *source = read_file(source_file);
+    if (!source) {
+        printf("Error: No se pudo leer el archivo '%s'\n", source_file);
+        return 1;
+    }
+    
+    // Abrir archivo de salida
+    FILE *output = fopen(output_file, "w");
+    if (!output) {
+        printf("Error: No se pudo crear el archivo '%s'\n", output_file);
+        free(source);
+        return 1;
+    }
+    
+    // Escribir header con información del formato
+    fprintf(output, "# Tokens generados desde: %s\n", source_file);
+    fprintf(output, "# Formato: tipo_token lexema linea columna [indice_palabra_clave]\n");
+    fprintf(output, "# Tipos: IDENTIFIER=0, NUMBER=1, STRING=2, OPERATOR=3, DELIMITER=4, KEYWORD=5, UNKNOWN=6, EOF=7\n");
+    fprintf(output, "# Palabras clave: fn=0, let=1, mut=2, if=3, else=4, match=5, while=6, loop=7, for=8, in=9, break=10, continue=11, return=12, true=13, false=14\n");
+    fprintf(output, "\n");
+    
+    Lexer lexer;
+    lexer_init(&lexer, source);
+    
+    int token_count = 0;
     for (;;) {
         token_t *token = lexer_next_token(&lexer);
         if (!token) {
-            printf("Error al obtener el siguiente token.\n");
+            fprintf(output, "# Error: No se pudo obtener el siguiente token\n");
             break;
         }
-        printf("line: %zu, column: %zu, Type: %s Lexeme: %s\n",token->line, token->column,token_type_name(token->type), token->lexeme ? token->lexeme : "NULL");
-
+    
+    // Escribir en formato: tipo lexema linea columna [indice_keyword]
+        if (token->type == TOKEN_KEYWORD) {
+            int keyword_index = get_keyword_index(token->lexeme);
+            fprintf(output, "%d %s %zu %zu %d\n", 
+                   token->type, 
+                   token->lexeme ? token->lexeme : "NULL",
+                   token->line, 
+                   token->column,
+                   keyword_index);
+        } else {
+            fprintf(output, "%d %s %zu %zu\n", 
+                   token->type, 
+                   token->lexeme ? token->lexeme : "NULL",
+                   token->line, 
+                   token->column);
+        }
+        
+        token_count++;
+        
         if (token->type == TOKEN_EOF) {
             free_token(token);
             break;
         }
         free_token(token);
     }
+    
+    fprintf(output, "\n# Total de tokens: %d\n", token_count);
+    
+    fclose(output);
     free(source);
+    
+    printf("✓ Tokens escritos en: %s (%d tokens)\n", output_file, token_count);
     return 0;
 }
