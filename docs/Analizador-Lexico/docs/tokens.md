@@ -1,6 +1,6 @@
-# 📌 Tokens del Lenguaje
+# Tokens del Lenguaje
 
-## 🔑 Palabras reservadas
+## Palabras reservadas
 | Token | Definición |
 |----------------------|----------------|
 | `fn` | definición de función | 
@@ -21,7 +21,7 @@
 
 ---
 
-## 📦 Tipos de datos
+## Tipos de datos
 | Token | Descripción |
 |---------------------|----|
 | `i32` | entero de 32 bits |
@@ -31,7 +31,7 @@
 
 ---
 
-## ➕ Operadores aritméticos
+## Operadores aritméticos
 | Token | Descripción |
 |-----------------------------------|----|
 | `+` | suma |
@@ -42,7 +42,7 @@
 
 ---
 
-## 🔍 Operadores de comparación
+## Operadores de comparación
 | Token | Descripción |
 |-----------------------------------------|----|
 | `==` | igual |
@@ -54,7 +54,7 @@
 
 ---
 
-## ⚡ Operadores lógicos
+## Operadores lógicos
 | Token | Descripción |
 |--------------------|----|
 | `&&` | operador AND |
@@ -63,7 +63,7 @@
 
 ---
 
-## 📌 Delimitadores y separadores
+## Delimitadores y separadores
 | Token | Descripción |
 |-----------------|----|
 | `;` | fin de instrucción |
@@ -74,29 +74,29 @@
 
 ---
 
-## 🆔 Identificadores
+## Identificadores
 - Deben iniciar con una letra o `_`.  
 - Pueden contener letras, dígitos o `_`.  
-- ❌ No se permiten `__` consecutivos.  
+- No se permiten `__` consecutivos.  
 - Ejemplos válidos: `x`, `_contador`, `suma_total`  
 - Ejemplos inválidos: `12abc`, `a__b`  
 
 ---
 
-## 🔢 Números
+## Números
 - **Enteros**: `123`, `-45`, `0xff` (hexadecimal), `0b1010` (binario).  
 - **Reales**: `3.14`, `-0.5`, `2.5e10`.  
 - Ejemplos inválidos: `1.2.3`, `12e`.  
 
 ---
 
-## 📝 Cadenas y caracteres
+## Cadenas y caracteres
 - **Cadenas**: `"Hola mundo"`, `"Linea\nNueva"`.  
 - **Caracteres**: `'a'`, `'\n'`.  
 - Ejemplos inválidos: `"Texto sin cierre`.  
 
 ---
 
-## 💬 Comentarios
+## Comentarios
 - Una línea: `// comentario`  
 - Varias líneas: `/* comentario */`  
