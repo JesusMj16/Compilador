@@ -65,6 +65,7 @@ static const char *two_char_operators[] = {
     "*=", 
     "/=",  
     "%=",  
+    "=>",  
     NULL   
 };
 
