@@ -2,7 +2,7 @@
 
 Este directorio contiene la documentación completa del **Parser Ascendente (Bottom-Up)** implementado para el compilador.
 
-## 📚 Documentos Disponibles
+## Documentos Disponibles
 
 ### 1. [RESUMEN.md](RESUMEN.md) - **Empieza Aquí** 
 **Resumen ejecutivo de la implementación**
@@ -41,7 +41,7 @@ Este directorio contiene la documentación completa del **Parser Ascendente (Bot
 - Conjuntos Primera Derecha (PD/LAST)
 - Análisis de no terminales
 
-## 🚀 Inicio Rápido
+## Inicio Rápido
 
 ### Compilar el Proyecto
 ```bash
@@ -61,7 +61,7 @@ make clean && make all
 ./bin/compilador archivo.txt
 ```
 
-## 📖 Orden de Lectura Recomendado
+## Orden de Lectura Recomendado
 
 Para entender completamente el parser, se recomienda leer en este orden:
 
@@ -71,24 +71,24 @@ Para entender completamente el parser, se recomienda leer en este orden:
 4. **gramatica.md** - Para la gramática completa
 5. **tabla-pi-pd.md** - Para análisis formal
 
-## 🎯 Componentes Principales
+## Componentes Principales
 
-### 1. 📚 Pila (Stack)
+### 1. Pila (Stack)
 - Mantiene estados LR
 - Almacena nodos parciales del AST
 - Implementación dinámica con crecimiento automático
 
-### 2. 🌳 Árbol de Sintaxis Abstracta (AST)
+### 2. Árbol de Sintaxis Abstracta (AST)
 - Representa la estructura del programa
 - 20+ tipos de nodos
 - Funciones de construcción y liberación
 
-### 3. 🔢 Matriz de Transiciones
+### 3. Matriz de Transiciones
 - Tabla ACTION (shift, reduce, accept, error)
 - Tabla GOTO (transiciones de estados)
 - 66 producciones de la gramática
 
-## 📊 Ejemplos
+## Ejemplos
 
 ### Ejemplo Simple
 ```rust
@@ -126,7 +126,7 @@ Program
             └─ Return: x + 1
 ```
 
-## 🔧 Archivos de Código
+## Archivos de Código
 
 ```
 include/
@@ -141,18 +141,18 @@ src/
 Makefile                # Reglas de compilación
 ```
 
-## 📈 Estadísticas
+## Estadísticas
 
 El parser puede mostrar estadísticas de su ejecución:
 
 ```
-📊 Estadísticas del Parser:
+    Estadísticas del Parser:
    Desplazamientos (shift): 45
    Reducciones (reduce):    23
    Tamaño de pila:          1
 ```
 
-## ✅ Características
+## Características
 
 - [x] Parsing ascendente (bottom-up)
 - [x] Pila dinámica con estados LR
@@ -163,7 +163,7 @@ El parser puede mostrar estadísticas de su ejecución:
 - [x] Extensible y mantenible
 - [x] Completamente documentado
 
-## 🎓 Conceptos Cubiertos
+## Conceptos Cubiertos
 
 - **Parser LR**: Left-to-right, Rightmost derivation
 - **Shift-Reduce**: Operaciones fundamentales
@@ -172,26 +172,3 @@ El parser puede mostrar estadísticas de su ejecución:
 - **Tablas de transición**: ACTION y GOTO
 - **Producciones**: Reglas de la gramática
 - **Análisis ascendente**: Bottom-up parsing
-
-## 📞 Soporte
-
-Para más información:
-- Ver código fuente comentado en `src/parser/parser.c`
-- Consultar header file en `include/parser.h`
-- Revisar ejemplos en `docs/Analizador-Lexico/examples/`
-
-## 🔮 Trabajo Futuro
-
-- Parámetros de función completos
-- Match expressions
-- For loops con iteradores
-- Arrays y acceso a elementos
-- Tipos genéricos
-- Recuperación de errores mejorada
-- Tablas LR completas (opcional)
-
----
-
-**Parser Ascendente LR v1.0**
-Compatible con tu Lexer existente
-Implementación completa con Pila, AST y Matriz de Transiciones

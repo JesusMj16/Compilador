@@ -1,0 +1,44 @@
+// Archivo de prueba exitoso - Programa con múltiples funciones y estructuras de control
+
+fn calcular_factorial() {
+    let n = 5;
+    let resultado = 1;
+    let i = 1;
+    
+    while i <= n {
+        resultado = resultado * i;
+        i = i + 1;
+    }
+    
+    return resultado;
+}
+
+fn procesar_numeros() {
+    let a = 15;
+    let b = 7;
+    let c = 3;
+    
+    let suma = a + b + c;
+    let producto = a * b;
+    let division = a / b;
+    
+    if producto > 100 {
+        let temp = producto - suma;
+        return temp;
+    } else {
+        return suma;
+    }
+}
+
+fn main() {
+    let fact = calcular_factorial();
+    let nums = procesar_numeros();
+    
+    let total = fact + nums;
+    
+    if total > 1000 {
+        return 1;
+    }
+    
+    return 0;
+}

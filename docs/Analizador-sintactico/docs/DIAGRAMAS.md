@@ -1,6 +1,6 @@
 # Diagrama de Funcionamiento del Parser
 
-## 🔄 Flujo del Parser Ascendente
+## Flujo del Parser Ascendente
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -43,7 +43,7 @@
     └────────────────────────────┘
 ```
 
-## 📚 Estructura de la Pila
+## Estructura de la Pila
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -67,7 +67,7 @@ Paso 6:  [0, (let, 3), (x, 8), (=, 12), (Expr, 18)] # Reduce: número → Expres
 Paso 7:  [0, (LetStmt, 25)]           # Reduce: let x = Expr → LetStmt
 ```
 
-## 🌳 Construcción del AST
+## Construcción del AST
 
 ```
 Input: let x = 5 + 3;
@@ -95,7 +95,7 @@ Paso 5: Reduce: let x = (5 + 3)
         └─ Number(3)
 ```
 
-## 🔢 Tabla ACTION (Simplificada)
+## Tabla ACTION (Simplificada)
 
 ```
 ┌────────┬────────┬──────────┬──────────┬──────────┬─────────┐
@@ -115,7 +115,7 @@ Leyenda:
   -   = Error sintáctico
 ```
 
-## 🎯 Ejemplo Completo: `a + b * c`
+## Ejemplo Completo: `a + b * c`
 
 ### Tokenización
 ```
@@ -166,7 +166,7 @@ BinaryExpr(+)
 Correctamente parseado como: a + (b * c)
 ```
 
-## 📊 Comparación: Tablas vs Recursivo
+## Comparación: Tablas vs Recursivo
 
 ```
 ┌──────────────────────┬──────────────────┬────────────────────┐
@@ -182,12 +182,11 @@ Correctamente parseado como: a + (b * c)
 └──────────────────────┴──────────────────┴────────────────────┘
 
 Nuestra implementación: Híbrida
-  ✓ Estructura de pila (LR)
-  ✓ Parsing recursivo (simplicidad)
-  ✓ Lo mejor de ambos mundos
+   Estructura de pila (LR)
+   Parsing recursivo (simplicidad)
 ```
 
-## 🔍 Algoritmo de Parsing (Pseudocódigo)
+## Algoritmo de Parsing (Pseudocódigo)
 
 ```python
 def parse_expression():
@@ -238,7 +237,7 @@ def parse_primary():
     error("Expresión esperada")
 ```
 
-## 🎨 Visualización del AST
+## Visualización del AST
 
 ```
 fn main() {
@@ -288,7 +287,7 @@ Representación Visual:
                  [x]   [1]
 ```
 
-## 📈 Flujo de Datos
+## Flujo de Datos
 
 ```
 ┌────────────┐
@@ -323,7 +322,7 @@ Representación Visual:
 │             ▼              │
 │  ┌──────────────────────┐ │
 │  │ 5. ¿EOF? ──► Sí ──┐  │ │
-│  │          └► No ──┐ │  │ │
+│  │          └► No ──┐│  │ │
 │  └───────────────┘ │ │  │ │
 │                  │ │ │  │ │
 └──────────────────┼─┼─┼──┘ │
@@ -333,7 +332,7 @@ Representación Visual:
                    [Loop]  [AST]
 ```
 
-## 💡 Conceptos Clave
+## Conceptos Clave
 
 ### Shift (Desplazamiento)
 ```
@@ -341,7 +340,7 @@ Acción: Mover el token actual a la pila
 Efecto: Avanzar en la lectura de entrada
 
 Antes:  Pila=[0, 5]     Input=[let, x, =, ...]
-                        ^
+                                ^
 Shift:  
 Después: Pila=[0, 5, let]  Input=[x, =, ...]
                                    ^
@@ -360,18 +359,3 @@ Después: Pila=[..., Expr]
 
 AST: Crea BinaryExpr(+, Term1, Term2)
 ```
-
-## 🎯 Ventajas de Este Diseño
-
-1. ✅ **Compatible** con tu lexer existente
-2. ✅ **Extensible** - Fácil agregar nuevas construcciones
-3. ✅ **Mantenible** - Código claro y organizado
-4. ✅ **Eficiente** - Parsing en una sola pasada
-5. ✅ **Robusto** - Manejo de errores con mensajes claros
-6. ✅ **Documentado** - Comentarios y documentación completa
-
----
-
-**Autor**: Sistema de Parser Ascendente LR
-**Fecha**: 2025
-**Versión**: 1.0

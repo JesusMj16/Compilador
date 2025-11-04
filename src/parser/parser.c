@@ -1246,14 +1246,14 @@ ASTNode* parser_parse(Parser *parser) {
 
 void parser_print_error(const Parser *parser) {
     if (parser->has_error) {
-        fprintf(stderr, "\n❌ Error de parsing en línea %zu, columna %zu:\n",
+        fprintf(stderr, "\n  Error de parsing en línea %zu, columna %zu:\n",
                 parser->error_line, parser->error_col);
         fprintf(stderr, "   %s\n", parser->error_msg);
     }
 }
 
 void parser_print_stats(const Parser *parser) {
-    printf("\n📊 Estadísticas del Parser:\n");
+    printf("\n  Estadísticas del Parser:\n");
     printf("   Desplazamientos (shift): %d\n", parser->shift_count);
     printf("   Reducciones (reduce):    %d\n", parser->reduce_count);
     printf("   Tamaño de pila:          %zu\n", stack_size(&parser->stack));

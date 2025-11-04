@@ -1,0 +1,17 @@
+// Archivo de prueba con error - Llave de cierre faltante y expresión inválida
+
+fn calcular() {
+    let x = 10;
+    let y = ;
+    
+    if x > 5 {
+        return x * 2;
+    
+    
+    return 0;
+}
+
+fn main() {
+    let resultado = calcular();
+    return resultado
+}

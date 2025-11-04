@@ -2,7 +2,7 @@ fn test() {
     let a = 5;
     let b = 3;
     let c = a + b * 2;
-    if c > 10 {
+    if (c > 10) {
         let resultado = c - 5;
     }
 }

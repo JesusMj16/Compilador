@@ -1,10 +1,8 @@
 # Guía de Uso del Parser
 
-## 🎯 Introducción
+## Introducción
 
-Esta guía muestra cómo usar el parser ascendente LR implementado en tu compilador.
-
-## 📋 Comandos Básicos
+## Comandos Básicos
 
 ### 1. Análisis Sintáctico Simple
 
@@ -28,11 +26,7 @@ Esta guía muestra cómo usar el parser ascendente LR implementado en tu compila
 === ANÁLISIS SINTÁCTICO ===
 Archivo: test_parser.txt
 
-🔄 Construyendo árbol de sintaxis abstracta...
-
-✅ Análisis sintáctico exitoso
-
-📄 ÁRBOL DE SINTAXIS ABSTRACTA (AST):
+ÁRBOL DE SINTAXIS ABSTRACTA (AST):
 ═══════════════════════════════════════
 
 Program (1 children)
@@ -60,7 +54,7 @@ Program (1 children)
 
 **Salida adicional:**
 ```
-📊 Estadísticas del Parser:
+   Estadísticas del Parser:
    Desplazamientos (shift): 45
    Reducciones (reduce):    23
    Tamaño de pila:          1
@@ -105,16 +99,16 @@ Línea Columna  Tipo         Lexema
 ║   COMPILADOR - ANÁLISIS COMPLETO          ║
 ╚════════════════════════════════════════════╝
 
-📝 Fase 1: Análisis Léxico
+Fase 1: Análisis Léxico
 ────────────────────────────
 ...
 
-🔍 Fase 2: Análisis Sintáctico
+Fase 2: Análisis Sintáctico
 ────────────────────────────
 ...
 
 ╔════════════════════════════════════════════╗
-║   ✅ COMPILACIÓN EXITOSA                  ║
+║       COMPILACIÓN EXITOSA                  ║
 ╚════════════════════════════════════════════╝
 ```
 
@@ -133,7 +127,7 @@ Línea Columna  Tipo         Lexema
 docs/Analizador-sintactico/archivos_parser/archivo_tokens.txt
 ```
 
-## 📚 Ejemplos Prácticos
+## Ejemplos Prácticos
 
 ### Ejemplo 1: Programa Simple
 
@@ -267,7 +261,7 @@ Program (1 children)
                 Number: 1
 ```
 
-## 🔧 Casos de Uso Comunes
+## Casos de Uso Comunes
 
 ### Verificar Sintaxis
 
@@ -278,12 +272,12 @@ Program (1 children)
 
 Si no hay errores, verás:
 ```
-✅ Análisis sintáctico exitoso
+ Análisis sintáctico exitoso
 ```
 
 Si hay errores, verás:
 ```
-❌ Error de parsing en línea X, columna Y:
+   Error de parsing en línea X, columna Y:
    [mensaje descriptivo]
 ```
 
@@ -308,7 +302,7 @@ El archivo generado tendrá formato:
 tipo_token nombre_token lexema linea columna
 ```
 
-## 🚨 Manejo de Errores
+## Manejo de Errores
 
 ### Error: Se esperaba punto y coma
 
@@ -321,7 +315,7 @@ fn main() {
 
 **Salida:**
 ```
-❌ Error de parsing en línea 2, columna 14:
+   Error de parsing en línea 2, columna 14:
    Se esperaba ';' después de la sentencia let
 ```
 
@@ -336,7 +330,7 @@ fn main() {
 
 **Salida:**
 ```
-❌ Error de parsing en línea 3, columna 1:
+   Error de parsing en línea 3, columna 1:
    Se esperaba '}' al final del bloque
 ```
 
@@ -351,16 +345,16 @@ fn main() {
 
 **Salida:**
 ```
-❌ Error de parsing en línea 2, columna 19:
+   Error de parsing en línea 2, columna 19:
    Se esperaba ')' después de la expresión
 ```
 
-## 📊 Interpretar las Estadísticas
+## Interpretar las Estadísticas
 
 Cuando usas `-s`, obtienes:
 
 ```
-📊 Estadísticas del Parser:
+   Estadísticas del Parser:
    Desplazamientos (shift): 45
    Reducciones (reduce):    23
    Tamaño de pila:          1
@@ -377,7 +371,7 @@ Cuando usas `-s`, obtienes:
 - Más estructura = más reduces
 - Pila final = 1 (éxito)
 
-## 🎓 Flujo de Trabajo Recomendado
+## Flujo de Trabajo Recomendado
 
 ### 1. Desarrollo Inicial
 ```bash
@@ -410,7 +404,7 @@ for file in tests/*.txt; do
 done
 ```
 
-## 📖 Ejemplos del Repositorio
+## Ejemplos del Repositorio
 
 Puedes probar con los ejemplos incluidos:
 
@@ -424,7 +418,7 @@ Puedes probar con los ejemplos incluidos:
 ./bin/compilador -p docs/Analizador-Lexico/examples/limit-01.txt
 ```
 
-## 🔍 Tips y Trucos
+## Tips y Trucos
 
 ### Redirigir Salida a Archivo
 
@@ -459,7 +453,7 @@ for file in *.txt; do
 done
 ```
 
-## 🎯 Casos de Uso Avanzados
+## Casos de Uso Avanzados
 
 ### 1. Integración en Pipeline
 
@@ -491,25 +485,3 @@ time ./bin/compilador -p archivo_grande.txt
 ./bin/compilador -p -s archivo_grande.txt
 ```
 
-## ✅ Checklist de Verificación
-
-Antes de entregar tu código, verifica:
-
-- [ ] `./bin/compilador -l mi_codigo.txt` - Sin errores léxicos
-- [ ] `./bin/compilador -p mi_codigo.txt` - Sin errores sintácticos
-- [ ] El AST tiene sentido y representa tu código correctamente
-- [ ] Las expresiones tienen la precedencia correcta
-- [ ] Todos los bloques están correctamente anidados
-
-## 📞 Ayuda
-
-Si tienes problemas:
-
-1. **Verifica la sintaxis**: Revisa que tu código siga la gramática
-2. **Usa `-l` primero**: Asegúrate de que los tokens son correctos
-3. **Revisa el AST**: El árbol debe reflejar tu intención
-4. **Consulta la documentación**: Ver `docs/Analizador-sintactico/docs/`
-
----
-
-**¡Feliz parsing!** 🚀

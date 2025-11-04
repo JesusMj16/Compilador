@@ -1,0 +1,14 @@
+// Archivo de prueba exitoso - Programa básico con variables y condicionales
+
+fn main() {
+    let x = 10;
+    let y = 20;
+    let suma = x + y;
+    
+    if suma > 25 {
+        let resultado = suma * 2;
+        return resultado;
+    }
+    
+    return suma;
+}

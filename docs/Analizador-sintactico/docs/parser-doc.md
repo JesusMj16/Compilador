@@ -375,10 +375,10 @@ typedef struct Parser {
 
 **Ejemplos de mensajes:**
 ```
-❌ Error de parsing en línea 5, columna 12:
+  Error de parsing en línea 5, columna 12:
    Se esperaba ';' después de la sentencia let
 
-❌ Error de parsing en línea 10, columna 8:
+   Error de parsing en línea 10, columna 8:
    Se esperaba '}' al final del bloque
 ```
 
@@ -399,7 +399,7 @@ typedef struct Parser {
 
 **Ejemplo de salida:**
 ```
-📊 Estadísticas del Parser:
+   Estadísticas del Parser:
    Desplazamientos (shift): 45
    Reducciones (reduce):    23
    Tamaño de pila:          1

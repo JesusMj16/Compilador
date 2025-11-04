@@ -1,0 +1,318 @@
+// Archivo de prueba de estrés - Múltiples funciones con operaciones complejas
+// Este archivo prueba el comportamiento del parser con muchas líneas y estructuras anidadas
+
+fn fibonacci() {
+    let n = 20;
+    let a = 0;
+    let b = 1;
+    let temp = 0;
+    let i = 2;
+    
+    if n <= 1 {
+        return n;
+    }
+    
+    while i < n {
+        temp = a + b;
+        a = b;
+        b = temp;
+        i = i + 1;
+    }
+    
+    return b;
+}
+
+fn operaciones_aritmeticas() {
+    let a = 100;
+    let b = 50;
+    let c = 25;
+    let d = 10;
+    let e = 5;
+    
+    let suma1 = a + b + c + d + e;
+    let suma2 = a + b;
+    let suma3 = c + d + e;
+    
+    let producto1 = a * b;
+    let producto2 = c * d * e;
+    let producto3 = producto1 * producto2;
+    
+    let division1 = a / b;
+    let division2 = c / d;
+    let division3 = division1 / division2;
+    
+    let modulo1 = a % b;
+    let modulo2 = c % d;
+    
+    let resultado = suma1 + producto3 - division3 + modulo1 - modulo2;
+    
+    return resultado;
+}
+
+fn operaciones_logicas() {
+    let verdadero = 1;
+    let falso = 0;
+    
+    let x = 10;
+    let y = 20;
+    let z = 15;
+    
+    if x < y {
+        if y > z {
+            if z > x {
+                let temp1 = x + y + z;
+                return temp1;
+            }
+        }
+    }
+    
+    if x == 10 {
+        let temp2 = x * 10;
+        return temp2;
+    }
+    
+    if y != 15 {
+        let temp3 = y - 5;
+        return temp3;
+    }
+    
+    if x <= 10 {
+        if y >= 20 {
+            let temp4 = x + y;
+            return temp4;
+        }
+    }
+    
+    return 0;
+}
+
+fn ciclos_anidados() {
+    let i = 0;
+    let j = 0;
+    let k = 0;
+    let suma = 0;
+    
+    while i < 10 {
+        j = 0;
+        while j < 10 {
+            k = 0;
+            while k < 10 {
+                suma = suma + i + j + k;
+                k = k + 1;
+            }
+            j = j + 1;
+        }
+        i = i + 1;
+    }
+    
+    return suma;
+}
+
+fn condicionales_anidados() {
+    let a = 15;
+    let b = 25;
+    let c = 35;
+    let d = 45;
+    
+    if a < b {
+        if b < c {
+            if c < d {
+                let resultado1 = a + b + c + d;
+                
+                if resultado1 > 100 {
+                    let temp1 = resultado1 / 2;
+                    return temp1;
+                } else {
+                    let temp2 = resultado1 * 2;
+                    return temp2;
+                }
+            } else {
+                return c;
+            }
+        } else {
+            return b;
+        }
+    } else {
+        return a;
+    }
+}
+
+fn operaciones_combinadas() {
+    let x = 10;
+    let y = 20;
+    let z = 30;
+    let w = 40;
+    
+    let expr1 = x + y * z - w / 2;
+    let expr2 = x * y + z / w - 5;
+    let expr3 = x + y - z * w / 10;
+    let expr4 = x * y * z + w - 100;
+    let expr5 = x + y + z + w;
+    
+    let resultado = expr1 + expr2 - expr3 + expr4 * expr5;
+    
+    if resultado > 1000 {
+        let temp = resultado / 10;
+        
+        while temp > 50 {
+            temp = temp - 10;
+        }
+        
+        return temp;
+    }
+    
+    return resultado;
+}
+
+fn variables_multiples() {
+    let v1 = 1;
+    let v2 = 2;
+    let v3 = 3;
+    let v4 = 4;
+    let v5 = 5;
+    let v6 = 6;
+    let v7 = 7;
+    let v8 = 8;
+    let v9 = 9;
+    let v10 = 10;
+    let v11 = 11;
+    let v12 = 12;
+    let v13 = 13;
+    let v14 = 14;
+    let v15 = 15;
+    let v16 = 16;
+    let v17 = 17;
+    let v18 = 18;
+    let v19 = 19;
+    let v20 = 20;
+    
+    let suma_pares = v2 + v4 + v6 + v8 + v10 + v12 + v14 + v16 + v18 + v20;
+    let suma_impares = v1 + v3 + v5 + v7 + v9 + v11 + v13 + v15 + v17 + v19;
+    
+    let diferencia = suma_pares - suma_impares;
+    let producto_total = suma_pares * suma_impares;
+    
+    if producto_total > 10000 {
+        return producto_total / 100;
+    }
+    
+    return diferencia;
+}
+
+fn expresiones_complejas() {
+    let a = 100;
+    let b = 200;
+    let c = 300;
+    let d = 400;
+    let e = 500;
+    
+    let expr_compleja_1 = a + b * c - d / e + a % b;
+    let expr_compleja_2 = a * b + c * d - e / a + b % c;
+    let expr_compleja_3 = a - b + c * d / e - a * b % c;
+    let expr_compleja_4 = a + b - c + d * e / a - b + c;
+    let expr_compleja_5 = a * b * c + d - e / a + b * c - d;
+    
+    let resultado_parcial_1 = expr_compleja_1 + expr_compleja_2;
+    let resultado_parcial_2 = expr_compleja_3 + expr_compleja_4;
+    let resultado_parcial_3 = expr_compleja_5 + resultado_parcial_1;
+    
+    let resultado_final = resultado_parcial_2 + resultado_parcial_3;
+    
+    return resultado_final;
+}
+
+fn bucles_con_operaciones() {
+    let contador = 0;
+    let acumulador = 0;
+    let multiplicador = 1;
+    
+    while contador < 50 {
+        acumulador = acumulador + contador;
+        multiplicador = multiplicador * 2;
+        
+        if contador % 10 == 0 {
+            let temp = acumulador / 10;
+            acumulador = temp;
+        }
+        
+        if multiplicador > 1000000 {
+            multiplicador = 1;
+        }
+        
+        contador = contador + 1;
+    }
+    
+    return acumulador + multiplicador;
+}
+
+fn prueba_exhaustiva() {
+    let test1 = operaciones_aritmeticas;
+    let test2 = operaciones_logicas;
+    let test3 = ciclos_anidados;
+    let test4 = condicionales_anidados;
+    let test5 = operaciones_combinadas;
+    let test6 = variables_multiples;
+    let test7 = expresiones_complejas;
+    let test8 = bucles_con_operaciones;
+    let test9 = fibonacci;
+    
+    let suma_tests_1_5 = test1 + test2 + test3 + test4 + test5;
+    let suma_tests_6_9 = test6 + test7 + test8 + test9;
+    
+    let resultado_total = suma_tests_1_5 + suma_tests_6_9;
+    
+    if resultado_total > 100000 {
+        let division = resultado_total / 1000;
+        
+        while division > 100 {
+            division = division - 50;
+        }
+        
+        return division;
+    } else {
+        let multiplicacion = resultado_total * 2;
+        return multiplicacion;
+    }
+}
+
+fn main() {
+    let inicio = 1;
+    let paso1 = fibonacci;
+    let paso2 = operaciones_aritmeticas;
+    let paso3 = operaciones_logicas;
+    let paso4 = ciclos_anidados;
+    let paso5 = condicionales_anidados;
+    let paso6 = operaciones_combinadas;
+    let paso7 = variables_multiples;
+    let paso8 = expresiones_complejas;
+    let paso9 = bucles_con_operaciones;
+    let paso10 = prueba_exhaustiva;
+    
+    let resultado_intermedio_1 = paso1 + paso2 + paso3;
+    let resultado_intermedio_2 = paso4 + paso5 + paso6;
+    let resultado_intermedio_3 = paso7 + paso8 + paso9;
+    
+    let resultado_parcial = resultado_intermedio_1 + resultado_intermedio_2 + resultado_intermedio_3;
+    let resultado_final = resultado_parcial + paso10;
+    
+    if resultado_final > 1000000 {
+        let ajuste = resultado_final / 10000;
+        
+        while ajuste > 1000 {
+            ajuste = ajuste / 2;
+        }
+        
+        if ajuste < 100 {
+            ajuste = ajuste * 10;
+        }
+        
+        return ajuste;
+    } else {
+        if resultado_final < 100 {
+            let incremento = resultado_final * 100;
+            return incremento;
+        }
+        
+        return resultado_final;
+    }
+}
