@@ -15,14 +15,68 @@
 * @brief Definición del enum TokenType
 */
 typedef enum TokenType {
-    TOKEN_IDENTIFIER,  /**< Identificador */
-    TOKEN_NUMBER,      /**< Número */
-    TOKEN_STRING,      /**< Cadena de texto */
-    TOKEN_OPERATOR,    /**< Operador */
-    TOKEN_DELIMITER,   /**< Delimitador */
-    TOKEN_KEYWORD,     /**< Palabra clave */
-    TOKEN_UNKNOWN,      /**< Token desconocido */
-    TOKEN_EOF         /**< Fin de archivo */
+    TOKEN_IDENTIFIER,   /**< Identificador */
+    TOKEN_NUMBER,       /**< Literal numérico */
+    TOKEN_STRING,       /**< Literal de cadena */
+    TOKEN_CHAR,         /**< Literal de carácter */
+    /* Palabras reservadas */
+    TOKEN_KW_FN,
+    TOKEN_KW_LET,
+    TOKEN_KW_MUT,
+    TOKEN_KW_IF,
+    TOKEN_KW_ELSE,
+    TOKEN_KW_MATCH,
+    TOKEN_KW_WHILE,
+    TOKEN_KW_LOOP,
+    TOKEN_KW_FOR,
+    TOKEN_KW_IN,
+    TOKEN_KW_BREAK,
+    TOKEN_KW_CONTINUE,
+    TOKEN_KW_RETURN,
+    TOKEN_KW_TRUE,
+    TOKEN_KW_FALSE,
+    TOKEN_KW_I32,
+    TOKEN_KW_F64,
+    TOKEN_KW_BOOL,
+    TOKEN_KW_CHAR,
+    /* Operadores */
+    TOKEN_PLUS,
+    TOKEN_MINUS,
+    TOKEN_STAR,
+    TOKEN_SLASH,
+    TOKEN_PERCENT,
+    TOKEN_EQUAL,
+    TOKEN_EQUAL_EQUAL,
+    TOKEN_BANG,
+    TOKEN_BANG_EQUAL,
+    TOKEN_LESS,
+    TOKEN_LESS_EQUAL,
+    TOKEN_GREATER,
+    TOKEN_GREATER_EQUAL,
+    TOKEN_AND_AND,
+    TOKEN_OR_OR,
+    TOKEN_PLUS_EQUAL,
+    TOKEN_MINUS_EQUAL,
+    TOKEN_STAR_EQUAL,
+    TOKEN_SLASH_EQUAL,
+    TOKEN_PERCENT_EQUAL,
+    TOKEN_PLUS_PLUS,
+    TOKEN_MINUS_MINUS,
+    TOKEN_ARROW,
+    /* Puntuación y delimitadores */
+    TOKEN_DOT,
+    TOKEN_COMMA,
+    TOKEN_SEMICOLON,
+    TOKEN_COLON,
+    TOKEN_LPAREN,
+    TOKEN_RPAREN,
+    TOKEN_LBRACE,
+    TOKEN_RBRACE,
+    TOKEN_LBRACKET,
+    TOKEN_RBRACKET,
+    /* Misceláneos */
+    TOKEN_UNKNOWN,
+    TOKEN_EOF
 } TokenType;
 
 /*

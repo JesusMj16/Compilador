@@ -5,7 +5,7 @@
  * Contiene la implementación de la función para verificar si un lexema es una palabra clave.
  */
 
-#include "keywords.h"
+#include "../../include/keywords.h"
 #include <string.h>
 
 /**
@@ -29,6 +29,10 @@ static const char *keywords[] = {
     "return",
     "true",
     "false",
+    "i32",
+    "f64",
+    "bool",
+    "char",
     NULL
 };
 

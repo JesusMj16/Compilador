@@ -2,8 +2,8 @@
  * @file lexer.c
  * @brief Implementación de estructuras y funciones del lexer
  */
-#include "../include/lexer.h"
-#include "../include/keywords.h"
+#include "../../include/lexer.h"
+#include "../../include/keywords.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -49,25 +49,66 @@ typedef enum {
 } State;
 
 /**
- * @brief Tabla de operadores de dos caracteres
+ * @brief Especificación de tokens de varios caracteres (principalmente operadores)
  */
-static const char *two_char_operators[] = {
-    "==",  
-    "!=",  
-    "<=",  
-    ">=",  
-    "&&",  
-    "||",  
-    "++", 
-    "--",  
-    "+=",  
-    "-=", 
-    "*=", 
-    "/=",  
-    "%=",  
-    "=>",  
-    NULL   
+typedef struct {
+    const char *lexeme;
+    TokenType type;
+} MultiCharToken;
+
+static const MultiCharToken multi_char_tokens[] = {
+    {"==", TOKEN_EQUAL_EQUAL},
+    {"!=", TOKEN_BANG_EQUAL},
+    {"<=", TOKEN_LESS_EQUAL},
+    {">=", TOKEN_GREATER_EQUAL},
+    {"&&", TOKEN_AND_AND},
+    {"||", TOKEN_OR_OR},
+    {"++", TOKEN_PLUS_PLUS},
+    {"--", TOKEN_MINUS_MINUS},
+    {"+=", TOKEN_PLUS_EQUAL},
+    {"-=", TOKEN_MINUS_EQUAL},
+    {"*=", TOKEN_STAR_EQUAL},
+    {"/=", TOKEN_SLASH_EQUAL},
+    {"%=", TOKEN_PERCENT_EQUAL},
+    {"=>", TOKEN_ARROW},
+    {NULL, TOKEN_UNKNOWN}
 };
+
+/**
+ * @brief Traduce el índice de palabra reservada a su TokenType concreto.
+ */
+static TokenType keyword_token_from_index(int index) {
+    static const TokenType map[] = {
+        TOKEN_KW_FN,
+        TOKEN_KW_LET,
+        TOKEN_KW_MUT,
+        TOKEN_KW_IF,
+        TOKEN_KW_ELSE,
+        TOKEN_KW_MATCH,
+        TOKEN_KW_WHILE,
+        TOKEN_KW_LOOP,
+        TOKEN_KW_FOR,
+        TOKEN_KW_IN,
+        TOKEN_KW_BREAK,
+        TOKEN_KW_CONTINUE,
+        TOKEN_KW_RETURN,
+        TOKEN_KW_TRUE,
+        TOKEN_KW_FALSE,
+        TOKEN_KW_I32,
+        TOKEN_KW_F64,
+        TOKEN_KW_BOOL,
+        TOKEN_KW_CHAR
+    };
+
+    if (index < 0) {
+        return TOKEN_IDENTIFIER;
+    }
+    size_t map_size = sizeof(map) / sizeof(map[0]);
+    if ((size_t)index >= map_size) {
+        return TOKEN_IDENTIFIER;
+    }
+    return map[index];
+}
 
 
 /**
@@ -159,7 +200,7 @@ static CharType get_char_type(int c) {
     if (c == '<') { return CHAR_LT; }
     if (c == '>') { return CHAR_GT; }
     if (c == '.') { return CHAR_DOT; }
-    if (c == ';' || c == ',' || c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']') { return CHAR_DELIMITER; }
+    if (c == ';' || c == ',' || c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']' || c == ':') { return CHAR_DELIMITER; }
     if (c == ' ' || c == '\t') { return CHAR_WHITESPACE; }
     if (c == '\n') { return CHAR_NEWLINE; }
     return CHAR_UNKNOWN;
@@ -365,7 +406,7 @@ static void skip_ignorable(Lexer *lxr){
  * @param lxr El lexer.
  * @param sl Línea de inicio del token.
  * @param sc Columna de inicio del token.
- * @return El token creado (TOKEN_IDENTIFIER o TOKEN_KEYWORD).
+ * @return El token creado (identificador o palabra reservada específica).
  */
 static token_t* lex_identifier_or_keyword(Lexer *lxr, size_t sl, size_t sc){
     const char *start = lxr->p;
@@ -398,7 +439,8 @@ static token_t* lex_identifier_or_keyword(Lexer *lxr, size_t sl, size_t sc){
         return create_token(TOKEN_UNKNOWN, NULL, sl, sc);
     }
     
-    TokenType ttype = is_keyword(lexeme) ? TOKEN_KEYWORD : TOKEN_IDENTIFIER;
+    int keyword_index = get_keyword_index(lexeme);
+    TokenType ttype = keyword_token_from_index(keyword_index);
     token_t *token = create_token(ttype, lexeme, sl, sc);
     free(lexeme);
     return token;
@@ -569,46 +611,60 @@ static int lxr_match2(const Lexer *lxr, const char *op) {
  * @param lxr El lexer.
  * @param sl Línea de inicio del token.
  * @param sc Columna de inicio del token.
- * @return El token creado (TOKEN_OPERATOR, TOKEN_DELIMITER o TOKEN_UNKNOWN).
+ * @return El token creado para el operador/delimitador, o TOKEN_UNKNOWN en caso contrario.
  */
 static token_t* lex_operator_or_delimiter(Lexer *lxr, size_t sl, size_t sc){
     const char *start = lxr->p;
 
-    for (const char **op = two_char_operators; *op; ++op) {
-        if (lxr_match2(lxr, *op)) {
+    for (const MultiCharToken *op = multi_char_tokens; op->lexeme; ++op) {
+        if (lxr_match2(lxr, op->lexeme)) {
             lxr_advance(lxr);
             lxr_advance(lxr);
             char *lex = make_lexeme(start, lxr->p);
-            token_t *tok = create_token(TOKEN_OPERATOR, lex, sl, sc);
-            free(lex);
+            token_t *tok = create_token(op->type, lex, sl, sc);
+            if (lex) {
+                free(lex);
+            }
             return tok;
         }
     }
 
-    // Delimitadores de un carácter
     char c = lxr_peek(lxr);
-    if (strchr(";,(){}[]", c)) {
-        lxr_advance(lxr);
-        char *lex = make_lexeme(start, lxr->p);
-        token_t *tok = create_token(TOKEN_DELIMITER, lex, sl, sc);
-        free(lex);
-        return tok;
+    TokenType ttype = TOKEN_UNKNOWN;
+    int recognized = 1;
+
+    switch (c) {
+        case ';': ttype = TOKEN_SEMICOLON; break;
+        case ',': ttype = TOKEN_COMMA; break;
+        case '(': ttype = TOKEN_LPAREN; break;
+        case ')': ttype = TOKEN_RPAREN; break;
+        case '{': ttype = TOKEN_LBRACE; break;
+        case '}': ttype = TOKEN_RBRACE; break;
+        case '[': ttype = TOKEN_LBRACKET; break;
+        case ']': ttype = TOKEN_RBRACKET; break;
+        case '.': ttype = TOKEN_DOT; break;
+        case ':': ttype = TOKEN_COLON; break;
+        case '+': ttype = TOKEN_PLUS; break;
+        case '-': ttype = TOKEN_MINUS; break;
+        case '*': ttype = TOKEN_STAR; break;
+        case '/': ttype = TOKEN_SLASH; break;
+        case '%': ttype = TOKEN_PERCENT; break;
+        case '=': ttype = TOKEN_EQUAL; break;
+        case '!': ttype = TOKEN_BANG; break;
+        case '<': ttype = TOKEN_LESS; break;
+        case '>': ttype = TOKEN_GREATER; break;
+        default:
+            recognized = 0;
+            break;
     }
 
-    // Operadores de un carácter 
-    if (strchr("+-*/%=!<>&|.", c)) {
-        lxr_advance(lxr);
-        char *lex = make_lexeme(start, lxr->p);
-        token_t *tok = create_token(TOKEN_OPERATOR, lex, sl, sc);
-        free(lex);
-        return tok;
-    }
-
-    // Carácter desconocido
     lxr_advance(lxr);
     char *lex = make_lexeme(start, lxr->p);
-    token_t *tok = create_token(TOKEN_UNKNOWN, lex, sl, sc);
-    free(lex);
+
+    token_t *tok = create_token(recognized ? ttype : TOKEN_UNKNOWN, lex, sl, sc);
+    if (lex) {
+        free(lex);
+    }
     return tok;
 }
 
@@ -670,7 +726,7 @@ token_t* lexer_next_token(Lexer *lxr){
         if (lxr_peek(lxr) == '\'') {
             lxr_advance(lxr);
             char *lex = make_lexeme(start, lxr->p);
-            token_t *token = create_token(TOKEN_STRING, lex, start_line, start_col);
+            token_t *token = create_token(TOKEN_CHAR, lex, start_line, start_col);
             free(lex);
             return token;
         } else {
@@ -712,17 +768,72 @@ token_t *get_next_token(const char *source){
  * @return El nombre del tipo de token como cadena.
  */
 const char* token_type_name(TokenType t) {
-    switch (t) {
-        case TOKEN_IDENTIFIER: return "IDENTIFIER";
-        case TOKEN_NUMBER:     return "NUMBER";
-        case TOKEN_STRING:     return "STRING";
-        case TOKEN_OPERATOR:   return "OPERATOR";
-        case TOKEN_DELIMITER:  return "DELIMITER";
-        case TOKEN_KEYWORD:    return "KEYWORD";
-        case TOKEN_UNKNOWN:    return "UNKNOWN";
-        case TOKEN_EOF:        return "EOF";
-        default:               return "INVALID";
+    static const char *names[] = {
+        [TOKEN_IDENTIFIER]  = "IDENT",
+        [TOKEN_NUMBER]      = "NUMBER",
+        [TOKEN_STRING]      = "STRING",
+        [TOKEN_CHAR]        = "CHAR",
+        [TOKEN_KW_FN]       = "KW_FN",
+        [TOKEN_KW_LET]      = "KW_LET",
+        [TOKEN_KW_MUT]      = "KW_MUT",
+        [TOKEN_KW_IF]       = "KW_IF",
+        [TOKEN_KW_ELSE]     = "KW_ELSE",
+        [TOKEN_KW_MATCH]    = "KW_MATCH",
+        [TOKEN_KW_WHILE]    = "KW_WHILE",
+        [TOKEN_KW_LOOP]     = "KW_LOOP",
+        [TOKEN_KW_FOR]      = "KW_FOR",
+        [TOKEN_KW_IN]       = "KW_IN",
+        [TOKEN_KW_BREAK]    = "KW_BREAK",
+        [TOKEN_KW_CONTINUE] = "KW_CONTINUE",
+        [TOKEN_KW_RETURN]   = "KW_RETURN",
+        [TOKEN_KW_TRUE]     = "KW_TRUE",
+        [TOKEN_KW_FALSE]    = "KW_FALSE",
+        [TOKEN_KW_I32]      = "KW_I32",
+        [TOKEN_KW_F64]      = "KW_F64",
+        [TOKEN_KW_BOOL]     = "KW_BOOL",
+        [TOKEN_KW_CHAR]     = "KW_CHAR",
+        [TOKEN_PLUS]        = "PLUS",
+        [TOKEN_MINUS]       = "MINUS",
+        [TOKEN_STAR]        = "STAR",
+        [TOKEN_SLASH]       = "SLASH",
+        [TOKEN_PERCENT]     = "PERCENT",
+        [TOKEN_EQUAL]       = "EQUAL",
+        [TOKEN_EQUAL_EQUAL] = "EQUAL_EQUAL",
+        [TOKEN_BANG]        = "BANG",
+        [TOKEN_BANG_EQUAL]  = "BANG_EQUAL",
+        [TOKEN_LESS]        = "LESS",
+        [TOKEN_LESS_EQUAL]  = "LESS_EQUAL",
+        [TOKEN_GREATER]     = "GREATER",
+        [TOKEN_GREATER_EQUAL] = "GREATER_EQUAL",
+        [TOKEN_AND_AND]     = "AND_AND",
+        [TOKEN_OR_OR]       = "OR_OR",
+        [TOKEN_PLUS_EQUAL]  = "PLUS_EQUAL",
+        [TOKEN_MINUS_EQUAL] = "MINUS_EQUAL",
+        [TOKEN_STAR_EQUAL]  = "STAR_EQUAL",
+        [TOKEN_SLASH_EQUAL] = "SLASH_EQUAL",
+        [TOKEN_PERCENT_EQUAL] = "PERCENT_EQUAL",
+        [TOKEN_PLUS_PLUS]   = "PLUS_PLUS",
+        [TOKEN_MINUS_MINUS] = "MINUS_MINUS",
+        [TOKEN_ARROW]       = "ARROW",
+        [TOKEN_DOT]         = "DOT",
+        [TOKEN_COMMA]       = "COMMA",
+        [TOKEN_SEMICOLON]   = "SEMICOLON",
+        [TOKEN_COLON]       = "COLON",
+        [TOKEN_LPAREN]      = "LPAREN",
+        [TOKEN_RPAREN]      = "RPAREN",
+        [TOKEN_LBRACE]      = "LBRACE",
+        [TOKEN_RBRACE]      = "RBRACE",
+        [TOKEN_LBRACKET]    = "LBRACKET",
+        [TOKEN_RBRACKET]    = "RBRACKET",
+        [TOKEN_UNKNOWN]     = "UNKNOWN",
+        [TOKEN_EOF]         = "EOF"
+    };
+
+    size_t count = sizeof(names) / sizeof(names[0]);
+    if ((size_t)t < count && names[t]) {
+        return names[t];
     }
+    return "INVALID";
 }
 
 /**
@@ -758,7 +869,7 @@ token_t *tokenize_all(const char *source) {
 }
 
 /**
- * @brief Escribe los tokens de un archivo fuente a un archivo de salida con formato numérico.
+ * @brief Escribe los tokens de un archivo fuente a un archivo de salida con formato legible.
  * 
  * @param source_file El archivo fuente a tokenizar.
  * @param output_file El archivo donde escribir los tokens.
@@ -784,9 +895,8 @@ int write_tokens_to_file(const char *source_file, const char *output_file) {
     
     // Escribir header con información del formato
     fprintf(output, "# Tokens generados desde: %s\n", source_file);
-    fprintf(output, "# Formato: tipo_token lexema linea columna [indice_palabra_clave]\n");
-    fprintf(output, "# Tipos: IDENTIFIER=0, NUMBER=1, STRING=2, OPERATOR=3, DELIMITER=4, KEYWORD=5, UNKNOWN=6, EOF=7\n");
-    fprintf(output, "# Palabras clave: fn=0, let=1, mut=2, if=3, else=4, match=5, while=6, loop=7, for=8, in=9, break=10, continue=11, return=12, true=13, false=14\n");
+    fprintf(output, "# Formato: id_token nombre_token lexema linea columna\n");
+    fprintf(output, "# Consulte token_type_name() para la correspondencia completa de identificadores.\n");
     fprintf(output, "\n");
     
     Lexer lexer;
@@ -800,22 +910,13 @@ int write_tokens_to_file(const char *source_file, const char *output_file) {
             break;
         }
     
-    // Escribir en formato: tipo lexema linea columna [indice_keyword]
-        if (token->type == TOKEN_KEYWORD) {
-            int keyword_index = get_keyword_index(token->lexeme);
-            fprintf(output, "%d %s %zu %zu %d\n", 
-                   token->type, 
-                   token->lexeme ? token->lexeme : "NULL",
-                   token->line, 
-                   token->column,
-                   keyword_index);
-        } else {
-            fprintf(output, "%d %s %zu %zu\n", 
-                   token->type, 
-                   token->lexeme ? token->lexeme : "NULL",
-                   token->line, 
-                   token->column);
-        }
+    // Escribir en formato: id nombre lexema linea columna
+        fprintf(output, "%d %s %s %zu %zu\n", 
+               token->type,
+               token_type_name(token->type),
+               token->lexeme ? token->lexeme : "NULL",
+               token->line, 
+               token->column);
         
         token_count++;
         

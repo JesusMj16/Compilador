@@ -2,7 +2,9 @@
  * @file keywords.h
  * @brief Declaración de la función is_keyword
  * 
- * Contiene la declaración de la función is_keyword que verifica si un lexema es una palabra clave.
+ * Contiene utilidades para verificar si un lexema es una palabra clave y obtener su índice
+ * dentro de la tabla de palabras reservadas. El orden es importante y debe coincidir con el
+ * mapeo definido en el lexer.
  */
 
 #ifndef KEYWORDS_H

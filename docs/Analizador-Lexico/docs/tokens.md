@@ -72,6 +72,7 @@
 | `{` `}` | bloques |
 | `[` `]` | arreglos / slices |
 | `.` | acceso a miembro |
+| `:` | anotación de tipo |
 
 ---
 
