@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../include/lexer.h"
+#include "../include/parser.h"
 
 /**
  * @brief Imprime la ayuda de uso del compilador.
@@ -17,10 +18,15 @@
 static void print_usage(const char *program_name) {
     printf("Uso: %s [opciones] <archivo>\n", program_name);
     printf("Opciones:\n");
+    printf("  -l             Solo análisis léxico\n");
+    printf("  -p             Análisis sintáctico (parser)\n");
     printf("  -t             Generar archivo de tokens\n");
+    printf("  -s             Mostrar estadísticas del parser\n");
     printf("  -h, --help     Mostrar esta ayuda\n");
     printf("\nEjemplos:\n");
-    printf("  %s programa.lang              # Análisis léxico en terminal\n", program_name);
+    printf("  %s programa.lang              # Análisis completo\n", program_name);
+    printf("  %s -l programa.lang           # Solo análisis léxico\n", program_name);
+    printf("  %s -p programa.lang           # Análisis sintáctico\n", program_name);
     printf("  %s -t programa.lang           # Generar archivo de tokens\n", program_name);
 }
 
@@ -115,6 +121,69 @@ static int generate_tokens_file(const char *filename) {
 }
 
 /**
+ * @brief Ejecuta el análisis sintáctico y muestra el AST.
+ * 
+ * @param filename El nombre del archivo a analizar.
+ * @param show_stats Si se deben mostrar las estadísticas.
+ * @return 0 si es exitoso, 1 si hay error.
+ */
+static int run_syntactic_analysis(const char *filename, int show_stats) {
+    printf("=== ANÁLISIS SINTÁCTICO ===\n");
+    printf("Archivo: %s\n\n", filename);
+    
+    char *source = read_file(filename);
+    if (source == NULL) {
+        fprintf(stderr, "Error: No se pudo leer el archivo '%s'\n", filename);
+        return 1;
+    }
+    
+    Lexer lexer;
+    lexer_init(&lexer, source);
+    
+    Parser parser;
+    if (!parser_init(&parser, &lexer)) {
+        fprintf(stderr, "Error: No se pudo inicializar el parser\n");
+        free(source);
+        return 1;
+    }
+    
+    printf("🔄 Construyendo árbol de sintaxis abstracta...\n\n");
+    
+    ASTNode *ast = parser_parse(&parser);
+    
+    if (parser.has_error) {
+        parser_print_error(&parser);
+        parser_free(&parser);
+        free(source);
+        return 1;
+    }
+    
+    if (ast) {
+        printf("✅ Análisis sintáctico exitoso\n");
+        
+        if (show_stats) {
+            parser_print_stats(&parser);
+        }
+        
+        printf("\n📄 ÁRBOL DE SINTAXIS ABSTRACTA (AST):\n");
+        printf("═══════════════════════════════════════\n\n");
+        ast_print(ast, 0);
+        printf("\n");
+        
+        ast_free(ast);
+    } else {
+        fprintf(stderr, "❌ Error: No se pudo construir el AST\n");
+        parser_free(&parser);
+        free(source);
+        return 1;
+    }
+    
+    parser_free(&parser);
+    free(source);
+    return 0;
+}
+
+/**
  * @brief Función principal del compilador.
  * 
  * @param argc Número de argumentos de línea de comandos.
@@ -128,14 +197,23 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    // Variables simples
+    // Variables de opciones
+    int lexical_only = 0;
+    int parser_only = 0;
     int generate_tokens = 0;
+    int show_stats = 0;
     const char *filename = NULL;
     
     // Procesar argumentos
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-t") == 0) {
+        if (strcmp(argv[i], "-l") == 0) {
+            lexical_only = 1;
+        } else if (strcmp(argv[i], "-p") == 0) {
+            parser_only = 1;
+        } else if (strcmp(argv[i], "-t") == 0) {
             generate_tokens = 1;
+        } else if (strcmp(argv[i], "-s") == 0) {
+            show_stats = 1;
         } else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             print_usage(argv[0]);
             return 0;
@@ -157,7 +235,35 @@ int main(int argc, char *argv[]) {
     // Ejecutar según la opción
     if (generate_tokens) {
         return generate_tokens_file(filename);
-    } else {
+    } else if (lexical_only) {
         return run_lexical_analysis(filename);
+    } else if (parser_only) {
+        return run_syntactic_analysis(filename, show_stats);
+    } else {
+        // Por defecto: análisis completo
+        printf("╔════════════════════════════════════════════╗\n");
+        printf("║   COMPILADOR - ANÁLISIS COMPLETO          ║\n");
+        printf("╚════════════════════════════════════════════╝\n\n");
+        
+        printf("📝 Fase 1: Análisis Léxico\n");
+        printf("────────────────────────────\n");
+        int lex_result = run_lexical_analysis(filename);
+        if (lex_result != 0) {
+            fprintf(stderr, "\n❌ Error en análisis léxico\n");
+            return lex_result;
+        }
+        
+        printf("\n🔍 Fase 2: Análisis Sintáctico\n");
+        printf("────────────────────────────\n");
+        int parse_result = run_syntactic_analysis(filename, show_stats);
+        if (parse_result != 0) {
+            fprintf(stderr, "\n❌ Error en análisis sintáctico\n");
+            return parse_result;
+        }
+        
+        printf("\n╔════════════════════════════════════════════╗\n");
+        printf("║   ✅ COMPILACIÓN EXITOSA                  ║\n");
+        printf("╚════════════════════════════════════════════╝\n");
+        return 0;
     }
 }
