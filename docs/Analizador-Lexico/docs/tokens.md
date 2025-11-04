@@ -71,6 +71,14 @@
 | `(` `)` | paréntesis |
 | `{` `}` | bloques |
 | `[` `]` | arreglos / slices |
+| `.` | acceso a miembro |
+
+---
+
+## Operadores de flujo
+| Token | Descripción |
+|---------------------|----|
+| `=>` | separador de patrón y resultado en expresiones `match` |
 
 ---
 
