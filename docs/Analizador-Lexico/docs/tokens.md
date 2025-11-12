@@ -1,20 +1,12 @@
-# Tokens del Lenguaje
+# Tokens del Lenguaje 
+Lenguaje reducido para: funciones, declaraciones/asignaciones y expresiones lógicas y aritméticas. Sin ciclos, condicionales, arreglos, cadenas, caracteres ni `match`.
 
 ## Palabras reservadas
 | Token | Definición |
 |----------------------|----------------|
 | `fn` | definición de función | 
 | `let` | declaración de variable |
-| `mut` | modificador de variable | 
-| `if` | condicional |
-| `else` | alternativa condicional |
-| `match` | selección múltiple |
-| `while` | ciclo condicional |
-| `loop` | ciclo infinito |
-| `for` | ciclo sobre rango o colección |
-| `in` | usado para contador en `for` |
-| `break` | instrucción para salir de un ciclo |
-| `continue` | continuar al siguiente ciclo |
+| `mut` | modificador de variable (variables mutables) |
 | `return` | retorno de función |
 | `true` | valor lógico verdadero |
 | `false` | valor lógico falso |
@@ -27,7 +19,6 @@
 | `i32` | entero de 32 bits |
 | `f64` | flotante de 64 bits |
 | `bool` | booleano |
-| `char` | carácter Unicode |
 
 ---
 
@@ -63,6 +54,13 @@
 
 ---
 
+## Asignación
+| Token | Descripción |
+|--------------------|----|
+| `=` | asignación simple |
+
+---
+
 ## Delimitadores y separadores
 | Token | Descripción |
 |-----------------|----|
@@ -70,42 +68,26 @@
 | `,` | separador |
 | `(` `)` | paréntesis |
 | `{` `}` | bloques |
-| `[` `]` | arreglos / slices |
-| `.` | acceso a miembro |
 | `:` | anotación de tipo |
 
 ---
 
-## Operadores de flujo
-| Token | Descripción |
-|---------------------|----|
-| `=>` | separador de patrón y resultado en expresiones `match` |
-
----
-
 ## Identificadores
-- Deben iniciar con una letra o `_`.  
-- Pueden contener letras, dígitos o `_`.  
-- No se permiten `__` consecutivos.  
-- Ejemplos válidos: `x`, `_contador`, `suma_total`  
-- Ejemplos inválidos: `12abc`, `a__b`  
+- Deben iniciar con una letra o `_`.
+- Pueden contener letras, dígitos o `_`.
+- No se permiten `__` consecutivos.
+- Ejemplos válidos: `x`, `_contador`, `suma_total`
+- Ejemplos inválidos: `12abc`, `a__b`
 
 ---
 
 ## Números
-- **Enteros**: `123`, `-45`, `0xff` (hexadecimal), `0b1010` (binario).  
-- **Reales**: `3.14`, `-0.5`, `2.5e10`.  
-- Ejemplos inválidos: `1.2.3`, `12e`.  
-
----
-
-## Cadenas y caracteres
-- **Cadenas**: `"Hola mundo"`, `"Linea\nNueva"`.  
-- **Caracteres**: `'a'`, `'\n'`.  
-- Ejemplos inválidos: `"Texto sin cierre`.  
+- Enteros decimales: `0`, `123`, `-45`.
+- Reales decimales (con exponente opcional): `3.14`, `-0.5`, `2.5e10`.
+- Ejemplos inválidos: `1.2.3`, `12e`.
 
 ---
 
 ## Comentarios
-- Una línea: `// comentario`  
-- Varias líneas: `/* comentario */`  
+- Una línea: `// comentario`
+- Varias líneas: `/* comentario */`

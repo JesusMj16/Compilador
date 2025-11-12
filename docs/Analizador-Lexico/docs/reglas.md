@@ -1,4 +1,4 @@
-Este documento define las reglas léxicas del lenguaje utilizando dos formatos complementarios: EBNF y expresiones regulares. La notación EBNF se emplea para describir de manera clara y estructurada la forma general de los tokens, lo que facilita la lectura y el entendimiento de la gramática. Las expresiones regulares, en cambio, ofrecen una representación práctica de esas mismas reglas, pensada para su implementación directa en analizadores léxicos.
+Este documento define las reglas léxicas del LENGUAJE REDUCIDO. Solo se consideran: funciones, declaraciones (con posible mutabilidad), asignaciones y expresiones aritmético-lógicas. Se eliminan ciclos, condicionales, patrón `match`, arreglos, cadenas y caracteres.
 
 ## Identificadores
 ### Forma EBNF
@@ -18,19 +18,15 @@ dígito        -> [0-9]
 ## Números
 ### Forma EBNF
 ```ebnf
-entero         -> signo? dígito+
-signo          -> '+' | '-'
-dígito         -> [0-9]
-
-entero_binario -> signo? "0b" [0-1]+
-entero_hex     -> signo? "0x" [0-9a-fA-F]+
+entero   -> signo? dígito+
+signo    -> '+' | '-'
+dígito   -> [0-9]
 ```
 
 ### Forma REGEX
 ```regex
 [+-]?[0-9]+
-[+-]?0b[01]+
-[+-]?0x[0-9a-fA-F]+
+// Hex y binario removidos en versión reducida
 ```
 
 ---
@@ -38,7 +34,7 @@ entero_hex     -> signo? "0x" [0-9a-fA-F]+
 ## Reales
 ### Forma EBNF
 ```ebnf
-real -> signo? dígito+ "." dígito+ ( exponente )?
+real      -> signo? dígito+ "." dígito+ ( exponente )?
 exponente -> ( 'e' | 'E' ) signo? dígito+
 ```
 
@@ -59,7 +55,7 @@ escape   -> '\' ( 'n' | 't' | '"' | '\'' | '\\' )
 
 ### Forma REGEX
 ```regex
-"([^"\\]|\\[nt"'])*"
+// Cadenas removidas
 ```
 
 ---
@@ -72,7 +68,7 @@ caracter_literal -> "'" ( caracter | escape ) "'"
 
 ### Forma REGEX
 ```regex
-'([^'\\]|\\[nt"'])'
+// Caracter literal removido
 ```
 
 ---
@@ -80,7 +76,7 @@ caracter_literal -> "'" ( caracter | escape ) "'"
 ## Comentarios
 ### Forma EBNF
 ```ebnf
-comentario_linea   -> "//" ( cualquier_caracter )* "\n"
+comentario_linea   -> "//" ( cualquier_caracter )* fin_linea
 comentario_bloque  -> "/*" ( cualquier_caracter | salto_linea )* "*/"
 ```
 
@@ -98,7 +94,7 @@ comentario_bloque  -> "/*" ( cualquier_caracter | salto_linea )* "*/"
 operador_aritmetico -> '+' | '-' | '*' | '/' | '%'
 operador_relacional -> '==' | '!=' | '<' | '>' | '<=' | '>='
 operador_logico     -> '&&' | '||' | '!'
-operador_asignacion -> '=' | '+=' | '-=' | '*=' | '/=' | '%='
+operador_asignacion -> '='
 ```
 
 ### Forma REGEX
@@ -106,7 +102,7 @@ operador_asignacion -> '=' | '+=' | '-=' | '*=' | '/=' | '%='
 (\+|\-|\*|/|%)
 (==|!=|<=|>=|<|>)
 (&&|\|\||!)
-(=|\+=|\-=|\*=|/=|%=)
+(=)
 ```
 
 ---
@@ -114,12 +110,12 @@ operador_asignacion -> '=' | '+=' | '-=' | '*=' | '/=' | '%='
 ## Delimitadores
 ### Forma EBNF
 ```ebnf
-delimitador -> '(' | ')' | '{' | '}' | '[' | ']' | ';' | ',' | '.'
+delimitador -> '(' | ')' | '{' | '}' | ';' | ',' | ':'
 ```
 
 ### Forma REGEX
 ```regex
-[()\[\]{};,.]
+[(){};,:]
 ```
 
 ---

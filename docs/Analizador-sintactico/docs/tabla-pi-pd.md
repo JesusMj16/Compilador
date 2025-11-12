@@ -1,77 +1,112 @@
-# Tabla de PI y PD
+# Tabla de Partes Izquierdas (PI) y Partes Derechas (PD)
 
-Esta tabla resume los conjuntos de Primera Izquierda (PI) y Primera Derecha (PD) asociados a cada no terminal de la gramatica descrita en `gramatica.md`. Los conjuntos PI son equivalentes a FIRST y los conjuntos PD coinciden con LAST. El simbolo `epsilon` indica que la produccion puede derivar la cadena vacia.
+Este documento calcula PI y PD siguiendo las láminas adjuntas y usando la gramática reducida definida en `gramatica-bnf.md`.
 
-## No terminales estructurales
-| No terminal           | PI                                                   | PD                                               |
-|-----------------------|-------------------------------------------------------|--------------------------------------------------|
-| Programa              | {'fn','let','if','while','for','loop','match','{','return','break','continue','!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'EOF'} |
-| ListaItems            | {'fn','let','if','while','for','loop','match','{','return','break','continue','!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','[','epsilon'} | {';','}'} |
-| Item                  | {'fn','let','if','while','for','loop','match','{','return','break','continue','!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {';','}'} |
-| Funcion               | {'fn'}                                               | {'}'} |
-| ListaParametrosOpt    | {'IDENT','epsilon'}                                  | {'i32','f64','bool','char','IDENT','epsilon'} |
-| ListaParametros       | {'IDENT'}                                            | {'i32','f64','bool','char','IDENT'} |
-| ListaParametrosTail   | {',','epsilon'}                                      | {'i32','f64','bool','char','IDENT','epsilon'} |
-| Parametro             | {'IDENT'}                                            | {'i32','f64','bool','char','IDENT'} |
-| Tipo                  | {'i32','f64','bool','char','IDENT'}                  | {'i32','f64','bool','char','IDENT'} |
-| Bloque                | {'{'}                                                | {'}'} |
-| ListaSentencias       | {'let','if','while','for','loop','match','{','return','break','continue','!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','[','epsilon'} | {';','}'} |
-| Sentencia             | {'let','if','while','for','loop','match','{','return','break','continue','!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {';','}'} |
-| LetSentencia          | {'let'}                                              | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','i32','f64','bool','char'} |
-| IfSentencia           | {'if'}                                               | {'}'} |
-| ElseOpt               | {'else','epsilon'}                                   | {'}','epsilon'} |
-| LoopSentencia         | {'while','for','loop'}                               | {'}'} |
-| WhileSentencia        | {'while'}                                            | {'}'} |
-| ForSentencia          | {'for'}                                              | {'}'} |
-| LoopForever           | {'loop'}                                             | {'}'} |
-| ReturnSentencia       | {'return'}                                           | {'return','NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| BreakSentencia        | {'break'}                                            | {'break'} |
-| ContinueSentencia     | {'continue'}                                         | {'continue'} |
-| ExprSentencia         | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| ExpresionOpt          | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','[','epsilon'} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| MutOpt                | {'mut','epsilon'}                                    | {'mut','epsilon'} |
-| AnotacionTipoOpt      | {':','epsilon'}                                      | {'i32','f64','bool','char','IDENT','epsilon'} |
-| InicializacionOpt     | {'=','epsilon'}                                      | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| MatchSentencia        | {'match'}                                            | {'}'} |
-| ListaMatchBrazos      | {'NUMBER','STRING','CHAR','true','false','IDENT'}    | {';'} |
-| ListaMatchBrazosTail  | {'NUMBER','STRING','CHAR','true','false','IDENT','epsilon'} | {';','epsilon'} |
-| MatchBrazo            | {'NUMBER','STRING','CHAR','true','false','IDENT'}    | {';'} |
-| MatchPatron           | {'NUMBER','STRING','CHAR','true','false','IDENT'}    | {'NUMBER','STRING','CHAR','true','false','IDENT'} |
-| MatchResultado        | {'{','!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'}','NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
+Criterio empleado:
+- Para `A → a b c`, PI(A) = { a } y PD(A) = { c }.
+- Si `A` tiene varias producciones, se toma la unión de las partes extremas de cada producción.
+- Si `A → B x C` (con no terminales), se arrastran posibles extremos: PI(A) agrega PI(B) y PD(A) agrega PD(C).
+- Si hay producción `ε`, se agrega `ε` al conjunto correspondiente.
 
-## No terminales de expresiones
-| No terminal         | PI                                                   | PD                                               |
-|---------------------|-------------------------------------------------------|--------------------------------------------------|
-| Expresion           | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| Asignacion          | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| AsignacionTail      | {'=','+=','-=','*=','/=','%=','epsilon'}              | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| OperadorAsignacion  | {'=','+=','-=','*=','/=','%='}                        | {'=','+=','-=','*=','/=','%='} |
-| LogicoOR            | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| LogicoORTail        | {'||','epsilon'}                                      | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| LogicoAND           | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| LogicoANDTail       | {'&&','epsilon'}                                      | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| Igualdad            | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| IgualdadTail        | {'==','!=','epsilon'}                                 | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| Comparacion         | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| TermCompTail        | {'<','>','<=','>=','epsilon'}                         | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| Term                | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| TermTail            | {'+','-','epsilon'}                                   | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| Factor              | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| FactorTail          | {'*','/','%','epsilon'}                               | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| Unario              | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| OperadorUnario      | {'!','-','+'}                                         | {'!','-','+'} |
-| Postfijo            | {'NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| PostfijoTail        | {'.','(','epsilon'}                                   | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| Llamada             | {'('}                                                | {')'} |
-| ListaArgumentosOpt  | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','[','epsilon'} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| ListaArgumentos     | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| ListaArgumentosTail | {',','epsilon'}                                      | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| Primario            | {'NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| ArregloLiteral      | {'['}                                                | {']'} |
-| ListaExpresionesOpt | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','[','epsilon'} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| ListaExpresiones    | {'!','-','+','NUMBER','STRING','CHAR','true','false','IDENT','(','['} | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']'} |
-| ListaExpresionesTail| {',','epsilon'}                                      | {'NUMBER','STRING','CHAR','true','false','IDENT',')',']','epsilon'} |
-| Literal             | {'NUMBER','STRING','CHAR','true','false'}            | {'NUMBER','STRING','CHAR','true','false'} |
-| Booleano            | {'true','false'}                                     | {'true','false'} |
+A continuación, se listan las producciones relevantes y después la tabla 
 
-Los conjuntos PI y PD fueron calculados de forma manual asegurando su consistencia con la gramatica propuesta. Sirven como insumo directo para construir tablas de precedencia o verificar condiciones de analizadores LR basados en dicha gramatica.
+## Producciones relevantes (resumen)
+- Programa → ListaItems EOF
+- ListaItems → Item ListaItems | ε
+- Item → Funcion | Sentencia
+- Funcion → 'fn' IDENT '(' ListaParametrosOpt ')' Bloque
+- ListaParametrosOpt → ListaParametros | ε
+- ListaParametros → Parametro ListaParametrosTail
+- ListaParametrosTail → ',' Parametro ListaParametrosTail | ε
+- Parametro → IDENT ':' Tipo
+- Tipo → 'i32' | 'f64' | 'bool' | IDENT
+- Bloque → '{' ListaSentencias '}'
+- ListaSentencias → Sentencia ListaSentencias | ε
+- Sentencia → LetSentencia ';' | ExprSentencia ';' | Bloque | ReturnSentencia ';'
+- LetSentencia → 'let' MutOpt IDENT AnotacionTipoOpt InicializacionOpt
+- MutOpt → 'mut' | ε
+- AnotacionTipoOpt → ':' Tipo | ε
+- InicializacionOpt → '=' Expresion | ε
+- ExprSentencia → Expresion
+- ReturnSentencia → 'return' ExpresionOpt
+- ExpresionOpt → Expresion | ε
+- Expresion → Asignacion
+- Asignacion → LogicoOR AsignacionTail
+- AsignacionTail → '=' Asignacion | ε
+- LogicoOR → LogicoAND LogicoORTail
+- LogicoORTail → '||' LogicoAND LogicoORTail | ε
+- LogicoAND → Igualdad LogicoANDTail
+- LogicoANDTail → '&&' Igualdad LogicoANDTail | ε
+- Igualdad → Comparacion IgualdadTail
+- IgualdadTail → ('==' | '!=') Comparacion IgualdadTail | ε
+- Comparacion → Aditivo ComparacionTail
+- ComparacionTail → ('<' | '>' | '<=' | '>=') Aditivo ComparacionTail | ε
+- Aditivo → Multiplicativo AditivoTail
+- AditivoTail → ('+' | '-') Multiplicativo AditivoTail | ε
+- Multiplicativo → Unario MultiplicativoTail
+- MultiplicativoTail → ('*' | '/' | '%') Unario MultiplicativoTail | ε
+- Unario → OperadorUnario Unario | Postfijo
+- OperadorUnario → '!' | '-' | '+'
+- Postfijo → Primario PostfijoTail
+- PostfijoTail → Llamada PostfijoTail | ε
+- Llamada → '(' ListaArgumentosOpt ')'
+- ListaArgumentosOpt → ListaArgumentos | ε
+- ListaArgumentos → Expresion ListaArgumentosTail
+- ListaArgumentosTail → ',' Expresion ListaArgumentosTail | ε
+- Primario → Literal | IDENT | '(' Expresion ')'
+- Literal → NUMBER | Booleano
+- Booleano → 'true' | 'false'
+
+---
+
+## Tabla PI/PD (formato del ejemplo)
+
+| Símbolo | PI | PD |
+|---|---|---|
+| Programa | ListaItems, ε, 'EOF' | 'EOF' |
+| ListaItems | Item, ε | ListaItems, ε |
+| Item | Funcion, Sentencia | ';', '}' |
+| Funcion | 'fn' | '}' |
+| ListaParametrosOpt | ListaParametros, ε | ListaParametrosTail, ε |
+| ListaParametros | Parametro | ListaParametrosTail |
+| ListaParametrosTail | ',', ε | ListaParametrosTail, ε |
+| Parametro | IDENT | Tipo |
+| Tipo | 'i32', 'f64', 'bool', IDENT | 'i32', 'f64', 'bool', IDENT |
+| Bloque | '{' | '}' |
+| ListaSentencias | Sentencia, ε | ListaSentencias, ε |
+| Sentencia | 'let', 'return', '{', '(', IDENT, NUMBER, 'true', 'false', '!', '-', '+' | ';', '}' |
+| LetSentencia | 'let' | IDENT, 'i32', 'f64', 'bool', IDENT, NUMBER, 'true', 'false', ')', ε |
+| MutOpt | 'mut', ε | 'mut', ε |
+| AnotacionTipoOpt | ':', ε | 'i32', 'f64', 'bool', IDENT, ε |
+| InicializacionOpt | '=', ε | IDENT, NUMBER, 'true', 'false', ')', ε |
+| ExprSentencia | '(', IDENT, NUMBER, 'true', 'false', '!', '-', '+' | IDENT, NUMBER, 'true', 'false', ')' |
+| ReturnSentencia | 'return' | IDENT, NUMBER, 'true', 'false', ')' , ε |
+| ExpresionOpt | Expresion, ε | ')', IDENT, NUMBER, 'true', 'false', ε |
+| Expresion | Asignacion | Asignacion |
+| Asignacion | LogicoOR | Asignacion, LogicoOR |
+| AsignacionTail | '=', ε | Asignacion, ε |
+| LogicoOR | LogicoAND | LogicoAND |
+| LogicoORTail | '||', ε | LogicoAND, ε |
+| LogicoAND | Igualdad | Igualdad |
+| LogicoANDTail | '&&', ε | Igualdad, ε |
+| Igualdad | Comparacion | Comparacion |
+| IgualdadTail | '==', '!=', ε | Comparacion, ε |
+| Comparacion | Aditivo | Aditivo |
+| ComparacionTail | '<', '>', '<=', '>=', ε | Aditivo, ε |
+| Aditivo | Multiplicativo | Multiplicativo |
+| AditivoTail | '+', '-', ε | Multiplicativo, ε |
+| Multiplicativo | Unario | Unario |
+| MultiplicativoTail | '*', '/', '%', ε | Unario, ε |
+| Unario | '!', '-', '+', Postfijo | Postfijo |
+| OperadorUnario | '!', '-', '+' | '!', '-', '+' |
+| Postfijo | Primario | PostfijoTail, ')', IDENT, NUMBER, 'true', 'false' |
+| PostfijoTail | Llamada, ε | PostfijoTail, ')', ε |
+| Llamada | '(' | ')' |
+| ListaArgumentosOpt | ListaArgumentos, ε | ListaArgumentosTail, ε |
+| ListaArgumentos | Expresion | ListaArgumentosTail |
+| ListaArgumentosTail | ',', ε | ListaArgumentosTail, ε |
+| Primario | Literal, IDENT, '(' | Literal, IDENT, ')' |
+| Literal | NUMBER, Booleano | NUMBER, Booleano |
+| Booleano | 'true', 'false' | 'true', 'false' |
+
+
