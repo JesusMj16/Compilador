@@ -17,28 +17,16 @@
 typedef enum TokenType {
     TOKEN_IDENTIFIER,   /**< Identificador */
     TOKEN_NUMBER,       /**< Literal numérico */
-    TOKEN_STRING,       /**< Literal de cadena */
-    TOKEN_CHAR,         /**< Literal de carácter */
     /* Palabras reservadas */
     TOKEN_KW_FN,
     TOKEN_KW_LET,
     TOKEN_KW_MUT,
-    TOKEN_KW_IF,
-    TOKEN_KW_ELSE,
-    TOKEN_KW_MATCH,
-    TOKEN_KW_WHILE,
-    TOKEN_KW_LOOP,
-    TOKEN_KW_FOR,
-    TOKEN_KW_IN,
-    TOKEN_KW_BREAK,
-    TOKEN_KW_CONTINUE,
     TOKEN_KW_RETURN,
     TOKEN_KW_TRUE,
     TOKEN_KW_FALSE,
     TOKEN_KW_I32,
     TOKEN_KW_F64,
     TOKEN_KW_BOOL,
-    TOKEN_KW_CHAR,
     /* Operadores */
     TOKEN_PLUS,
     TOKEN_MINUS,
@@ -55,28 +43,17 @@ typedef enum TokenType {
     TOKEN_GREATER_EQUAL,
     TOKEN_AND_AND,
     TOKEN_OR_OR,
-    TOKEN_PLUS_EQUAL,
-    TOKEN_MINUS_EQUAL,
-    TOKEN_STAR_EQUAL,
-    TOKEN_SLASH_EQUAL,
-    TOKEN_PERCENT_EQUAL,
-    TOKEN_PLUS_PLUS,
-    TOKEN_MINUS_MINUS,
-    TOKEN_ARROW,
     /* Puntuación y delimitadores */
-    TOKEN_DOT,
-    TOKEN_COMMA,
     TOKEN_SEMICOLON,
+    TOKEN_COMMA,
     TOKEN_COLON,
     TOKEN_LPAREN,
     TOKEN_RPAREN,
     TOKEN_LBRACE,
     TOKEN_RBRACE,
-    TOKEN_LBRACKET,
-    TOKEN_RBRACKET,
     /* Misceláneos */
-    TOKEN_UNKNOWN,
-    TOKEN_EOF
+    TOKEN_EOF,
+    TOKEN_UNKNOWN
 } TokenType;
 
 /*
@@ -93,17 +70,21 @@ typedef struct token_t{
 /*
 * @brief Estructura del lexer
 */
+struct SymbolTable; /**< Declaración adelantada para evitar dependencias circulares */
+
 typedef struct Lexer {
-    const char *source;   /**< Código fuente a analizar */
-    const char *p;        /**< Puntero actual en el código fuente */
-    size_t line;          /**< Línea actual */
-    size_t col;           /**< Columna actual */
+    const char *source;        /**< Código fuente a analizar */
+    const char *p;             /**< Puntero actual en el código fuente */
+    size_t line;               /**< Línea actual */
+    size_t col;                /**< Columna actual */
+    struct SymbolTable *symtab;/**< Tabla de símbolos asociada (opcional) */
 } Lexer;
 
 token_t *create_token(TokenType type, const char *lexeme,size_t line, size_t column);
 void free_token(token_t *token);
 void free_token_list(token_t *head);
 void lexer_init(Lexer *lxr, const char *source);
+void lexer_set_symbol_table(Lexer *lxr, struct SymbolTable *symtab);
 token_t* lexer_next_token(Lexer *lxr);
 char *read_file(const char *filename);
 token_t *get_next_token(const char *source);

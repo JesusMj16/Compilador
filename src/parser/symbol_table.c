@@ -14,6 +14,8 @@
 extern char *strdup(const char *s);
 #endif
 
+#define SIZE_T_BUFFER 32
+
 /* ============================================================================
  * FUNCIONES AUXILIARES PRIVADAS
  * ============================================================================ */
@@ -210,22 +212,20 @@ void symbol_table_remove_scope(SymbolTable *table) {
     
     while (current) {
         if (current->scope_level == table->current_scope) {
-            // Eliminar este símbolo
             SymbolEntry *to_delete = current;
-            
+            current = current->next;
             if (prev) {
-                prev->next = current->next;
+                prev->next = current;
             } else {
-                table->head = current->next;
+                table->head = current;
             }
-            
-            if (table->tail == current) {
+            if (table->tail == to_delete) {
                 table->tail = prev;
             }
-            
-            current = current->next;
             free_symbol_entry(to_delete);
-            table->count--;
+            if (table->count > 0) {
+                table->count--;
+            }
         } else {
             prev = current;
             current = current->next;
@@ -272,6 +272,58 @@ size_t symbol_entry_count_occurrences(const SymbolEntry *entry) {
     return count;
 }
 
+static size_t size_t_to_cstr(char *buffer, size_t buf_size, size_t value) {
+    if (!buffer || buf_size == 0) return 0;
+    char tmp[SIZE_T_BUFFER];
+    size_t idx = 0;
+    do {
+        if (idx < sizeof(tmp)) {
+            tmp[idx++] = (char)('0' + (value % 10));
+        }
+        value /= 10;
+    } while (value > 0 && idx < sizeof(tmp));
+
+    size_t written = idx;
+    if (written + 1 > buf_size) {
+        written = buf_size - 1;
+    }
+    for (size_t i = 0; i < written; ++i) {
+        buffer[i] = tmp[written - 1 - i];
+    }
+    buffer[written] = '\0';
+    return written;
+}
+
+static void print_size_t(FILE *stream, const char *prefix, size_t value, int newline) {
+    if (!stream) return;
+    if (prefix) fputs(prefix, stream);
+    char buf[SIZE_T_BUFFER];
+    size_t_to_cstr(buf, sizeof(buf), value);
+    fputs(buf, stream);
+    if (newline) fputc('\n', stream);
+}
+
+static int snprintf_size_t(char *buffer, size_t buf_size, const char *prefix, size_t value) {
+    if (!buffer || buf_size == 0) return 0;
+    int written = 0;
+    if (prefix) {
+        int prefix_written = (int)snprintf(buffer, buf_size, "%s", prefix);
+        if (prefix_written < 0) return prefix_written;
+        if ((size_t)prefix_written >= buf_size) return prefix_written;
+        buffer += prefix_written;
+        buf_size -= (size_t)prefix_written;
+        written += prefix_written;
+    }
+    char tmp[SIZE_T_BUFFER];
+    size_t len = size_t_to_cstr(tmp, sizeof(tmp), value);
+    if (len >= buf_size) {
+        len = buf_size > 0 ? buf_size - 1 : 0;
+    }
+    memcpy(buffer, tmp, len);
+    if (buf_size > 0) buffer[len] = '\0';
+    return written + (int)len;
+}
+
 void symbol_table_print(const SymbolTable *table) {
     if (!table) return;
     
@@ -279,7 +331,8 @@ void symbol_table_print(const SymbolTable *table) {
     printf("║                      TABLA DE SÍMBOLOS                             ║\n");
     printf("╚════════════════════════════════════════════════════════════════════╝\n\n");
     
-    printf("Total de símbolos: %zu\n\n", table->count);
+    print_size_t(stdout, "Total de símbolos: ", table->count, 1);
+    puts("");
     
     printf("%-20s %-12s %-10s %-8s %-30s\n", 
            "Lexema", "Tipo Token", "Tipo Dato", "Ámbito", "Líneas");
@@ -295,10 +348,10 @@ void symbol_table_print(const SymbolTable *table) {
         while (line_node) {
             char temp[32];
             if (first) {
-                snprintf(temp, sizeof(temp), "%zu", line_node->line);
+                snprintf_size_t(temp, sizeof(temp), NULL, line_node->line);
                 first = 0;
             } else {
-                snprintf(temp, sizeof(temp), ", %zu", line_node->line);
+                snprintf_size_t(temp, sizeof(temp), ", ", line_node->line);
             }
             strncat(lines_str, temp, sizeof(lines_str) - strlen(lines_str) - 1);
             line_node = line_node->next;
@@ -343,7 +396,8 @@ int symbol_table_write_to_file(const SymbolTable *table, const char *filename) {
     // Escribir encabezado
     fprintf(file, "# Tabla de Símbolos\n");
     fprintf(file, "# Formato: lexema | tipo_token | tipo_dato | ámbito | líneas\n");
-    fprintf(file, "# Total de símbolos: %zu\n\n", table->count);
+    print_size_t(file, "# Total de símbolos: ", table->count, 1);
+    fputc('\n', file);
     
     SymbolEntry *current = table->head;
     while (current) {
@@ -354,10 +408,10 @@ int symbol_table_write_to_file(const SymbolTable *table, const char *filename) {
         while (line_node) {
             char temp[32];
             if (first) {
-                snprintf(temp, sizeof(temp), "%zu", line_node->line);
+                snprintf_size_t(temp, sizeof(temp), NULL, line_node->line);
                 first = 0;
             } else {
-                snprintf(temp, sizeof(temp), ",%zu", line_node->line);
+                snprintf_size_t(temp, sizeof(temp), ",", line_node->line);
             }
             strncat(lines_str, temp, sizeof(lines_str) - strlen(lines_str) - 1);
             line_node = line_node->next;

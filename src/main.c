@@ -49,6 +49,9 @@ static int run_lexical_analysis(const char *filename) {
     
     Lexer lexer;
     lexer_init(&lexer, source);
+    SymbolTable table;
+    symbol_table_init(&table);
+    lexer_set_symbol_table(&lexer, &table);
     
     printf("%-6s %-8s %-12s %s\n", "Línea", "Columna", "Tipo", "Lexema");
     printf("%-6s %-8s %-12s %s\n", "-----", "-------", "----", "------");
@@ -78,6 +81,7 @@ static int run_lexical_analysis(const char *filename) {
     
     printf("\nTotal de tokens: %d\n", token_count);
     
+    symbol_table_free(&table);
     free(source);
     return 0;
 }
@@ -143,6 +147,7 @@ static int run_syntactic_analysis(const char *filename, int show_stats) {
     
     SymbolTable symbol_table;
     symbol_table_init(&symbol_table);
+    lexer_set_symbol_table(&lexer, &symbol_table);
     
     Parser parser;
     if (!parser_init(&parser, &lexer, &symbol_table)) {

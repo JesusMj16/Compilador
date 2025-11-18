@@ -4,49 +4,11 @@
  */
 #include "../../include/lexer.h"
 #include "../../include/keywords.h"
+#include "../../include/symbol_table.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
-#define NUM_STATES 31
-#define NUM_CHAR_TYPES 24
-
-/**
- * @brief Definición de los estados del autómata
- */
-typedef enum {
-    STATE_START,
-    STATE_IDENTIFIER,
-    STATE_INT,
-    STATE_SIGN,
-    STATE_BIN_PREFIX,
-    STATE_BIN,
-    STATE_HEX_PREFIX,
-    STATE_HEX,
-    STATE_REAL,
-    STATE_REAL_FRACTION,
-    STATE_EXPONENT_MARK,
-    STATE_EXPONENT_SIGN,
-    STATE_EXPONENT,
-    STATE_STRING,
-    STATE_STRING_ESCAPE,
-    STATE_CHAR,
-    STATE_CHAR_ESCAPE,
-    STATE_CHAR_END,
-    STATE_SLASH,
-    STATE_COMMENT_LINE,
-    STATE_COMMENT_BLOCK,
-    STATE_COMMENT_BLOCK_END,
-    STATE_OPERATOR,
-    STATE_OPERATOR_EQ, 
-    STATE_OPERATOR_AND,
-    STATE_OPERATOR_OR,
-    STATE_DELIMITER,
-    STATE_WHITESPACE,
-    STATE_FINAL,
-    STATE_ERROR,
-    STATE_EOF
-} State;
+#include <stdbool.h>
 
 /**
  * @brief Especificación de tokens de varios caracteres (principalmente operadores)
@@ -56,6 +18,10 @@ typedef struct {
     TokenType type;
 } MultiCharToken;
 
+static inline void lxr_advance(Lexer *lxr);
+static inline char lxr_peek(const Lexer *lxr);
+static inline char lxr_peek_next(const Lexer *lxr);
+
 static const MultiCharToken multi_char_tokens[] = {
     {"==", TOKEN_EQUAL_EQUAL},
     {"!=", TOKEN_BANG_EQUAL},
@@ -63,14 +29,6 @@ static const MultiCharToken multi_char_tokens[] = {
     {">=", TOKEN_GREATER_EQUAL},
     {"&&", TOKEN_AND_AND},
     {"||", TOKEN_OR_OR},
-    {"++", TOKEN_PLUS_PLUS},
-    {"--", TOKEN_MINUS_MINUS},
-    {"+=", TOKEN_PLUS_EQUAL},
-    {"-=", TOKEN_MINUS_EQUAL},
-    {"*=", TOKEN_STAR_EQUAL},
-    {"/=", TOKEN_SLASH_EQUAL},
-    {"%=", TOKEN_PERCENT_EQUAL},
-    {"=>", TOKEN_ARROW},
     {NULL, TOKEN_UNKNOWN}
 };
 
@@ -82,22 +40,12 @@ static TokenType keyword_token_from_index(int index) {
         TOKEN_KW_FN,
         TOKEN_KW_LET,
         TOKEN_KW_MUT,
-        TOKEN_KW_IF,
-        TOKEN_KW_ELSE,
-        TOKEN_KW_MATCH,
-        TOKEN_KW_WHILE,
-        TOKEN_KW_LOOP,
-        TOKEN_KW_FOR,
-        TOKEN_KW_IN,
-        TOKEN_KW_BREAK,
-        TOKEN_KW_CONTINUE,
         TOKEN_KW_RETURN,
         TOKEN_KW_TRUE,
         TOKEN_KW_FALSE,
         TOKEN_KW_I32,
         TOKEN_KW_F64,
-        TOKEN_KW_BOOL,
-        TOKEN_KW_CHAR
+        TOKEN_KW_BOOL
     };
 
     if (index < 0) {
@@ -110,36 +58,118 @@ static TokenType keyword_token_from_index(int index) {
     return map[index];
 }
 
-
-/**
- * @brief Definición de los tipos de caracteres
- */
-typedef enum CharType{
-    CHAR_LETTER,       
-    CHAR_DIGIT,        
-    CHAR_UNDERSCORE,   
-    CHAR_QUOTE,        
-    CHAR_APOSTROPHE,  
-    CHAR_BACKSLASH,    
-    CHAR_PLUS,         
-    CHAR_MINUS,        
-    CHAR_STAR,         
-    CHAR_SLASH,        
-    CHAR_PERCENT,      
-    CHAR_EQUAL,        
-    CHAR_EXCLAMATION,  
-    CHAR_AMPERSAND,    
-    CHAR_PIPE,         
-    CHAR_LT,           
-    CHAR_GT,           
-    CHAR_HEXLETTER,    
-    CHAR_DOT,          
-    CHAR_DELIMITER,    
-    CHAR_WHITESPACE,   
-    CHAR_NEWLINE,       
+typedef enum CharType {
+    CHAR_LETTER,
+    CHAR_DIGIT,
+    CHAR_UNDERSCORE,
+    CHAR_PLUS,
+    CHAR_MINUS,
+    CHAR_STAR,
+    CHAR_SLASH,
+    CHAR_PERCENT,
+    CHAR_EQUAL,
+    CHAR_EXCLAMATION,
+    CHAR_AMPERSAND,
+    CHAR_PIPE,
+    CHAR_LT,
+    CHAR_GT,
+    CHAR_DOT,
+    CHAR_DELIMITER,
+    CHAR_WHITESPACE,
+    CHAR_NEWLINE,
     CHAR_EOF,
-    CHAR_UNKNOWN    
+    CHAR_UNKNOWN
 } CharType;
+
+#define AUT_ACCEPT_BASE 100
+
+typedef enum AutomatonState {
+    AUTO_START = 0,
+    AUTO_WHITESPACE,
+    AUTO_SLASH,
+    AUTO_STATE_COUNT,
+    AUTO_ACCEPT_IDENTIFIER = AUT_ACCEPT_BASE,
+    AUTO_ACCEPT_NUMBER,
+    AUTO_ACCEPT_OPERATOR,
+    AUTO_ACCEPT_DELIMITER,
+    AUTO_ACCEPT_WHITESPACE,
+    AUTO_ACCEPT_COMMENT_LINE,
+    AUTO_ACCEPT_COMMENT_BLOCK,
+    AUTO_ACCEPT_SLASH,
+    AUTO_ACCEPT_EOF,
+    AUTO_ERROR_STATE
+} AutomatonState;
+
+#define CHAR_TYPE_COUNT (CHAR_UNKNOWN + 1)
+
+static const AutomatonState transition_table[AUTO_STATE_COUNT][CHAR_TYPE_COUNT] = {
+    [AUTO_START] = {
+        [CHAR_LETTER] = AUTO_ACCEPT_IDENTIFIER,
+        [CHAR_DIGIT] = AUTO_ACCEPT_NUMBER,
+        [CHAR_UNDERSCORE] = AUTO_ACCEPT_IDENTIFIER,
+        [CHAR_PLUS] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_MINUS] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_STAR] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_SLASH] = AUTO_SLASH,
+        [CHAR_PERCENT] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_EQUAL] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_EXCLAMATION] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_AMPERSAND] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_PIPE] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_LT] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_GT] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_DOT] = AUTO_ERROR_STATE,
+        [CHAR_DELIMITER] = AUTO_ACCEPT_DELIMITER,
+        [CHAR_WHITESPACE] = AUTO_WHITESPACE,
+        [CHAR_NEWLINE] = AUTO_WHITESPACE,
+        [CHAR_EOF] = AUTO_ACCEPT_EOF,
+        [CHAR_UNKNOWN] = AUTO_ERROR_STATE
+    },
+    [AUTO_WHITESPACE] = {
+        [CHAR_LETTER] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_DIGIT] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_UNDERSCORE] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_PLUS] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_MINUS] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_STAR] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_SLASH] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_PERCENT] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_EQUAL] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_EXCLAMATION] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_AMPERSAND] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_PIPE] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_LT] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_GT] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_DOT] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_DELIMITER] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_WHITESPACE] = AUTO_WHITESPACE,
+        [CHAR_NEWLINE] = AUTO_WHITESPACE,
+        [CHAR_EOF] = AUTO_ACCEPT_WHITESPACE,
+        [CHAR_UNKNOWN] = AUTO_ACCEPT_WHITESPACE
+    },
+    [AUTO_SLASH] = {
+        [CHAR_LETTER] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_DIGIT] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_UNDERSCORE] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_PLUS] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_MINUS] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_STAR] = AUTO_ACCEPT_COMMENT_BLOCK,
+        [CHAR_SLASH] = AUTO_ACCEPT_COMMENT_LINE,
+        [CHAR_PERCENT] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_EQUAL] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_EXCLAMATION] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_AMPERSAND] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_PIPE] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_LT] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_GT] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_DOT] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_DELIMITER] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_WHITESPACE] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_NEWLINE] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_EOF] = AUTO_ACCEPT_OPERATOR,
+        [CHAR_UNKNOWN] = AUTO_ACCEPT_OPERATOR
+    }
+};
 
 #ifdef LEXER_DEBUG
 static const char* char_type_to_string(CharType type) {
@@ -147,9 +177,6 @@ static const char* char_type_to_string(CharType type) {
         [CHAR_LETTER]       = "CHAR_LETTER",
         [CHAR_DIGIT]        = "CHAR_DIGIT",
         [CHAR_UNDERSCORE]   = "CHAR_UNDERSCORE",
-        [CHAR_QUOTE]        = "CHAR_QUOTE",
-        [CHAR_APOSTROPHE]   = "CHAR_APOSTROPHE",
-        [CHAR_BACKSLASH]    = "CHAR_BACKSLASH",
         [CHAR_PLUS]         = "CHAR_PLUS",
         [CHAR_MINUS]        = "CHAR_MINUS",
         [CHAR_STAR]         = "CHAR_STAR",
@@ -161,7 +188,6 @@ static const char* char_type_to_string(CharType type) {
         [CHAR_PIPE]         = "CHAR_PIPE",
         [CHAR_LT]           = "CHAR_LT",
         [CHAR_GT]           = "CHAR_GT",
-        [CHAR_HEXLETTER]    = "CHAR_HEXLETTER",
         [CHAR_DOT]          = "CHAR_DOT",
         [CHAR_DELIMITER]    = "CHAR_DELIMITER",
         [CHAR_WHITESPACE]   = "CHAR_WHITESPACE",
@@ -185,9 +211,6 @@ static CharType get_char_type(int c) {
     if (c >= '0' && c <= '9') { return CHAR_DIGIT; }
     if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) { return CHAR_LETTER; }
     if (c == '_') { return CHAR_UNDERSCORE; } 
-    if (c == '"') { return CHAR_QUOTE; }
-    if (c == '\'') { return CHAR_APOSTROPHE; }
-    if (c == '\\') { return CHAR_BACKSLASH; }
     if (c == '+') { return CHAR_PLUS; }
     if (c == '-') { return CHAR_MINUS; }
     if (c == '*') { return CHAR_STAR; }
@@ -200,10 +223,75 @@ static CharType get_char_type(int c) {
     if (c == '<') { return CHAR_LT; }
     if (c == '>') { return CHAR_GT; }
     if (c == '.') { return CHAR_DOT; }
-    if (c == ';' || c == ',' || c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']' || c == ':') { return CHAR_DELIMITER; }
+    if (c == ';' || c == ',' || c == '(' || c == ')' || c == '{' || c == '}' || c == ':') { return CHAR_DELIMITER; }
     if (c == ' ' || c == '\t') { return CHAR_WHITESPACE; }
-    if (c == '\n') { return CHAR_NEWLINE; }
+    if (c == '\n' || c == '\r') { return CHAR_NEWLINE; }
     return CHAR_UNKNOWN;
+}
+
+static CharType peek_char_type(const Lexer *lxr, size_t offset) {
+    if (!lxr || !lxr->p) return CHAR_UNKNOWN;
+    return get_char_type(lxr->p[offset]);
+}
+
+static AutomatonState automaton_classify(const Lexer *lxr) {
+    AutomatonState state = AUTO_START;
+    size_t offset = 0;
+
+    while (1) {
+        CharType type = peek_char_type(lxr, offset);
+        AutomatonState next = transition_table[state][type];
+        if (next >= AUT_ACCEPT_BASE || next == AUTO_ERROR_STATE) {
+            return next;
+        }
+        state = next;
+        offset++;
+    }
+}
+
+static void consume_whitespace(Lexer *lxr) {
+    while (lxr && lxr->p && lxr->p[0] != '\0') {
+        CharType type = get_char_type(lxr->p[0]);
+        if (type == CHAR_WHITESPACE || type == CHAR_NEWLINE) {
+            lxr_advance(lxr);
+            continue;
+        }
+        break;
+    }
+}
+
+static void consume_line_comment(Lexer *lxr) {
+    if (!lxr || !lxr->p) return;
+    if (lxr->p[0] != '/' || lxr->p[1] != '/') {
+        return;
+    }
+    while (lxr->p[0] != '\0' && lxr->p[0] != '\n') {
+        lxr_advance(lxr);
+    }
+}
+
+static bool consume_block_comment(Lexer *lxr) {
+    if (!lxr || !lxr->p) return false;
+    if (lxr->p[0] != '/' || lxr->p[1] != '*') {
+        return false;
+    }
+    lxr_advance(lxr);
+    lxr_advance(lxr);
+
+    while (lxr->p[0] != '\0') {
+        if (lxr->p[0] == '*' && lxr->p[1] == '/') {
+            lxr_advance(lxr);
+            lxr_advance(lxr);
+            return true;
+        }
+        lxr_advance(lxr);
+    }
+    return false;
+}
+
+static void lexer_register_identifier(Lexer *lxr, const char *lexeme, size_t line) {
+    if (!lxr || !lxr->symtab || !lexeme) return;
+    symbol_table_insert(lxr->symtab, lexeme, TOKEN_IDENTIFIER, line);
 }
 
 /**
@@ -354,46 +442,6 @@ static char* make_lexeme(const char *start, const char *end) {
 }
 
 /**
- * @brief Omite caracteres ignorables como espacios en blanco y comentarios.
- * 
- * @param lxr El lexer.
- */
-static void skip_ignorable(Lexer *lxr){
-    for (;;) {
-        CharType type = get_char_type(lxr_peek(lxr));
-        if (type == CHAR_WHITESPACE || type == CHAR_NEWLINE) {
-            lxr_advance(lxr);
-            continue;
-        }
-        if (type == CHAR_SLASH) {
-            char next = lxr_peek_next(lxr);
-            if (next == '/') {
-                
-                lxr_advance(lxr); 
-                lxr_advance(lxr);
-                while (lxr_peek(lxr) != '\0' && lxr_peek(lxr) != '\n') {
-                    lxr_advance(lxr);
-                }
-                continue;
-            } else if (next == '*') {
-                lxr_advance(lxr);
-                lxr_advance(lxr);
-                while (lxr_peek(lxr) != '\0') {
-                    if (lxr_peek(lxr) == '*' && lxr_peek_next(lxr) == '/') {
-                        lxr_advance(lxr);
-                        lxr_advance(lxr);
-                        break;
-                    }
-                    lxr_advance(lxr);
-                }
-                continue;
-            }
-        }
-        break;
-    }
-}
-
-/**
  * @brief Analiza y crea un token para identificadores o palabras clave.
  * 
  * Reglas según reglas.md:
@@ -442,40 +490,16 @@ static token_t* lex_identifier_or_keyword(Lexer *lxr, size_t sl, size_t sc){
     int keyword_index = get_keyword_index(lexeme);
     TokenType ttype = keyword_token_from_index(keyword_index);
     token_t *token = create_token(ttype, lexeme, sl, sc);
+    if (ttype == TOKEN_IDENTIFIER) {
+        lexer_register_identifier(lxr, lexeme, sl);
+    }
     free(lexeme);
     return token;
 }
 
 /**
- * @brief Verifica si un carácter es un dígito hexadecimal.
- * 
- * @param c El carácter a verificar.
- * @return 1 si es un dígito hexadecimal, 0 en caso contrario.
- */
-static int is_hex_digit(char c) {
-    if (c >= '0' && c <= '9') {
-        return 1;
-    } else if (c >= 'a' && c <= 'f') {
-        return 1;
-    } else if (c >= 'A' && c <= 'F') {
-        return 1;
-    }
-    return 0;
-}
-
-/**
- * @brief Verifica si un carácter es un dígito binario.
- * 
- * @param c El carácter a verificar.
- * @return 1 si es un dígito binario (0 o 1), 0 en caso contrario.
- */
-static int is_bin_digit(char c) {
-    return c == '0' || c == '1';
-}
-
-/**
- * @brief Analiza y crea un token para números (enteros, reales, hexadecimales, binarios).
- * 
+ * @brief Analiza y crea un token para números decimales (enteros o reales con exponente).
+ *
  * @param lxr El lexer.
  * @param sl Línea de inicio del token.
  * @param sc Columna de inicio del token.
@@ -483,35 +507,6 @@ static int is_bin_digit(char c) {
  */
 static token_t* lex_number(Lexer *lxr, size_t sl, size_t sc){
     const char  *start  = lxr->p;
-
-    if (lxr_peek(lxr) == '0' && (lxr_peek_next(lxr) == 'x' || lxr_peek_next(lxr) == 'X')) {
-        lxr_advance(lxr); 
-        lxr_advance(lxr); 
-        int have = 0;
-        while (is_hex_digit(lxr_peek(lxr))) {
-            have = 1;
-            lxr_advance(lxr);
-        }
-        char *lexeme = make_lexeme(start, lxr->p);
-        token_t *tok = create_token(have ? TOKEN_NUMBER : TOKEN_UNKNOWN, lexeme, sl, sc);
-        free(lexeme);
-        return tok;
-    }
-
-    // Números binarios (0b o 0B)
-    if (lxr_peek(lxr) == '0' && (lxr_peek_next(lxr) == 'b' || lxr_peek_next(lxr) == 'B')) {
-        lxr_advance(lxr);
-        lxr_advance(lxr); 
-        int have = 0;
-        while (is_bin_digit(lxr_peek(lxr))) {
-            have = 1;
-            lxr_advance(lxr);
-        }
-        char *lexeme = make_lexeme(start, lxr->p);
-        token_t *tok = create_token(have ? TOKEN_NUMBER : TOKEN_UNKNOWN, lexeme, sl, sc);
-        free(lexeme);
-        return tok;
-    }
 
     while (get_char_type(lxr_peek(lxr)) == CHAR_DIGIT) {
         lxr_advance(lxr);
@@ -548,39 +543,6 @@ static token_t* lex_number(Lexer *lxr, size_t sl, size_t sc){
     token_t *token_num = create_token(TOKEN_NUMBER, lexeme, sl, sc);
     free(lexeme);
     return token_num;
-}
-
-/**
- * @brief Analiza y crea un token para cadenas de texto.
- * 
- * @param lxr El lexer.
- * @param sl Línea de inicio del token.
- * @param sc Columna de inicio del token.
- * @return El token creado (TOKEN_STRING o TOKEN_UNKNOWN).
- */
-static token_t* lex_string(Lexer *lxr, size_t sl, size_t sc){
-    const char *start = lxr->p;
-    lxr_advance(lxr); 
-    int ok = 0;
-    while (lxr_peek(lxr) != '\0') {
-        char c = lxr_peek(lxr);
-        if (c == '\\') {
-            lxr_advance(lxr);
-            if (lxr_peek(lxr) != '\0') {
-                lxr_advance(lxr);
-            }
-        } else if (c == '"') {
-            lxr_advance(lxr);
-            ok = 1;
-            break;
-        } else {
-            lxr_advance(lxr);
-        }
-    }
-    char *lexeme = make_lexeme(start, lxr->p);
-    token_t *token_str = create_token(ok ? TOKEN_STRING : TOKEN_UNKNOWN, lexeme, sl, sc);
-    free(lexeme);
-    return token_str;
 }
 
 /**
@@ -640,9 +602,6 @@ static token_t* lex_operator_or_delimiter(Lexer *lxr, size_t sl, size_t sc){
         case ')': ttype = TOKEN_RPAREN; break;
         case '{': ttype = TOKEN_LBRACE; break;
         case '}': ttype = TOKEN_RBRACE; break;
-        case '[': ttype = TOKEN_LBRACKET; break;
-        case ']': ttype = TOKEN_RBRACKET; break;
-        case '.': ttype = TOKEN_DOT; break;
         case ':': ttype = TOKEN_COLON; break;
         case '+': ttype = TOKEN_PLUS; break;
         case '-': ttype = TOKEN_MINUS; break;
@@ -679,6 +638,12 @@ void lexer_init(Lexer *lxr, const char *source){
     lxr->p = lxr->source;
     lxr->line = 1;
     lxr->col = 1;
+    lxr->symtab = NULL;
+}
+
+void lexer_set_symbol_table(Lexer *lxr, SymbolTable *symtab) {
+    if (!lxr) return;
+    lxr->symtab = symtab;
 }
 
 /**
@@ -691,54 +656,44 @@ token_t* lexer_next_token(Lexer *lxr){
     if (!lxr || !lxr->p) {
         return NULL;
     }
-    skip_ignorable(lxr);
+    for (;;) {
+        AutomatonState decision = automaton_classify(lxr);
+        size_t start_line = lxr->line;
+        size_t start_col = lxr->col;
 
-    size_t start_line = lxr->line;
-    size_t start_col = lxr->col;
-    CharType type = get_char_type(lxr_peek(lxr));
-
-    if (type == CHAR_EOF) {
-        return create_token(TOKEN_EOF, "EOF", start_line, start_col);
-    }
-    if (type == CHAR_LETTER || type == CHAR_UNDERSCORE) {
-        return lex_identifier_or_keyword(lxr, start_line, start_col);
-    }
-    if (type == CHAR_DIGIT) {
-        return lex_number(lxr, start_line, start_col);
-    }
-    if (type == CHAR_QUOTE) {
-        return lex_string(lxr, start_line, start_col);
-    }
-    if (type == CHAR_APOSTROPHE) {
-        const char *start = lxr->p;
-        lxr_advance(lxr); // '
-        
-        // Manejar caracter con escape
-        if (lxr_peek(lxr) == '\\') {
-            lxr_advance(lxr);
-            if (lxr_peek(lxr) != '\0') lxr_advance(lxr);
-        } else if (lxr_peek(lxr) != '\0' && lxr_peek(lxr) != '\'' && lxr_peek(lxr) != '\n') {
-            // Caracter normal
-            lxr_advance(lxr);
-        }
-        
-        // Debe terminar con '
-        if (lxr_peek(lxr) == '\'') {
-            lxr_advance(lxr);
-            char *lex = make_lexeme(start, lxr->p);
-            token_t *token = create_token(TOKEN_CHAR, lex, start_line, start_col);
-            free(lex);
-            return token;
-        } else {
-            // Caracter mal formado
-            char *lex = make_lexeme(start, lxr->p);
-            token_t *token = create_token(TOKEN_UNKNOWN, lex, start_line, start_col);
-            free(lex);
-            return token;
+        switch (decision) {
+            case AUTO_ACCEPT_IDENTIFIER:
+                return lex_identifier_or_keyword(lxr, start_line, start_col);
+            case AUTO_ACCEPT_NUMBER:
+                return lex_number(lxr, start_line, start_col);
+            case AUTO_ACCEPT_OPERATOR:
+            case AUTO_ACCEPT_DELIMITER:
+            case AUTO_ACCEPT_SLASH:
+                return lex_operator_or_delimiter(lxr, start_line, start_col);
+            case AUTO_ACCEPT_WHITESPACE:
+                consume_whitespace(lxr);
+                continue;
+            case AUTO_ACCEPT_COMMENT_LINE:
+                consume_line_comment(lxr);
+                continue;
+            case AUTO_ACCEPT_COMMENT_BLOCK:
+                if (!consume_block_comment(lxr)) {
+                    return create_token(TOKEN_UNKNOWN, "Unclosed comment", start_line, start_col);
+                }
+                continue;
+            case AUTO_ACCEPT_EOF:
+                return create_token(TOKEN_EOF, "EOF", start_line, start_col);
+            case AUTO_ERROR_STATE:
+            default: {
+                char bad[2] = { lxr_peek(lxr), '\0' };
+                token_t *unknown = create_token(TOKEN_UNKNOWN, bad, start_line, start_col);
+                if (lxr_peek(lxr) != '\0') {
+                    lxr_advance(lxr);
+                }
+                return unknown;
+            }
         }
     }
-
-    return lex_operator_or_delimiter(lxr, start_line, start_col);
 }
 
 /**
@@ -771,27 +726,15 @@ const char* token_type_name(TokenType t) {
     static const char *names[] = {
         [TOKEN_IDENTIFIER]  = "IDENT",
         [TOKEN_NUMBER]      = "NUMBER",
-        [TOKEN_STRING]      = "STRING",
-        [TOKEN_CHAR]        = "CHAR",
         [TOKEN_KW_FN]       = "KW_FN",
         [TOKEN_KW_LET]      = "KW_LET",
         [TOKEN_KW_MUT]      = "KW_MUT",
-        [TOKEN_KW_IF]       = "KW_IF",
-        [TOKEN_KW_ELSE]     = "KW_ELSE",
-        [TOKEN_KW_MATCH]    = "KW_MATCH",
-        [TOKEN_KW_WHILE]    = "KW_WHILE",
-        [TOKEN_KW_LOOP]     = "KW_LOOP",
-        [TOKEN_KW_FOR]      = "KW_FOR",
-        [TOKEN_KW_IN]       = "KW_IN",
-        [TOKEN_KW_BREAK]    = "KW_BREAK",
-        [TOKEN_KW_CONTINUE] = "KW_CONTINUE",
         [TOKEN_KW_RETURN]   = "KW_RETURN",
         [TOKEN_KW_TRUE]     = "KW_TRUE",
         [TOKEN_KW_FALSE]    = "KW_FALSE",
         [TOKEN_KW_I32]      = "KW_I32",
         [TOKEN_KW_F64]      = "KW_F64",
         [TOKEN_KW_BOOL]     = "KW_BOOL",
-        [TOKEN_KW_CHAR]     = "KW_CHAR",
         [TOKEN_PLUS]        = "PLUS",
         [TOKEN_MINUS]       = "MINUS",
         [TOKEN_STAR]        = "STAR",
@@ -807,26 +750,15 @@ const char* token_type_name(TokenType t) {
         [TOKEN_GREATER_EQUAL] = "GREATER_EQUAL",
         [TOKEN_AND_AND]     = "AND_AND",
         [TOKEN_OR_OR]       = "OR_OR",
-        [TOKEN_PLUS_EQUAL]  = "PLUS_EQUAL",
-        [TOKEN_MINUS_EQUAL] = "MINUS_EQUAL",
-        [TOKEN_STAR_EQUAL]  = "STAR_EQUAL",
-        [TOKEN_SLASH_EQUAL] = "SLASH_EQUAL",
-        [TOKEN_PERCENT_EQUAL] = "PERCENT_EQUAL",
-        [TOKEN_PLUS_PLUS]   = "PLUS_PLUS",
-        [TOKEN_MINUS_MINUS] = "MINUS_MINUS",
-        [TOKEN_ARROW]       = "ARROW",
-        [TOKEN_DOT]         = "DOT",
-        [TOKEN_COMMA]       = "COMMA",
         [TOKEN_SEMICOLON]   = "SEMICOLON",
+        [TOKEN_COMMA]       = "COMMA",
         [TOKEN_COLON]       = "COLON",
         [TOKEN_LPAREN]      = "LPAREN",
         [TOKEN_RPAREN]      = "RPAREN",
         [TOKEN_LBRACE]      = "LBRACE",
         [TOKEN_RBRACE]      = "RBRACE",
-        [TOKEN_LBRACKET]    = "LBRACKET",
-        [TOKEN_RBRACKET]    = "RBRACKET",
-        [TOKEN_UNKNOWN]     = "UNKNOWN",
-        [TOKEN_EOF]         = "EOF"
+        [TOKEN_EOF]         = "EOF",
+        [TOKEN_UNKNOWN]     = "UNKNOWN"
     };
 
     size_t count = sizeof(names) / sizeof(names[0]);
@@ -901,6 +833,9 @@ int write_tokens_to_file(const char *source_file, const char *output_file) {
     
     Lexer lexer;
     lexer_init(&lexer, source);
+    SymbolTable temp_table;
+    symbol_table_init(&temp_table);
+    lexer_set_symbol_table(&lexer, &temp_table);
     
     int token_count = 0;
     for (;;) {
@@ -930,6 +865,7 @@ int write_tokens_to_file(const char *source_file, const char *output_file) {
     fprintf(output, "\n# Total de tokens: %d\n", token_count);
     
     fclose(output);
+    symbol_table_free(&temp_table);
     free(source);
     
     printf("✓ Tokens escritos en: %s (%d tokens)\n", output_file, token_count);

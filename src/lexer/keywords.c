@@ -17,22 +17,12 @@ static const char *keywords[] = {
     "fn",
     "let",
     "mut",
-    "if",
-    "else",
-    "match",
-    "while",
-    "loop",
-    "for",
-    "in",
-    "break",
-    "continue",
     "return",
     "true",
     "false",
     "i32",
     "f64",
     "bool",
-    "char",
     NULL
 };
 
