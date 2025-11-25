@@ -32,7 +32,7 @@ typedef struct SymbolEntry {
     bool is_parameter;         /**< Indica si es un parámetro de función */
     LineList *lines;           /**< Lista de líneas donde aparece */
     int scope_level;           /**< Nivel de ámbito (0 = global) */
-    struct SymbolEntry *next;  /**< Siguiente entrada (lista enlazada) */
+    struct SymbolEntry *next;  /**< Siguiente entrada  */
 } SymbolEntry;
 
 typedef struct SymbolTable {

@@ -40,6 +40,8 @@ static TokenType keyword_token_from_index(int index) {
         TOKEN_KW_FN,
         TOKEN_KW_LET,
         TOKEN_KW_MUT,
+        TOKEN_KW_IF,
+        TOKEN_KW_ELSE,
         TOKEN_KW_RETURN,
         TOKEN_KW_TRUE,
         TOKEN_KW_FALSE,
@@ -729,6 +731,8 @@ const char* token_type_name(TokenType t) {
         [TOKEN_KW_FN]       = "KW_FN",
         [TOKEN_KW_LET]      = "KW_LET",
         [TOKEN_KW_MUT]      = "KW_MUT",
+        [TOKEN_KW_IF]       = "KW_IF",
+        [TOKEN_KW_ELSE]     = "KW_ELSE",
         [TOKEN_KW_RETURN]   = "KW_RETURN",
         [TOKEN_KW_TRUE]     = "KW_TRUE",
         [TOKEN_KW_FALSE]    = "KW_FALSE",
@@ -868,6 +872,6 @@ int write_tokens_to_file(const char *source_file, const char *output_file) {
     symbol_table_free(&temp_table);
     free(source);
     
-    printf("✓ Tokens escritos en: %s (%d tokens)\n", output_file, token_count);
+    printf(" Tokens escritos en: %s (%d tokens)\n", output_file, token_count);
     return 0;
 }

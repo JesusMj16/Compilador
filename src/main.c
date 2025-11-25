@@ -19,15 +19,15 @@
 static void print_usage(const char *program_name) {
     printf("Uso: %s [opciones] <archivo>\n", program_name);
     printf("Opciones:\n");
-    printf("  -l             Solo análisis léxico\n");
-    printf("  -p             Análisis sintáctico (parser)\n");
+    printf("  -l             Solo analisis lexico\n");
+    printf("  -p             Analisis sintactico (parser)\n");
     printf("  -t             Generar archivo de tokens\n");
-    printf("  -s             Mostrar estadísticas del parser\n");
+    printf("  -s             Mostrar estadisticas del parser\n");
     printf("  -h, --help     Mostrar esta ayuda\n");
     printf("\nEjemplos:\n");
-    printf("  %s programa.lang              # Análisis completo\n", program_name);
-    printf("  %s -l programa.lang           # Solo análisis léxico\n", program_name);
-    printf("  %s -p programa.lang           # Análisis sintáctico\n", program_name);
+    printf("  %s programa.lang              # Analisis completo\n", program_name);
+    printf("  %s -l programa.lang           # Solo analisis lexico\n", program_name);
+    printf("  %s -p programa.lang           # Analisis sintactico\n", program_name);
     printf("  %s -t programa.lang           # Generar archivo de tokens\n", program_name);
 }
 
@@ -38,7 +38,7 @@ static void print_usage(const char *program_name) {
  * @return 0 si es exitoso, 1 si hay error.
  */
 static int run_lexical_analysis(const char *filename) {
-    printf("=== ANÁLISIS LÉXICO ===\n");
+    printf("=== ANALISIS LEXICO ===\n");
     printf("Archivo: %s\n\n", filename);
     
     char *source = read_file(filename);
@@ -53,7 +53,7 @@ static int run_lexical_analysis(const char *filename) {
     symbol_table_init(&table);
     lexer_set_symbol_table(&lexer, &table);
     
-    printf("%-6s %-8s %-12s %s\n", "Línea", "Columna", "Tipo", "Lexema");
+    printf("%-6s %-8s %-12s %s\n", "Linea", "Columna", "Tipo", "Lexema");
     printf("%-6s %-8s %-12s %s\n", "-----", "-------", "----", "------");
     
     int token_count = 0;
@@ -93,7 +93,7 @@ static int run_lexical_analysis(const char *filename) {
  * @return 0 si es exitoso, 1 si hay error.
  */
 static int generate_tokens_file(const char *filename) {
-    printf("=== GENERACIÓN DE ARCHIVO DE TOKENS ===\n");
+    printf("=== GENERACION DE ARCHIVO DE TOKENS ===\n");
     printf("Archivo fuente: %s\n", filename);
     
     // Generar nombre de archivo de salida en la carpeta docs/Analizador-sintactico/archivos_parser
@@ -117,7 +117,7 @@ static int generate_tokens_file(const char *filename) {
     int result = write_tokens_to_file(filename, default_output);
     
     if (result == 0) {
-        printf("\n✓ Archivo de tokens generado exitosamente\n");
+        printf("\nArchivo de tokens generado exitosamente\n");
         printf("  - Formato: tipo_token lexema linea columna [indice_palabra_clave]\n");
         printf("  - Listo para ser usado por el parser\n");
     }
@@ -133,7 +133,7 @@ static int generate_tokens_file(const char *filename) {
  * @return 0 si es exitoso, 1 si hay error.
  */
 static int run_syntactic_analysis(const char *filename, int show_stats) {
-    printf("=== ANÁLISIS SINTÁCTICO ===\n");
+    printf("=== ANALISIS SINTACTICO ===\n");
     printf("Archivo: %s\n\n", filename);
     
     char *source = read_file(filename);
@@ -157,7 +157,7 @@ static int run_syntactic_analysis(const char *filename, int show_stats) {
         return 1;
     }
     
-    printf("⏳ Construyendo árbol de sintaxis abstracta...\n\n");
+    printf("Construyendo arbol de sintaxis abstracta...\n\n");
     
     ASTNode *ast = parser_parse(&parser);
     
@@ -169,18 +169,18 @@ static int run_syntactic_analysis(const char *filename, int show_stats) {
     }
     
     if (ast) {
-        printf("✓ Análisis sintáctico exitoso\n");
+        printf("Analisis sintactico exitoso\n");
         
         if (show_stats) {
             parser_print_stats(&parser);
         }
         
-        printf("\n═══════════════════════════════════════\n");
-        printf(" ÁRBOL DE SINTAXIS ABSTRACTA (AST)\n");
-        printf("═══════════════════════════════════════\n\n");
+        printf("\n=======================================\n");
+        printf(" ARBOL DE SINTAXIS ABSTRACTA (AST)\n");
+        printf("=======================================\n\n");
         ast_print(ast, 0);
         
-        printf("\n═══════════════════════════════════════\n");
+        printf("\n=======================================\n");
         symbol_table_print(&symbol_table);
         
         // Guardar tabla de símbolos en archivo
@@ -188,23 +188,23 @@ static int run_syntactic_analysis(const char *filename, int show_stats) {
         snprintf(symbols_file, sizeof(symbols_file), "%s.symbols.txt", filename);
         symbol_table_write_to_file(&symbol_table, symbols_file);
         
-        printf("\n╔════════════════════════════════════════════╗\n");
-        printf("║    RESUMEN DEL ANÁLISIS                    ║\n");
-        printf("╚════════════════════════════════════════════╝\n");
+        printf("\n===============================================\n");
+        printf("    RESUMEN DEL ANALISIS\n");
+        printf("===============================================\n");
         printf("  Total de errores: %d\n", errors);
-        printf("  Total de líneas compiladas: %d\n", lines);
+        printf("  Total de lineas compiladas: %d\n", lines);
         printf("\n");
         
         ast_free(ast);
     } else {
-        fprintf(stderr, "✗ Error: No se pudo construir el AST\n");
+        fprintf(stderr, "Error: No se pudo construir el AST\n");
         parser_print_errors(&parser);
         
-        printf("\n╔════════════════════════════════════════════╗\n");
-        printf("║    RESUMEN DEL ANÁLISIS                    ║\n");
-        printf("╚════════════════════════════════════════════╝\n");
+        printf("\n===============================================\n");
+        printf("    RESUMEN DEL ANALISIS\n");
+        printf("===============================================\n");
         printf("  Total de errores: %d\n", errors);
-        printf("  Total de líneas compiladas: %d\n", lines);
+        printf("  Total de lineas compiladas: %d\n", lines);
         printf("\n");
         
         parser_free(&parser);
@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
         } else if (argv[i][0] != '-') {
             filename = argv[i];
         } else {
-            fprintf(stderr, "Error: Opción desconocida '%s'\n\n", argv[i]);
+            fprintf(stderr, "Error: Opcion desconocida '%s'\n\n", argv[i]);
             print_usage(argv[0]);
             return 1;
         }
@@ -277,29 +277,29 @@ int main(int argc, char *argv[]) {
         return run_syntactic_analysis(filename, show_stats);
     } else {
         // Por defecto: análisis completo
-        printf("╔════════════════════════════════════════════╗\n");
-        printf("║   COMPILADOR - ANÁLISIS COMPLETO           ║\n");
-        printf("╚════════════════════════════════════════════╝\n\n");
+        printf("===============================================\n");
+        printf("   COMPILADOR - ANALISIS COMPLETO\n");
+        printf("===============================================\n\n");
         
-        printf(" Fase 1: Análisis Léxico\n");
-        printf("────────────────────────────\n");
+        printf(" Fase 1: Analisis Lexico\n");
+        printf("-----------------------------\n");
         int lex_result = run_lexical_analysis(filename);
         if (lex_result != 0) {
-            fprintf(stderr, "\n Error en análisis léxico\n");
+            fprintf(stderr, "\n Error en analisis lexico\n");
             return lex_result;
         }
         
-        printf("\n Fase 2: Análisis Sintáctico\n");
-        printf("────────────────────────────\n");
+        printf("\n Fase 2: Analisis Sintactico\n");
+        printf("-----------------------------\n");
         int parse_result = run_syntactic_analysis(filename, 1);
         
-        printf("\n╔════════════════════════════════════════════╗\n");
+        printf("\n===============================================\n");
         if (parse_result == 0) {
-            printf("║    ✓ COMPILACIÓN EXITOSA                   ║\n");
+            printf("    COMPILACION EXITOSA\n");
         } else {
-            printf("║    ✗ COMPILACIÓN CON ERRORES               ║\n");
+            printf("    COMPILACION CON ERRORES\n");
         }
-        printf("╚════════════════════════════════════════════╝\n");
+        printf("===============================================\n");
         return parse_result;
     }
 }

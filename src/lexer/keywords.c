@@ -17,6 +17,8 @@ static const char *keywords[] = {
     "fn",
     "let",
     "mut",
+    "if",
+    "else",
     "return",
     "true",
     "false",

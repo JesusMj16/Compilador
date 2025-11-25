@@ -1,0 +1,11 @@
+# Tabla de Símbolos
+# Formato: lexema | tipo_token | tipo_dato | ámbito | líneas
+# Total de símbolos: 7
+
+a | 0 | i32 | 0 | 1
+b | 0 | i32 | 0 | 1
+total | 0 | i32 | 0 | 2
+suma | 0 | - | 0 | 1
+x | 0 | - | 0 | 7
+y | 0 | - | 0 | 8
+main | 0 | - | 0 | 6

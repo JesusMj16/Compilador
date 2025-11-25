@@ -1,5 +1,5 @@
 # Tokens del Lenguaje 
-Lenguaje reducido para: funciones, declaraciones/asignaciones y expresiones lógicas y aritméticas. Sin ciclos, condicionales, arreglos, cadenas, caracteres ni `match`.
+Lenguaje: Utilizando  funciones, declaraciones, asignaciones, expresiones lógicas y aritméticas, e instrucciones condicionales `if` and `else`.
 
 ## Palabras reservadas
 | Token | Definición |
@@ -7,6 +7,8 @@ Lenguaje reducido para: funciones, declaraciones/asignaciones y expresiones lóg
 | `fn` | definición de función | 
 | `let` | declaración de variable |
 | `mut` | modificador de variable (variables mutables) |
+| `if` | condición con rama verdadera |
+| `else` | rama alternativa del `if` |
 | `return` | retorno de función |
 | `true` | valor lógico verdadero |
 | `false` | valor lógico falso |

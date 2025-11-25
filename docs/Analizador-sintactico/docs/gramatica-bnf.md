@@ -16,10 +16,7 @@ Tipo -> 'i32' | 'f64' | 'bool' | IDENT
 
 Bloque -> '{' ListaSentencias '}'
 ListaSentencias -> Sentencia ListaSentencias | epsilon
-Sentencia -> LetSentencia ';'
-          | ExprSentencia ';'
-          | Bloque
-          | ReturnSentencia ';'
+Sentencia -> LetSentencia ';'| ExprSentencia ';'| Bloque| ReturnSentencia ';'| IfSentencia
 
 LetSentencia -> 'let' MutOpt IDENT AnotacionTipoOpt InicializacionOpt
 MutOpt -> 'mut' | epsilon
@@ -29,6 +26,10 @@ InicializacionOpt -> '=' Expresion | epsilon
 ExprSentencia -> Expresion
 ReturnSentencia -> 'return' ExpresionOpt
 ExpresionOpt -> Expresion | epsilon
+
+IfSentencia -> 'if' '(' Expresion ')' Bloque ElseOpt
+ElseOpt -> 'else' IfElseCuerpo | epsilon
+IfElseCuerpo -> IfSentencia | Bloque
 
 Expresion -> Asignacion
 Asignacion -> LogicoOR AsignacionTail
@@ -62,9 +63,7 @@ ListaArgumentosOpt -> ListaArgumentos | epsilon
 ListaArgumentos -> Expresion ListaArgumentosTail
 ListaArgumentosTail -> ',' Expresion ListaArgumentosTail | epsilon
 
-Primario -> Literal
-         | IDENT
-         | '(' Expresion ')'
+Primario -> Literal| IDENT| '(' Expresion ')'
 
 Literal -> NUMBER | Booleano
 Booleano -> 'true' | 'false'

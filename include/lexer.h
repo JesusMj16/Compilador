@@ -21,6 +21,8 @@ typedef enum TokenType {
     TOKEN_KW_FN,
     TOKEN_KW_LET,
     TOKEN_KW_MUT,
+    TOKEN_KW_IF,
+    TOKEN_KW_ELSE,
     TOKEN_KW_RETURN,
     TOKEN_KW_TRUE,
     TOKEN_KW_FALSE,

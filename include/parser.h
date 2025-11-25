@@ -1,15 +1,10 @@
 /**
  * @file parser.h
- * @brief Parser Descendente Recursivo para el compilador
- * 
- * Este archivo define un parser descendente recursivo que implementa
- * la gramática reducida del lenguaje (solo funciones, let, return, expresiones).
- * 
- * El parser:
- * 1. Lee tokens del lexer
- * 2. Construye un ÁRBOL DE SINTAXIS ABSTRACTA (AST)
- * 3. Actualiza la TABLA DE SÍMBOLOS con información semántica
- * 4. Reporta errores sintácticos con línea y columna
+ * @brief Parser LR ascendente para el compilador
+ *
+ * El parser ejecuta un análisis LR automático (tablas acción/goto) sobre la
+ * gramática del lenguaje y, a partir de las reducciones, construye el AST y
+ * actualiza la tabla de símbolos.
  */
 
 #ifndef PARSER_H
@@ -31,6 +26,7 @@ typedef enum ASTNodeType {
     AST_LET_STMT,           // Sentencia let
     AST_EXPR_STMT,          // Expresión como sentencia
     AST_RETURN_STMT,        // Sentencia return
+    AST_IF_STMT,            // Sentencia if/else
     
     // Expresiones binarias
     AST_BINARY_EXPR,        // Expresión binaria (op left right)
@@ -111,6 +107,12 @@ typedef struct ASTNode {
             char *type;
             struct ASTNode *initializer;
         } let_stmt;
+        // Para sentencia if
+        struct {
+            struct ASTNode *condition;
+            struct ASTNode *then_branch;
+            struct ASTNode *else_branch;
+        } if_stmt;
         
         // Para sentencia return
         struct {
@@ -149,22 +151,19 @@ typedef struct ASTNode {
 } ASTNode;
 
 typedef struct Parser {
-    Lexer *lexer;                 // Lexer para obtener tokens
-    token_t *current_token;       // Token actual
-    token_t *previous_token;      // Token anterior (para recuperación de errores)
-    
+    Lexer *lexer;                 // Lexer asociado (origen del texto)
     SymbolTable *symbol_table;    // Tabla de símbolos
-    
+    const char *source_text;      // Código fuente completo
+
     // Información de error
     bool has_error;
     char error_msg[512];
     size_t error_line;
     size_t error_col;
-    int error_count;              // Contador de errores
-    
+    int error_count;
+
     // Estadísticas
-    int lines_compiled;           // Líneas compiladas
-    bool panic_mode;              // Modo pánico para recuperación de errores
+    int lines_compiled;
 } Parser;
 
 ASTNode* ast_create_node(ASTNodeType type, size_t line, size_t col);
@@ -186,6 +185,7 @@ ASTNode* ast_create_parameter(const char *name, const char *type, size_t line, s
 ASTNode* ast_create_let(const char *name, bool is_mut, const char *type, ASTNode *init, size_t line, size_t col);
 
 ASTNode* ast_create_return(ASTNode *value, size_t line, size_t col);
+ASTNode* ast_create_if(ASTNode *condition, ASTNode *then_branch, ASTNode *else_branch, size_t line, size_t col);
 
 ASTNode* ast_create_call(ASTNode *callee, ASTNode *arguments, size_t line, size_t col);
 
@@ -212,7 +212,5 @@ void parser_print_stats(const Parser *parser);
 int parser_get_error_count(const Parser *parser);
 
 int parser_get_lines_compiled(const Parser *parser);
-
-const char* non_terminal_name(int nt);
 
 #endif // PARSER_H

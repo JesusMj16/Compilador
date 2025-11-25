@@ -1,6 +1,6 @@
 # Gramática (EBNF simplificada, sin recursión por la izquierda)
 
-Esta gramática describe el LENGUAJE REDUCIDO: solo funciones, declaraciones (`let`/`mut`), asignaciones simples (`=`), `return` y expresiones aritmético-lógicas (con comparaciones). No hay condicionales, ciclos, `match`, arreglos, cadenas ni caracteres.
+Esta gramática describe el LENGUAJE REDUCIDO: funciones, declaraciones (`let`/`mut`), asignaciones simples (`=`), `return`, expresiones aritmético-lógicas (con comparaciones) e instrucciones condicionales `if`/`else`. No hay ciclos, `match`, arreglos, cadenas ni caracteres.
 
 Convenciones visuales
 - Se usa la notación con corchetes angulares y `::=` al estilo del ejemplo adjunto.
@@ -24,10 +24,12 @@ Tipo                ::= 'i32' | 'f64' | 'bool' | IDENT
 Bloques y sentencias
 Bloque          ::= '{' ListaSentencias '}'
 ListaSentencias ::= Sentencia ListaSentencias| epsilon
-Sentencia       ::= LetSentencia ';'| ExprSentencia ';'| Bloque| ReturnSentencia ';'
+Sentencia       ::= LetSentencia ';'| ExprSentencia ';'| Bloque| ReturnSentencia ';'| IfSentencia
 LetSentencia::= 'let' [ 'mut' ] IDENT [ ':' Tipo ] [ '=' Expresion ]
 ExprSentencia   ::= Expresion
 ReturnSentencia ::= 'return' [ Expresion ]
+IfSentencia     ::= 'if' '(' Expresion ')' Bloque [ ElseRama ]
+ElseRama        ::= 'else' ( IfSentencia | Bloque )
 
 Expresiones (precedencia y asociatividad)
 Expresion     ::= Asignacion

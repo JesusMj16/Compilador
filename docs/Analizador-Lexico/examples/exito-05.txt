@@ -1,0 +1,13 @@
+fn suma(a: i32, b: i32) {
+    let mut total: i32 = a + b;
+    return total;
+}
+
+fn main() {
+    let x = 10;
+    let mut y = suma(x, 5);
+    if (y != 0) {
+        y = y + 1;
+    }
+    return y;
+}
