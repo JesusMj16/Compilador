@@ -182,6 +182,7 @@ static int run_syntactic_analysis(const char *filename, int show_stats) {
         
         printf("\n=======================================\n");
         symbol_table_print(&symbol_table);
+        printf("\n=======================================\n");
         
         // Guardar tabla de símbolos en archivo
         char symbols_file[512];

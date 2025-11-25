@@ -326,18 +326,12 @@ static int snprintf_size_t(char *buffer, size_t buf_size, const char *prefix, si
 
 void symbol_table_print(const SymbolTable *table) {
     if (!table) return;
-    
-    printf("\n╔════════════════════════════════════════════════════════════════════╗\n");
-    printf("║                      TABLA DE SÍMBOLOS                             ║\n");
-    printf("╚════════════════════════════════════════════════════════════════════╝\n\n");
-    
-    print_size_t(stdout, "Total de símbolos: ", table->count, 1);
+    printf("     TABLA DE SIMBOLOS\n");
+    print_size_t(stdout, "Total de simbolos: ", table->count, 1);
     puts("");
-    
+
     printf("%-20s %-12s %-10s %-8s %-30s\n", 
-           "Lexema", "Tipo Token", "Tipo Dato", "Ámbito", "Líneas");
-    printf("%-20s %-12s %-10s %-8s %-30s\n", 
-           "──────", "──────────", "─────────", "──────", "──────");
+           "Lexema", "Tipo Token", "Tipo Dato", "Ambito", "Lineas");
     
     SymbolEntry *current = table->head;
     while (current) {
@@ -394,9 +388,9 @@ int symbol_table_write_to_file(const SymbolTable *table, const char *filename) {
     }
     
     // Escribir encabezado
-    fprintf(file, "# Tabla de Símbolos\n");
-    fprintf(file, "# Formato: lexema | tipo_token | tipo_dato | ámbito | líneas\n");
-    print_size_t(file, "# Total de símbolos: ", table->count, 1);
+    fprintf(file, "# Tabla de Simbolos\n");
+    fprintf(file, "# Formato: lexema | tipo_token | tipo_dato | ambito | lineas\n");
+    print_size_t(file, "# Total de simbolos: ", table->count, 1);
     fputc('\n', file);
     
     SymbolEntry *current = table->head;
@@ -429,7 +423,7 @@ int symbol_table_write_to_file(const SymbolTable *table, const char *filename) {
     }
     
     fclose(file);
-    printf("✓ Tabla de símbolos escrita en: %s\n", filename);
+    printf("Tabla de simbolos escrita en: %s\n", filename);
     return 0;
 }
 
