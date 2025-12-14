@@ -1,0 +1,9 @@
+TOKENS (parciales):
+TOKEN_KW_LET     "let"
+TOKEN_IDENTIFIER "x"
+TOKEN_COLON      ":"
+TOKEN_KW_I32     "i32"
+TOKEN_EQUAL      "="
+
+ERRORES:
+Error léxico [1:14]: carácter no reconocido: '@'

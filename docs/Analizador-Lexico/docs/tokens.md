@@ -1,5 +1,5 @@
 # Tokens del Lenguaje 
-Lenguaje: Utilizando  funciones, declaraciones, asignaciones, expresiones lógicas y aritméticas, e instrucciones condicionales `if` and `else`.
+Lenguaje: Utilizando funciones, declaraciones, asignaciones, expresiones lógicas y aritméticas, e instrucciones condicionales `if` y `else`.
 
 ## Palabras reservadas
 | Token | Definición |
@@ -84,8 +84,9 @@ Lenguaje: Utilizando  funciones, declaraciones, asignaciones, expresiones lógic
 ---
 
 ## Números
-- Enteros decimales: `0`, `123`, `-45`.
-- Reales decimales (con exponente opcional): `3.14`, `-0.5`, `2.5e10`.
+- Enteros decimales: `0`, `123`.
+- Reales decimales (con exponente opcional): `3.14`, `0.5`, `2.5e10`.
+- El signo `+`/`-` se tokeniza como operador y la negación/unario se resuelve en la fase sintáctica (por ejemplo: `-45` se tokeniza como `-` y `45`).
 - Ejemplos inválidos: `1.2.3`, `12e`.
 
 ---

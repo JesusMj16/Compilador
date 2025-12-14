@@ -1,0 +1,125 @@
+% Especificación del Analizador Léxico (Lenguaje Reducido)
+\documentclass[12pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{verbatim}
+
+\geometry{margin=2.5cm}
+
+\title{Especificación del Analizador Léxico}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introducción}
+Este proyecto implementa la primera fase de un compilador: el \textbf{análisis léxico}. El objetivo es transformar el código fuente del lenguaje reducido en una secuencia de \textbf{tokens} que pueda consumir la fase sintáctica (Bison). Un compilador depende de esta etapa para:
+\begin{itemize}[nosep]
+  \item normalizar la entrada (por ejemplo, ignorar espacios y comentarios),
+  \item reconocer patrones válidos (identificadores, números, operadores, etc.),
+  \item reportar errores tempranos cuando se detectan caracteres o lexemas inválidos.
+\end{itemize}
+
+\subsection*{Alcance del proyecto}
+\textbf{Sí hace:}
+\begin{itemize}[nosep]
+  \item Reconoce tokens para: funciones, declaraciones (con posible mutabilidad), asignaciones, expresiones aritmético-lógicas, condicionales \texttt{if}/\texttt{else} y \texttt{return}.
+  \item Reconoce: identificadores, palabras reservadas, literales numéricos (enteros y reales), operadores, delimitadores, espacios en blanco y comentarios.
+  \item Maneja errores léxicos: caracteres no reconocidos y lexemas inválidos.
+  \item Produce tokens consistentes para el parser (Bison).
+\end{itemize}
+
+\textbf{No hace:}
+\begin{itemize}[nosep]
+  \item No soporta ciclos, patrón \texttt{match}, arreglos, cadenas, ni literales de carácter.
+  \item No realiza verificación semántica (tipos, ámbitos, etc.).
+\end{itemize}
+
+\section{Diseño del Analizador Léxico}
+La implementación objetivo se plantea con \textbf{Flex} como generador de analizador léxico: a partir de expresiones regulares, Flex construye un autómata determinista (DFA) equivalente. El lexer se integra con \textbf{Bison} retornando códigos de token y, cuando corresponda, adjuntando el lexema como valor semántico.
+
+\subsection{Alfabeto de entrada}
+Se asume entrada en texto plano (ASCII extendido o UTF-8, pero el lenguaje solo define tokens sobre el subconjunto ASCII):
+\begin{itemize}[nosep]
+  \item Letras: \texttt{A--Z}, \texttt{a--z}
+  \item Dígitos: \texttt{0--9}
+  \item Guion bajo: \texttt{\_}
+  \item Operadores: \texttt{+ - * / \% = ! < > \& |}
+  \item Delimitadores: \texttt{( ) \{ \} ; , :}
+  \item Punto: \texttt{.} (solo válido dentro de reales)
+  \item Espacios en blanco: espacio y tabulación
+  \item Saltos de línea: \texttt{\textbackslash n} y \texttt{\textbackslash r\textbackslash n}
+\end{itemize}
+
+\subsection{Conjunto de tokens a reconocer}
+El lexer debe reconocer (como mínimo) el siguiente conjunto:
+\begin{itemize}[nosep]
+  \item \textbf{Identificadores}: nombres de variables/funciones.
+  \item \textbf{Palabras reservadas}: \texttt{fn}, \texttt{let}, \texttt{mut}, \texttt{if}, \texttt{else}, \texttt{return}, \texttt{true}, \texttt{false}, \texttt{i32}, \texttt{f64}, \texttt{bool}.
+  \item \textbf{Números}: enteros decimales y reales decimales con exponente opcional.
+  \item \textbf{Operadores}: aritméticos \texttt{+ - * / \%}, comparación \texttt{== != < > <= >=}, lógicos \texttt{\&\& || !}, asignación \texttt{=}.
+  \item \textbf{Delimitadores}: \texttt{( ) \{ \} ; , :}.
+  \item \textbf{Espacios/Comentarios}: se consumen y no se entregan al parser (salvo que el proyecto exija tokens explícitos de espacio; por defecto se ignoran).
+\end{itemize}
+
+\subsection{Definiciones y expresiones regulares}
+A continuación se listan las expresiones regulares normativas para Flex.
+
+\subsubsection*{Identificadores}
+\begin{verbatim}
+ID  [_a-zA-Z](?:[_a-zA-Z0-9]|_(?!_))*
+\end{verbatim}
+Regla adicional: un identificador \textbf{no} puede contener \texttt{__} consecutivos.
+
+\subsubsection*{Números}
+Importante: el signo \texttt{+}/\texttt{-} se tokeniza como operador; la negación/unario se resuelve en la fase sintáctica.
+
+Entero:
+\begin{verbatim}
+INT  [0-9]+
+\end{verbatim}
+
+Real (con exponente opcional):
+\begin{verbatim}
+REAL  [0-9]+\.[0-9]+([eE][+-]?[0-9]+)?
+\end{verbatim}
+
+Nota: un \texttt{.} aislado (o un \texttt{.} no seguido de dígitos) se considera \textbf{error léxico}.
+
+\subsubsection*{Comentarios}
+\begin{verbatim}
+LINE_COMMENT   //[^\r\n]*
+BLOCK_COMMENT  /\*([^*]|\*+[^*/])*\*+/
+\end{verbatim}
+Los comentarios se consumen (se ignoran) y deben actualizar correctamente línea/columna.
+
+\subsubsection*{Espacios en blanco}
+\begin{verbatim}
+WS  [ \t]+
+NL  (\r\n|\n)
+\end{verbatim}
+\texttt{WS} y \texttt{NL} se consumen; \texttt{NL} incrementa el contador de línea y reinicia columna.
+
+\subsubsection*{Operadores y delimitadores}
+Se recomienda priorizar primero los tokens multi-caracter y luego los de un carácter.
+\begin{verbatim}
+==  !=  <=  >=  &&  ||
++  -  *  /  %  =  !  <  >
+;  ,  :  (  )  {  }
+\end{verbatim}
+
+\subsection{Manejo de errores léxicos}
+El lexer debe:
+\begin{itemize}[nosep]
+  \item Reportar \textbf{carácter no reconocido} (cualquier símbolo fuera del alfabeto definido) indicando línea y columna.
+  \item Reportar \textbf{token inválido} cuando un patrón casi-válido viola una regla (por ejemplo, identificador con \texttt{__}, o punto aislado).
+  \item Continuar el análisis en lo posible (estrategia de recuperación mínima: consumir el carácter/lexema inválido y seguir).
+\end{itemize}
+
+\end{document}

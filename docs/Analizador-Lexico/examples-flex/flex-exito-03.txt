@@ -1,0 +1,5 @@
+fn f() {
+  let y: f64 = 2.5e10;
+  let z: f64 = 3.14;
+  return y + z;
+}

@@ -1,0 +1,2 @@
+ERRORES:
+Error léxico [1:5]: identificador inválido (contiene '__'): 'a__b'

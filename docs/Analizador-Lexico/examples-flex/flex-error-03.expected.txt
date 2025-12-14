@@ -1,0 +1,3 @@
+ERRORES:
+Error léxico [1:14]: literal numérico con exponente incompleto: '12e'
+Error léxico [2:14]: punto aislado (solo permitido en reales): '.'

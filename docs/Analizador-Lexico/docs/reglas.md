@@ -1,8 +1,8 @@
-Este documento define las reglas léxicas del LENGUAJE REDUCIDO. Solo se consideran: funciones, declaraciones (con posible mutabilidad), asignaciones y expresiones aritmético-lógicas. Se eliminan ciclos, condicionales, patrón `match`, arreglos, cadenas y caracteres.
+Este documento define las reglas léxicas del LENGUAJE REDUCIDO. Se consideran: funciones, declaraciones (con posible mutabilidad), asignaciones, expresiones aritmético-lógicas y condicionales `if`/`else`, además de `return`. Se eliminan ciclos, patrón `match`, arreglos, cadenas y caracteres.
 
-## Autómata determinista (DFA) usado por el lexer
+## Modelo (DFA) usado por el lexer
 
-El lexer ahora se implementa como un autómata determinista guiado por tablas. Cada carácter de la entrada se clasifica primero en una de las siguientes categorías: `LETTER`, `DIGIT`, `_`, operadores individuales (`+ - * / %`), comparadores (`= ! < >`), conectores (`& |`), delimitadores (`( ) { } ; , :`), punto (`.`), espacios (` `, `\t`), saltos de línea (`\n`, `\r`) y fin de archivo.
+El lexer puede verse como un autómata determinista (DFA). En una implementación con Flex, el DFA se genera automáticamente a partir de expresiones regulares; en una implementación manual, puede representarse con tablas. Cada carácter de la entrada se clasifica primero en una de las siguientes categorías: `LETTER`, `DIGIT`, `_`, operadores individuales (`+ - * / %`), comparadores (`= ! < >`), conectores (`& |`), delimitadores (`( ) { } ; , :`), punto (`.`), espacios (` `, `\t`), saltos de línea (`\n`, `\r`) y fin de archivo.
 
 Con esa clasificación se consulta una tabla de transición explícita que cubre los estados principales:
 
@@ -23,38 +23,43 @@ dígito        -> [0-9]
 
 ### Forma REGEX
 ```regex
-[_a-zA-Z][_a-zA-Z0-9]*
+[_a-zA-Z](?:[_a-zA-Z0-9]|_(?!_))*
 ```
+
+Restricción adicional (normativa): un identificador NO puede contener la subcadena `__` (dos guiones bajos consecutivos).
 
 ---
 
 ## Números
 ### Forma EBNF
 ```ebnf
-entero   -> signo? dígito+
-signo    -> '+' | '-'
+entero   -> dígito+
 dígito   -> [0-9]
 ```
 
 ### Forma REGEX
 ```regex
-[+-]?[0-9]+
-// Hex y binario removidos en versión reducida
+[0-9]+
 ```
+
+Nota: el signo (`+`/`-`) se tokeniza como operador (TOKEN_PLUS/TOKEN_MINUS). La negación/unario se resuelve en la fase sintáctica.
 
 ---
 
 ## Reales
 ### Forma EBNF
 ```ebnf
-real      -> signo? dígito+ "." dígito+ ( exponente )?
+real      -> dígito+ "." dígito+ ( exponente )?
 exponente -> ( 'e' | 'E' ) signo? dígito+
+signo     -> '+' | '-'
 ```
 
 ### Forma REGEX
 ```regex
-[+-]?[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?
+[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?
 ```
+
+Nota: el punto (`.`) solo es válido dentro de un real con dígitos a ambos lados. Un `.` aislado se considera error léxico.
 
 ---
 
