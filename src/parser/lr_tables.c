@@ -690,7 +690,7 @@ static bool lr_build_parse_table(LRParseTable *table) {
             int symbol = LR_SYMBOL_FROM_NONTERM(nt);
             int dest = automaton.transitions[state][symbol];
             if (dest >= 0) {
-                table->gotos[state * LR_NONTERM_COUNT + nt] = dest;
+                table->gotos[state * LR_NONTERM_COUNT + nt] = dest; //tabla de goto nos dira a que estado ir
             }
         }
 

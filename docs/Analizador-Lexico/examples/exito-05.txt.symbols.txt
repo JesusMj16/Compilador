@@ -1,6 +1,6 @@
-# Tabla de Símbolos
-# Formato: lexema | tipo_token | tipo_dato | ámbito | líneas
-# Total de símbolos: 7
+# Tabla de Simbolos
+# Formato: lexema | tipo_token | tipo_dato | ambito | lineas
+# Total de simbolos: 7
 
 a | 0 | i32 | 0 | 1
 b | 0 | i32 | 0 | 1

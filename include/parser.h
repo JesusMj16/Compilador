@@ -151,7 +151,7 @@ typedef struct ASTNode {
 } ASTNode;
 
 typedef struct Parser {
-    Lexer *lexer;                 // Lexer asociado (origen del texto)
+    Lexer *lexer;                 // Lexer asociado 
     SymbolTable *symbol_table;    // Tabla de símbolos
     const char *source_text;      // Código fuente completo
 

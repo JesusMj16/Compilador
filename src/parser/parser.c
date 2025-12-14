@@ -29,15 +29,15 @@ extern char *strdup(const char *s);
  * ============================================================================ */
 
 static const LRProduction* lr_get_cached_productions(size_t *count) {
-    static const LRProduction *productions = NULL;
-    static size_t production_count = 0;
-    if (!productions) {
-        productions = lr_get_productions(&production_count);
+    static const LRProduction *productions = NULL; // Tabla de producciones
+    static size_t production_count = 0; // Cantidad de producciones 
+    if (!productions) { //primera vez que se llama
+        productions = lr_get_productions(&production_count); // Obtiene las producciones 
     }
-    if (count) {
-        *count = production_count;
+    if (count) { //en segunda vez que se llama
+        *count = production_count; // Obtiene la cantidad de producciones
     }
-    return productions;
+    return productions; // Retorna la tabla de producciones
 }
 
 typedef struct {
@@ -45,47 +45,47 @@ typedef struct {
     char *lexeme;
     size_t line;
     size_t column;
-} LRToken;
+} LRToken; //Esta estructura representa un token
 
 typedef struct {
     LRToken *data;
     size_t count;
     size_t capacity;
-} LRTokenBuffer;
+} LRTokenBuffer; // Buffer de tokens
 
 static void lr_token_buffer_init(LRTokenBuffer *buf) {
-    buf->data = NULL;
-    buf->count = 0;
-    buf->capacity = 0;
+    buf->data = NULL; // Buffer de tokens
+    buf->count = 0; // Cantidad de tokens
+    buf->capacity = 0; // Capacidad del buffer
 }
 
 static void lr_token_buffer_free(LRTokenBuffer *buf) {
-    if (!buf) return;
-    for (size_t i = 0; i < buf->count; ++i) {
-        free(buf->data[i].lexeme);
+    if (!buf) return; //si el buffer es nulo, no hace nada
+    for (size_t i = 0; i < buf->count; ++i) { //recorre todos los tokens
+        free(buf->data[i].lexeme); //libera la memoria de cada token
     }
-    free(buf->data);
-    buf->data = NULL;
-    buf->count = 0;
-    buf->capacity = 0;
+    free(buf->data); //libera la memoria del buffer
+    buf->data = NULL; // Buffer de tokens
+    buf->count = 0; // Cantidad de tokens
+    buf->capacity = 0; // Capacidad del buffer
 }
 
 static bool lr_token_buffer_push(LRTokenBuffer *buf, const token_t *tok) {
-    if (buf->count == buf->capacity) {
-        size_t new_cap = buf->capacity ? buf->capacity * 2 : 32;
-        LRToken *new_data = (LRToken*)realloc(buf->data, new_cap * sizeof(LRToken));
-        if (!new_data) {
+    if (buf->count == buf->capacity) { //si el buffer esta lleno
+        size_t new_cap = buf->capacity ? buf->capacity * 2 : 32; //duplica la capacidad
+        LRToken *new_data = (LRToken*)realloc(buf->data, new_cap * sizeof(LRToken)); //reajusta el buffer
+        if (!new_data) { //si no se puede reajustar
             return false;
         }
-        buf->data = new_data;
-        buf->capacity = new_cap;
+        buf->data = new_data; // Buffer de tokens
+        buf->capacity = new_cap; // Capacidad del buffer
     }
-    LRToken *slot = &buf->data[buf->count];
-    slot->type = tok->type;
-    slot->line = tok->line;
-    slot->column = tok->column;
-    const char *src = tok->lexeme ? tok->lexeme : "?";
-    slot->lexeme = strdup(src);
+    LRToken *slot = &buf->data[buf->count]; // Puntero al nuevo token
+    slot->type = tok->type; // Tipo del token
+    slot->line = tok->line; // Linea del token
+    slot->column = tok->column; // Columna del token
+    const char *src = tok->lexeme ? tok->lexeme : "?"; // Lexema del token
+    slot->lexeme = strdup(src); // Lexema del token
     if (!slot->lexeme) {
         return false;
     }
@@ -96,12 +96,12 @@ static bool lr_token_buffer_push(LRTokenBuffer *buf, const token_t *tok) {
 static LRReductionNode* lr_node_create(int symbol, const char *lexeme, size_t line, size_t column) {
     LRReductionNode *node = (LRReductionNode*)calloc(1, sizeof(LRReductionNode));
     if (!node) return NULL;
-    node->symbol = symbol;
+    node->symbol = symbol; //simbolo por ejemplo identificador o numero, palabra reservada
     if (lexeme) {
-        node->lexeme = strdup(lexeme);
+        node->lexeme = strdup(lexeme); //stdrup nos regresa un puntero a una copia del lexema
     }
-    node->line = line;
-    node->column = column;
+    node->line = line; // linea del token
+    node->column = column; // columna del token
     return node;
 }
 
@@ -116,25 +116,25 @@ static bool lr_node_add_child(LRReductionNode *parent, LRReductionNode *child) {
         parent->children = new_children;
         parent->capacity = new_cap;
     }
-    parent->children[parent->child_count++] = child;
+    parent->children[parent->child_count++] = child; // aqui por ejemplo se agregaria un hijo a un nodo un hijo seria un simbolo o un terminal
     return true;
 }
 
-static void lr_node_free(LRReductionNode *node) {
+static void lr_node_free(LRReductionNode *node) { //libera la memoria de un nodo
     if (!node) return;
     for (size_t i = 0; i < node->child_count; ++i) {
         lr_node_free(node->children[i]);
     }
     free(node->children);
-    free(node->lexeme);
-    free(node);
+    free(node->lexeme); //libera la memoria del lexema un lexema se veria como un identificador o numero o palabra reservada
+    free(node); //libera la memoria del nodo
 }
 
-typedef struct {
-    int *data;
-    size_t count;
-    size_t capacity;
-} LRIntVector;
+typedef struct { //Definicion de un vector de enteros
+    int *data; //vector de enteros
+    size_t count; //cantidad de enteros
+    size_t capacity; //capacidad del vector
+} LRIntVector; //Esto se utiliza para almacenar los indices de las producciones
 
 static void lr_int_vector_init(LRIntVector *vec) {
     vec->data = NULL;
@@ -142,47 +142,47 @@ static void lr_int_vector_init(LRIntVector *vec) {
     vec->capacity = 0;
 }
 
-static void lr_int_vector_free(LRIntVector *vec) {
+static void lr_int_vector_free(LRIntVector *vec) { //libera la memoria de un vector de enteros
     free(vec->data);
     vec->data = NULL;
     vec->count = 0;
     vec->capacity = 0;
 }
 
-static bool lr_int_vector_push(LRIntVector *vec, int value) {
+static bool lr_int_vector_push(LRIntVector *vec, int value) { //agrega un entero al vector
     if (vec->count == vec->capacity) {
-        size_t new_cap = vec->capacity ? vec->capacity * 2 : 32;
-        int *new_data = (int*)realloc(vec->data, new_cap * sizeof(int));
+        size_t new_cap = vec->capacity ? vec->capacity * 2 : 32; //duplica la capacidad
+        int *new_data = (int*)realloc(vec->data, new_cap * sizeof(int)); //reajusta el vector
         if (!new_data) {
             return false;
         }
         vec->data = new_data;
         vec->capacity = new_cap;
     }
-    vec->data[vec->count++] = value;
-    return true;
+    vec->data[vec->count++] = value; //agrega un entero al vector
+    return true; //retorna true si se agrega correctamente y se utiliza para verificar si se agrega correctamente
 }
 
-typedef struct {
+typedef struct { //Definicion de una pila de enteros
     int *data;
     size_t count;
     size_t capacity;
-} LRIntStack;
+} LRIntStack; //Esto se utiliza para almacenar los indices de las producciones mas especifico en un ejemplo se veria: [1, 2, 3, 4, 5]
 
-static void lr_int_stack_init(LRIntStack *stack) {
+static void lr_int_stack_init(LRIntStack *stack) { //inicializa la pila de enteros
     stack->data = NULL;
     stack->count = 0;
     stack->capacity = 0;
 }
 
-static void lr_int_stack_free(LRIntStack *stack) {
+static void lr_int_stack_free(LRIntStack *stack) { //libera la memoria de la pila de enteros
     free(stack->data);
     stack->data = NULL;
     stack->count = 0;
     stack->capacity = 0;
 }
 
-static bool lr_int_stack_push(LRIntStack *stack, int value) {
+static bool lr_int_stack_push(LRIntStack *stack, int value) { //agrega un entero a la pila
     if (stack->count == stack->capacity) {
         size_t new_cap = stack->capacity ? stack->capacity * 2 : 32;
         int *new_data = (int*)realloc(stack->data, new_cap * sizeof(int));
@@ -196,12 +196,12 @@ static bool lr_int_stack_push(LRIntStack *stack, int value) {
     return true;
 }
 
-static int lr_int_stack_top(const LRIntStack *stack) {
+static int lr_int_stack_top(const LRIntStack *stack) { //retorna el ultimo elemento de la pila
     if (stack->count == 0) return -1;
     return stack->data[stack->count - 1];
 }
 
-static void lr_int_stack_pop(LRIntStack *stack, size_t n) {
+static void lr_int_stack_pop(LRIntStack *stack, size_t n) { //elimina n elementos de la pila
     if (stack->count >= n) {
         stack->count -= n;
     } else {
@@ -209,26 +209,26 @@ static void lr_int_stack_pop(LRIntStack *stack, size_t n) {
     }
 }
 
-typedef struct {
+typedef struct { //Definicion de una pila de nodos que se utilizan para almacenar los nodos de la reduccion
     LRReductionNode **data;
     size_t count;
     size_t capacity;
-} LRNodeStack;
+} LRNodeStack; // un ejemplo de una pila de nodos en este parser seria: [nodo(3)->nodo(+)->nodo(5)] 
 
-static void lr_node_stack_init(LRNodeStack *stack) {
+static void lr_node_stack_init(LRNodeStack *stack) {//Inicializa la pila de nodos
     stack->data = NULL;
     stack->count = 0;
     stack->capacity = 0;
 }
 
-static void lr_node_stack_free(LRNodeStack *stack) {
+static void lr_node_stack_free(LRNodeStack *stack) {//Libera la memoria de la pila de nodos
     free(stack->data);
     stack->data = NULL;
     stack->count = 0;
     stack->capacity = 0;
 }
 
-static bool lr_node_stack_push(LRNodeStack *stack, LRReductionNode *node) {
+static bool lr_node_stack_push(LRNodeStack *stack, LRReductionNode *node) {//agrega un nodo a la pila
     if (stack->count == stack->capacity) {
         size_t new_cap = stack->capacity ? stack->capacity * 2 : 32;
         LRReductionNode **new_data = (LRReductionNode**)realloc(stack->data, new_cap * sizeof(LRReductionNode*));
@@ -242,36 +242,36 @@ static bool lr_node_stack_push(LRNodeStack *stack, LRReductionNode *node) {
     return true;
 }
 
-static LRReductionNode* lr_node_stack_pop(LRNodeStack *stack) {
+static LRReductionNode* lr_node_stack_pop(LRNodeStack *stack) { //elimina el ultimo nodo de la pila y obtenemos el nodo eliminado
     if (stack->count == 0) return NULL;
     return stack->data[--stack->count];
 }
 
-typedef struct {
-    const LRParseTable *table;
-    LRTokenBuffer tokens;
-    LRReductionNode *root;
-    LRIntVector reductions;
-    bool success;
-    char error_msg[256];
-    size_t error_line;
-    size_t error_col;
-    TokenType error_token;
+typedef struct { //Definicion de los artefactos del parser que se utilizan para almacenar los resultados del parser
+    const LRParseTable *table; //Tabla de parsing
+    LRTokenBuffer tokens; //Buffer de tokens
+    LRReductionNode *root; //Nodo raiz
+    LRIntVector reductions; //Vector de reducciones
+    bool success; //Indica si el parsing fue exitoso
+    char error_msg[256]; //Mensaje de error
+    size_t error_line; //error en la linea
+    size_t error_col; //error en la columna
+    TokenType error_token; //error en el token
 } LRParseArtifacts;
 
 static void lr_parse_artifacts_init(LRParseArtifacts *art) {
-    art->table = NULL;
-    lr_token_buffer_init(&art->tokens);
-    art->root = NULL;
-    lr_int_vector_init(&art->reductions);
-    art->success = false;
-    art->error_msg[0] = '\0';
-    art->error_line = 0;
-    art->error_col = 0;
-    art->error_token = TOKEN_UNKNOWN;
+    art->table = NULL; //Inicializamos la tabla de parsing
+    lr_token_buffer_init(&art->tokens); //Inicializamos el buffer de tokens
+    art->root = NULL; //Inicializamos el nodo raiz
+    lr_int_vector_init(&art->reductions); //Inicializamos el vector de reducciones
+    art->success = false; //Inicializamos el resultado del parsing
+    art->error_msg[0] = '\0'; //Inicializamos el mensaje de error
+    art->error_line = 0; //Inicializamos el error en la linea
+    art->error_col = 0; //Inicializamos el error en la columna
+    art->error_token = TOKEN_UNKNOWN; //Inicializamos el error en el token
 }
 
-static void lr_parse_artifacts_free(LRParseArtifacts *art) {
+static void lr_parse_artifacts_free(LRParseArtifacts *art) { //libera la memoria de los artefactos del parser
     lr_node_free(art->root);
     lr_token_buffer_free(&art->tokens);
     lr_int_vector_free(&art->reductions);
@@ -279,38 +279,38 @@ static void lr_parse_artifacts_free(LRParseArtifacts *art) {
     art->table = NULL;
 }
 
-static bool lr_collect_tokens_for_lr(const Parser *parser, LRTokenBuffer *buffer) {
-    if (!parser || !parser->source_text) {
+static bool lr_collect_tokens_for_lr(const Parser *parser, LRTokenBuffer *buffer) { //recopila los tokens para el parsing
+    if (!parser || !parser->source_text) { //verificamos que el parser y el texto fuente no sean nulos
         return false;
     }
-    Lexer temp;
-    lexer_init(&temp, parser->source_text);
-    lexer_set_symbol_table(&temp, NULL);
+    Lexer temp; //creamos un lexer temporal
+    lexer_init(&temp, parser->source_text); //inicializamos el lexer temporal
+    lexer_set_symbol_table(&temp, NULL); //inicializamos la tabla de simbolos
     for (;;) {
-        token_t *tok = lexer_next_token(&temp);
+        token_t *tok = lexer_next_token(&temp); //obtenemos el siguiente token
         if (!tok) {
             return false;
         }
-        bool pushed = lr_token_buffer_push(buffer, tok);
-        TokenType ttype = tok->type;
-        free_token(tok);
+        bool pushed = lr_token_buffer_push(buffer, tok);//agregamos el token al buffer
+        TokenType ttype = tok->type; //obtenemos el tipo de token
+        free_token(tok); //liberamos el token
         if (!pushed) {
             return false;
         }
         if (ttype == TOKEN_EOF) {
-            break;
+            break; //si es el token de fin de archivo, salimos del bucle
         }
     }
     return true;
 }
 
-static void lr_expected_tokens(const LRParseTable *table, size_t state, char *buffer, size_t size) {
+static void lr_expected_tokens(const LRParseTable *table, size_t state, char *buffer, size_t size) { //obtenemos los tokens esperados tras errores
     buffer[0] = '\0';
     bool first = true;
     for (int term = 0; term < LR_TERM_COUNT; ++term) {
-        const LRAction *action = &table->action[state * LR_TERM_COUNT + term];
-        if (action->type != LR_ACTION_ERROR) {
-            if (!first) {
+        const LRAction *action = &table->action[state * LR_TERM_COUNT + term]; //obtenemos la accion
+        if (action->type != LR_ACTION_ERROR) { //si la accion no es error
+            if (!first) { //si no es el primer token
                 size_t len = strlen(buffer);
                 if (len + 2 < size) {
                     strncat(buffer, ", ", size - len - 1);
@@ -319,61 +319,61 @@ static void lr_expected_tokens(const LRParseTable *table, size_t state, char *bu
             size_t len2 = strlen(buffer);
             const char *name = lr_terminal_name(term);
             if (len2 + strlen(name) < size) {
-                strncat(buffer, name, size - len2 - 1);
+                strncat(buffer, name, size - len2 - 1); 
             }
-            first = false;
+            first = false; //ponemos first en false
         }
     }
     if (first) {
-        snprintf(buffer, size, "<ninguno>");
+        snprintf(buffer, size, "<ninguno>"); //si no hay tokens esperados, ponemos "ninguno"
     }
 }
 
-static bool lr_run_lr_parser(Parser *parser, LRParseArtifacts *art) {
-    lr_parse_artifacts_init(art);
-    const LRParseTable *table = lr_get_parse_table();
-    if (!table) {
-        snprintf(art->error_msg, sizeof(art->error_msg), "No se pudo construir la tabla LR");
+static bool lr_run_lr_parser(Parser *parser, LRParseArtifacts *art) { //ejecutamos el parser LR
+    lr_parse_artifacts_init(art); //inicializamos los artefactos del parser
+    const LRParseTable *table = lr_get_parse_table(); //obtenemos la tabla de acciones y goto
+    if (!table) { //si no se pudo obtener la tabla de parsing
+        snprintf(art->error_msg, sizeof(art->error_msg), "No se pudo construir la tabla LR"); //ponemos el error
         return false;
     }
     art->table = table;
-    if (!lr_collect_tokens_for_lr(parser, &art->tokens)) {
-        snprintf(art->error_msg, sizeof(art->error_msg), "No se pudo tokenizar la entrada para el parser LR");
+    if (!lr_collect_tokens_for_lr(parser, &art->tokens)) { //si no se pudo tokenizar la entrada para el parser LR
+        snprintf(art->error_msg, sizeof(art->error_msg), "No se pudo tokenizar la entrada para el parser LR"); //ponemos el error
         return false;
     }
 
-    LRIntStack state_stack;
-    LRNodeStack node_stack;
-    lr_int_stack_init(&state_stack);
-    lr_node_stack_init(&node_stack);
-    lr_int_stack_push(&state_stack, 0);
+    LRIntStack state_stack; //pila de estados
+    LRNodeStack node_stack; //pila de nodos
+    lr_int_stack_init(&state_stack); //inicializamos la pila de estados
+    lr_node_stack_init(&node_stack); //inicializamos la pila de nodos
+    lr_int_stack_push(&state_stack, 0); //ponemos el estado 0 en la pila de estados
 
-    const LRProduction *productions = lr_get_cached_productions(NULL);
-    size_t ip = 0;
-    bool running = true;
-    while (running) {
-        if (ip >= art->tokens.count) {
-            snprintf(art->error_msg, sizeof(art->error_msg), "Se alcanzo el final de tokens sin aceptar");
+    const LRProduction *productions = lr_get_cached_productions(NULL); //obtenemos las producciones
+    size_t ip = 0; //indice de tokens el que señala en que token nos encontramos
+    bool running = true; //bandera de ejecucion
+    while (running) { //bucle de ejecucion
+        if (ip >= art->tokens.count) { //si se alcanzo el final de tokens
+            snprintf(art->error_msg, sizeof(art->error_msg), "Se alcanzo el final de tokens sin aceptar"); //ponemos el error
             break;
         }
-        LRToken *lookahead = &art->tokens.data[ip];
-        int term = lr_terminal_from_token(lookahead->type);
-        if (term < 0) {
-            snprintf(art->error_msg, sizeof(art->error_msg), "Token '%s' no soportado por la tabla LR", lookahead->lexeme ? lookahead->lexeme : "?");
-            art->error_line = lookahead->line;
-            art->error_col = lookahead->column;
-            art->error_token = lookahead->type;
+        LRToken *lookahead = &art->tokens.data[ip]; //obtenemos el token actual
+        int term = lr_terminal_from_token(lookahead->type); //obtenemos el terminal un TOKEN_PLUS, TOKEN_MINUS, TOKEN_MULTIPLY, TOKEN_DIVIDE, TOKEN_LPAREN, TOKEN_RPAREN, TOKEN_IDENTIFIER, TOKEN_NUMBER, TOKEN_STRING, TOKEN_TRUE, TOKEN_FALSE, TOKEN_NULL, TOKEN_EOF
+        if (term < 0) { //si el terminal no es soportado
+            snprintf(art->error_msg, sizeof(art->error_msg), "Token '%s' no soportado por la tabla LR", lookahead->lexeme ? lookahead->lexeme : "?"); //ponemos el error
+            art->error_line = lookahead->line; //ponemos la linea del error
+            art->error_col = lookahead->column; //ponemos la columna del error
+            art->error_token = lookahead->type; //ponemos el token del error
             break;
         }
         int state = lr_int_stack_top(&state_stack);
-        const LRAction action = table->action[state * LR_TERM_COUNT + term];
+        const LRAction action = table->action[state * LR_TERM_COUNT + term]; //obtenemos la accion por ejemplo
         switch (action.type) {
-            case LR_ACTION_SHIFT: {
-                LRReductionNode *node = lr_node_create(
-                    LR_SYMBOL_FROM_TERMINAL(term),
-                    lookahead->lexeme,
-                    lookahead->line,
-                    lookahead->column);
+            case LR_ACTION_SHIFT: { //casos shift
+                LRReductionNode *node = lr_node_create( //creamos un nodo de lectura
+                    LR_SYMBOL_FROM_TERMINAL(term), // Que tipo de token es
+                    lookahead->lexeme, // El lexema del token
+                    lookahead->line, // La linea del token
+                    lookahead->column); // La columna del token
                 if (!node || !lr_node_stack_push(&node_stack, node)) {
                     snprintf(art->error_msg, sizeof(art->error_msg), "Sin memoria durante SHIFT");
                     running = false;
@@ -388,8 +388,8 @@ static bool lr_run_lr_parser(Parser *parser, LRParseArtifacts *art) {
                 break;
             }
             case LR_ACTION_REDUCE: {
-                const LRProduction *prod = &productions[action.value];
-                LRReductionNode *node = lr_node_create(prod->lhs, NULL, 0, 0);
+                const LRProduction *prod = &productions[action.value]; //que produccion se reduce
+                LRReductionNode *node = lr_node_create(prod->lhs, NULL, 0, 0); //creamos un nodo de reduccion padre
                 if (!node) {
                     snprintf(art->error_msg, sizeof(art->error_msg), "Sin memoria durante REDUCE");
                     running = false;
@@ -398,11 +398,11 @@ static bool lr_run_lr_parser(Parser *parser, LRParseArtifacts *art) {
                 // Cada produccion ya define como se reduce ,
                 // por lo que solo debemos tomar los nodos RHS en orden y colgarlos del nuevo LHS.
                 LRReductionNode *children[LR_MAX_RHS] = {0};
-                for (int i = prod->rhs_len - 1; i >= 0; --i) {
-                    children[i] = lr_node_stack_pop(&node_stack);
+                for (int i = prod->rhs_len - 1; i >= 0; --i) { //recorremos los nodos hijos
+                    children[i] = lr_node_stack_pop(&node_stack); //obtenemos el nodo hijo empezamos de derecha a izquierda
                     if (!children[i]) {
                         snprintf(art->error_msg, sizeof(art->error_msg), "Pila de nodos inconsistente en reduccion");
-                        running = false;
+                        running = false; //ponemos la bandera de ejecucion a false
                         break;
                     }
                 }
@@ -410,18 +410,18 @@ static bool lr_run_lr_parser(Parser *parser, LRParseArtifacts *art) {
                     lr_node_free(node);
                     break;
                 }
-                if (prod->rhs_len > 0) {
-                    if (state_stack.count < (size_t)prod->rhs_len) {
+                if (prod->rhs_len > 0) { // si la produccion tiene mas de un hijo
+                    if (state_stack.count < (size_t)prod->rhs_len) { //si la pila de estados es insuficiente
                         snprintf(art->error_msg, sizeof(art->error_msg), "Pila de estados insuficiente en reduccion");
                         lr_node_free(node);
                         running = false;
                         break;
                     }
-                    lr_int_stack_pop(&state_stack, (size_t)prod->rhs_len);
+                    lr_int_stack_pop(&state_stack, (size_t)prod->rhs_len); //quitamos los estados de la pila
                 }
-                bool attach_ok = true;
-                for (int i = 0; i < prod->rhs_len; ++i) {
-                    if (!lr_node_add_child(node, children[i])) {
+                bool attach_ok = true; //bandera de ejecucion
+                for (int i = 0; i < prod->rhs_len; ++i) { //recorremos los nodos hijos
+                    if (!lr_node_add_child(node, children[i])) { //agregamos los nodos hijos
                         attach_ok = false;
                         break;
                     }
@@ -432,21 +432,21 @@ static bool lr_run_lr_parser(Parser *parser, LRParseArtifacts *art) {
                     running = false;
                     break;
                 }
-                if ((node->line == 0 && node->column == 0) && prod->rhs_len > 0) {
-                    for (int i = 0; i < prod->rhs_len; ++i) {
-                        if (children[i] && (children[i]->line || children[i]->column)) {
+                if ((node->line == 0 && node->column == 0) && prod->rhs_len > 0) { // si la produccion tiene mas de un hijo
+                    for (int i = 0; i < prod->rhs_len; ++i) { //recorremos los nodos hijos
+                        if (children[i] && (children[i]->line || children[i]->column)) { //si el hijo tiene linea y columna
                             node->line = children[i]->line;
                             node->column = children[i]->column;
                             break;
                         }
                     }
                 }
-                int goto_state = lr_int_stack_top(&state_stack);
-                if (goto_state < 0) {
+                int goto_state = lr_int_stack_top(&state_stack); //obtenemos el estado actual despues de la reduccion
+                if (goto_state < 0) { //si la pila de estados es insuficiente
                     snprintf(art->error_msg, sizeof(art->error_msg), "Pila de estados vacia en reduccion");
                     lr_node_free(node);
                     running = false;
-                    break;
+                    break; 
                 }
                 int next_state = table->gotos[goto_state * LR_NONTERM_COUNT + LR_SYMBOL_TO_NONTERM(prod->lhs)];
                 if (next_state < 0) {
@@ -486,16 +486,16 @@ static bool lr_run_lr_parser(Parser *parser, LRParseArtifacts *art) {
     }
 
     if (art->success) {
-        LRReductionNode *root = lr_node_stack_pop(&node_stack);
-        art->root = root;
+        LRReductionNode *root = lr_node_stack_pop(&node_stack); //el arbol de la produccion
+        art->root = root; //se guarda el arbol en el AST
     } else {
         while (node_stack.count > 0) {
-            lr_node_free(lr_node_stack_pop(&node_stack));
+            lr_node_free(lr_node_stack_pop(&node_stack)); //liberamos la pila de nodos
         }
     }
-    lr_node_stack_free(&node_stack);
-    lr_int_stack_free(&state_stack);
-    return art->success;
+    lr_node_stack_free(&node_stack); //liberamos la pila de nodos
+    lr_int_stack_free(&state_stack); //liberamos la pila de estados
+    return art->success; //retornamos el resultado del parser
 }
 
 #ifdef PARSER_DEBUG_LR
@@ -834,7 +834,7 @@ const char* unary_op_name(UnaryOp op) {
 }
 
 /* ============================================================================
- * IMPRESION DEL AST
+ * IMPRESION DEL AST Arbol de sintaxis abstracta
  * ============================================================================ */
 
 void ast_print(const ASTNode *node, int indent) {
@@ -952,10 +952,10 @@ void ast_print(const ASTNode *node, int indent) {
  * CONSTRUCCION DEL AST A PARTIR DEL ARBOL LR
  * ============================================================================ */
 
-static ASTNode* lr_build_ast_from_tree(const LRReductionNode *root, Parser *parser);
-static ASTNode* lr_build_programa(const LRReductionNode *node, Parser *parser);
-static bool lr_collect_lista_items(const LRReductionNode *node, Parser *parser, ASTNode *program);
-static ASTNode* lr_build_item(const LRReductionNode *node, Parser *parser);
+static ASTNode* lr_build_ast_from_tree(const LRReductionNode *root, Parser *parser); //recibe el arbol de la produccion crudo
+static ASTNode* lr_build_programa(const LRReductionNode *node, Parser *parser); //Empezamos a construir el AST
+static bool lr_collect_lista_items(const LRReductionNode *node, Parser *parser, ASTNode *program);//Desempaquetamos el arbol de la produccion crudo
+static ASTNode* lr_build_item(const LRReductionNode *node, Parser *parser);//Decidimos que tipo de item es funcion o let, y lo construimos
 static ASTNode* lr_build_funcion(const LRReductionNode *node, Parser *parser);
 static ASTNode* lr_build_lista_param_opt(const LRReductionNode *node, Parser *parser);
 static bool lr_fill_lista_param(const LRReductionNode *node, Parser *parser, ASTNode *list);
