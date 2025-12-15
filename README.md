@@ -35,7 +35,7 @@ make all
 
 ## Ejecutar
 
-El ejecutable parsea un archivo y reporta `PARSE_OK` o `PARSE_FAIL`.
+El ejecutable parsea un archivo y reporta `PARSE_OK` si no hay errores léxicos/sintácticos/semánticos, o `PARSE_FAIL` en caso contrario.
 
 ```powershell
 mingw32-make run-file FILE=docs/Analizador-sintactico/examples-bison/parse-exito-01.txt

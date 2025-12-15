@@ -33,12 +33,23 @@ static char *xstrdup(const char *s) {
 static void advance_position(const char *text, int len) {
     /* Actualiza yylineno/yycolumn para cualquier lexema (incl. comentarios). */
     for (int i = 0; i < len; i++) {
+        /* En Windows, muchas entradas vienen con CRLF. Trátalo como un solo salto. */
+        if (text[i] == '\r') {
+            if (i + 1 < len && text[i + 1] == '\n') {
+                i++; /* consumir el '\n' también */
+            }
+            yylineno++;
+            yycolumn = 1;
+            continue;
+        }
+
         if (text[i] == '\n') {
             yylineno++;
             yycolumn = 1;
-        } else {
-            yycolumn++;
+            continue;
         }
+
+        yycolumn++;
     }
 }
 
@@ -62,7 +73,7 @@ INT            {DIGIT}+
 REAL           {DIGIT}+\.{DIGIT}+([eE][+-]?{DIGIT}+)?
 
 WS             [ \t]+
-NL             (\r\n|\n)
+ NL             (\r\n|\n|\r)
 
 %%
 
@@ -87,7 +98,8 @@ NL             (\r\n|\n)
 <COMMENT><<EOF>> {
                     lex_error_at(comment_start_line, comment_start_col, "comentario de bloque sin cerrar", NULL);
                     BEGIN(INITIAL);
-                    return TOKEN_EOF;
+                    /* Fuerza fallo de parseo: hubo error léxico antes de EOF. */
+                    return TOKEN_UNKNOWN;
                 }
 
 <COMMENT>.|{NL}|{WS} {
@@ -122,6 +134,15 @@ NL             (\r\n|\n)
                     yylval.lexeme = xstrdup(yytext);
                     advance_position(yytext, yyleng);
                     return TOKEN_NUMBER;
+                }
+
+/* Mal formado: 12e3, 12E-10 (sin punto decimal) => error léxico */
+{INT}[eE][+-]?{DIGIT}+ {
+                    int start_line = yylineno;
+                    int start_col  = yycolumn;
+                    advance_position(yytext, yyleng);
+                    lex_error_at(start_line, start_col, "literal numérico con exponente sin punto decimal", yytext);
+                    return TOKEN_UNKNOWN;
                 }
 
 /* Mal formado: 12e, 12e+, 12E- (sin dígitos de exponente) => error léxico */

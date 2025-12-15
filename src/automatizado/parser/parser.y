@@ -1,7 +1,7 @@
 /*
  * parser.y
  * Parser Bison (Yacc) para Mini-Leng (lenguaje reducido).
- * - Diseñado para integrarse con el lexer Flex en src/lexer_flex/lexer.l
+ * - Diseñado para integrarse con el lexer Flex en src/automatizado/lexer/lexer.l
  * - Manejo de errores sintácticos con recuperación básica.
  * - Acciones semánticas mínimas: revisión de tipos + mutabilidad de variables.
  */
@@ -131,7 +131,7 @@ static TypeTag type_of_number_lexeme(const char *lex) {
     int flag;
 }
 
-/* Tokens deben coincidir con los que retorna src/lexer_flex/lexer.l */
+/* Tokens deben coincidir con los que retorna src/automatizado/lexer/lexer.l */
 %token <lexeme> TOKEN_IDENTIFIER TOKEN_NUMBER
 
 %token TOKEN_KW_FN TOKEN_KW_LET TOKEN_KW_MUT TOKEN_KW_IF TOKEN_KW_ELSE TOKEN_KW_RETURN
@@ -168,6 +168,11 @@ static TypeTag type_of_number_lexeme(const char *lex) {
 
 program
     : function_list TOKEN_EOF
+      {
+          if (semantic_errors > 0) {
+              YYABORT;
+          }
+      }
     ;
 
 function_list

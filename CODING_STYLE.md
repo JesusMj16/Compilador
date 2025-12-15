@@ -41,7 +41,7 @@ Este documento define las reglas de estilo de código para garantizar **consiste
 * **Archivos** → minúsculas, palabras separadas con guión bajo.
 
   ```
-  lexer.c, lexer.h, symbol_table.c
+  lexer.l, parser.y, flex_runner.c, main.c
   ```
 
 ---

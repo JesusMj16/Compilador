@@ -4,14 +4,14 @@ Este documento define las reglas léxicas del LENGUAJE REDUCIDO. Se consideran: 
 
 El lexer puede verse como un autómata determinista (DFA). En una implementación con Flex, el DFA se genera automáticamente a partir de expresiones regulares. Cada carácter de la entrada se clasifica primero en una de las siguientes categorías: `LETTER`, `DIGIT`, `_`, operadores individuales (`+ - * / %`), comparadores (`= ! < >`), conectores (`& |`), delimitadores (`( ) { } ; , :`), punto (`.`), espacios (` `, `\t`), saltos de línea (`\n`, `\r`) y fin de archivo.
 
-Con esa clasificación se consulta una tabla de transición explícita que cubre los estados principales:
+En esta versión automatizada, no se mantiene una tabla de transición manual: Flex construye el DFA internamente a partir de las reglas REGEX definidas en el lexer. La prioridad se determina por (1) el lexema más largo posible y (2) el orden de las reglas dentro del archivo.
 
-- `AUTO_START`: punto de entrada para cada token. Decide entre identificadores, números, operadores/delimitadores y detecta comentarios.
-- `AUTO_WHITESPACE`: acumula espacios y saltos de línea, reportando un estado aceptado que simplemente consume el bloque antes de volver a `AUTO_START`.
-- `AUTO_SLASH`: desambiguador para `/`, el inicio de `//` o `/* */`.
-- Estados de aceptación (`AUTO_ACCEPT_*`): indican qué analizador especializado debe ejecutarse (`lex_identifier_or_keyword`, `lex_number`, `lex_operator_or_delimiter`) o si debe consumirse un comentario/espacio.
+El contrato lexer→parser es:
 
-El flujo es: se clasifica el prefijo usando la tabla, se ejecuta la rutina correspondiente y, si se detecta un identificador válido, el lexer lo registra inmediatamente en la tabla de símbolos. Este enfoque asegura que las reglas descritas más abajo se mantengan sincronizadas con el código, y facilita extender el lenguaje agregando columnas (tipos de carácter) o filas (estados) a la tabla.
+- Las reglas viven en `src/automatizado/lexer/lexer.l`.
+- El lexer devuelve tokens compatibles con Bison (definidos en `parser.tab.h`).
+- Espacios en blanco y comentarios se consumen (no producen tokens).
+- Se mantiene ubicación (`yylineno`, `yycolumn`) para reportar errores léxicos y para que el parser pueda reportar errores sintácticos.
 
 ## Identificadores
 ### Forma EBNF
@@ -142,7 +142,7 @@ delimitador -> '(' | ')' | '{' | '}' | ';' | ',' | ':'
 ### Forma EBNF
 ```ebnf
 espacio_blanco -> ' ' | '\t' | salto_linea
-salto_linea    -> '\n' | '\r\n'
+salto_linea    -> '\n' | '\r\n' | '\r'
 ```
 
 ### Forma REGEX

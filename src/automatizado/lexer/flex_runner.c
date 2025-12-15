@@ -3,7 +3,7 @@
  * Runner mínimo para ejecutar el lexer de Flex y comparar contra archivos .expected.txt.
  *
  * Compilación (ejemplo):
- *   flex -o build/lexer.yy.c src/lexer_flex/lexer.l
+ *   flex -o build/lexer.yy.c src/automatizado/lexer/lexer.l
  *   gcc -Ibuild -o bin/flex-runner build/lexer.yy.c src/automatizado/lexer/flex_runner.c
  *
  * Uso:

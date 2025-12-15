@@ -87,7 +87,7 @@ Lenguaje: Utilizando funciones, declaraciones, asignaciones, expresiones lógica
 - Enteros decimales: `0`, `123`.
 - Reales decimales (con exponente opcional): `3.14`, `0.5`, `2.5e10`.
 - El signo `+`/`-` se tokeniza como operador y la negación/unario se resuelve en la fase sintáctica (por ejemplo: `-45` se tokeniza como `-` y `45`).
-- Ejemplos inválidos: `1.2.3`, `12e`.
+- Ejemplos inválidos: `1.2.3`, `12e`, `12e3` (el exponente solo se permite en reales con punto).
 
 ---
 

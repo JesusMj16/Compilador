@@ -43,11 +43,10 @@ Cada archivo debe iniciar con un bloque:
 
 ```c
 /**
- * @file lexer.h
- * @brief Definiciones y prototipos del analizador léxico.
+ * @file flex_runner.c
+ * @brief Runner de pruebas del lexer (Flex).
  *
- * Contiene la definición de estructuras y funciones públicas
- * para el manejo de tokens en el compilador.
+ * Contiene utilidades para ejecutar el lexer y comparar salidas esperadas.
  */
 ```
 
