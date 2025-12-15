@@ -1,0 +1,3 @@
+SINTAX_ERROR_EXPECTED
+Motivo: paréntesis no cerrado.
+Recuperación: el parser debe continuar tras detectar el error.

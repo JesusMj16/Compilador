@@ -1,0 +1,3 @@
+SINTAX_ERROR_EXPECTED
+Motivo: falta ';' al final de la declaración let.
+Recuperación: el parser debe sincronizar en ';' o '}' y continuar.

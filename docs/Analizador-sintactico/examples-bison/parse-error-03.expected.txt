@@ -1,0 +1,2 @@
+SINTAX_ERROR_EXPECTED
+Motivo: 'else' sin un 'if' previo.

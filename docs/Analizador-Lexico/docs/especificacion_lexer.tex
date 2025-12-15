@@ -122,4 +122,87 @@ El lexer debe:
   \item Continuar el análisis en lo posible (estrategia de recuperación mínima: consumir el carácter/lexema inválido y seguir).
 \end{itemize}
 
+\section{Diseño del Analizador Sintáctico y Semántico}
+La fase sintáctica se implementa con \textbf{Bison} (Yacc). El analizador sintáctico consume la secuencia de tokens producida por el lexer (Flex) y construye una representación estructurada del programa (por ejemplo, AST) o ejecuta acciones semánticas durante el parseo.
+
+\subsection{Decisiones de diseño (sintáctico)}
+\begin{itemize}[nosep]
+  \item \textbf{Gramática no ambigua}: se definen precedencias y asociatividades para eliminar ambigüedades de expresiones (aritméticas, relacionales y lógicas).
+  \item \textbf{Integración con el lexer}: el lexer retorna tokens como \texttt{TOKEN\_KW\_FN}, \texttt{TOKEN\_IDENTIFIER}, \texttt{TOKEN\_NUMBER}, etc. Bison debe definir estos tokens (en el header generado) o mapearlos de forma consistente.
+  \item \textbf{Recuperación básica}: se usa el token especial \texttt{error} de Bison para sincronizar el análisis al encontrar errores (por ejemplo, hasta el siguiente \texttt{;} o \texttt{\}}).
+\end{itemize}
+
+\subsection{Definición de gramática (BNF/EBNF)}
+La siguiente gramática es una guía (EBNF) alineada con el lenguaje reducido descrito en \texttt{tokens.md} y \texttt{reglas.md}. El objetivo es soportar: funciones, declaraciones \texttt{let} (con \texttt{mut} opcional), asignaciones, sentencias \texttt{return}, condicionales \texttt{if/else}, y expresiones.
+
+\begin{verbatim}
+programa        -> ( funcion )* EOF
+
+funcion         -> 'fn' IDENT '(' params_opt ')' bloque
+params_opt      -> params | epsilon
+params          -> param ( ',' param )*
+param           -> IDENT ':' tipo
+
+bloque          -> '{' ( sentencia )* '}'
+
+sentencia       -> let_stmt ';'
+               | return_stmt ';'
+               | if_stmt
+               | expr_stmt ';'
+
+let_stmt        -> 'let' mut_opt IDENT tipo_opt init_opt
+mut_opt         -> 'mut' | epsilon
+tipo_opt        -> ':' tipo | epsilon
+init_opt        -> '=' expr | epsilon
+
+return_stmt     -> 'return' expr_opt
+expr_opt        -> expr | epsilon
+
+if_stmt         -> 'if' expr bloque else_opt
+else_opt        -> 'else' bloque | epsilon
+
+expr_stmt       -> expr
+
+expr            -> asignacion
+asignacion      -> IDENT '=' asignacion | log_or
+
+log_or          -> log_and ( '||' log_and )*
+log_and         -> igualdad ( '&&' igualdad )*
+igualdad        -> rel ( ( '==' | '!=' ) rel )*
+rel             -> suma ( ( '<' | '<=' | '>' | '>=' ) suma )*
+suma            -> mult ( ( '+' | '-' ) mult )*
+mult            -> unario ( ( '*' | '/' | '%' ) unario )*
+unario          -> ( '!' | '+' | '-' ) unario | primario
+
+primario        -> NUMBER
+               | 'true'
+               | 'false'
+               | IDENT
+               | IDENT '(' args_opt ')'
+               | '(' expr ')'
+
+args_opt        -> args | epsilon
+args            -> expr ( ',' expr )*
+
+tipo            -> 'i32' | 'f64' | 'bool'
+\end{verbatim}
+
+\subsection{Acciones semánticas: revisión de tipos (mínimo)}
+La revisión de tipos se realiza como verificación semántica básica durante el parseo o en un pase posterior sobre el AST. Reglas mínimas recomendadas:
+\begin{itemize}[nosep]
+  \item \textbf{Declaraciones}: \texttt{let x: T = expr;} requiere que el tipo inferido/obtenido de \texttt{expr} sea compatible con \texttt{T}.
+  \item \textbf{Asignaciones}: \texttt{x = expr;} requiere que \texttt{x} exista en la tabla de símbolos y que el tipo de \texttt{expr} sea compatible.
+  \item \textbf{Operadores}:
+    \begin{itemize}[nosep]
+      \item Aritméticos (\texttt{+ - * / %}): operandos numéricos; resultado numérico.
+      \item Relacionales (\texttt{< <= > >=}): operandos numéricos; resultado \texttt{bool}.
+      \item Igualdad (\texttt{== !=}): operandos de tipos compatibles; resultado \texttt{bool}.
+      \item Lógicos (\texttt{\&\& || !}): operandos booleanos; resultado \texttt{bool}.
+    \end{itemize}
+  \item \textbf{return}: dentro de una función, el valor retornado debe ser una expresión válida (y si se modela tipo de retorno, debe ser compatible).
+  \item \textbf{if/else}: la condición debe ser \texttt{bool}.
+\end{itemize}
+
+Una implementación típica define un enum de tipos (\texttt{TYPE\_I32}, \texttt{TYPE\_F64}, \texttt{TYPE\_BOOL}, \texttt{TYPE\_ERROR}) y propaga tipos en las reglas de expresión mediante atributos semánticos. Cuando se detecta incompatibilidad, se reporta un error semántico con línea/columna y se propaga \texttt{TYPE\_ERROR} para evitar cascadas.
+
 \end{document}

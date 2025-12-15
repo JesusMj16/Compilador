@@ -1,80 +1,119 @@
 # ==============================
-# Makefile para Compilador
+# Makefile para Compilador (VERSIÓN AUTOMATIZADA)
+# Flex + Bison
 # ==============================
 
-# Compilador y banderas
+# Toolchain
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -Iinclude
+CFLAGS = -Wall -Wextra -std=c11 -Iinclude -Ibuild
+
+FLEX ?= flex
+BISON ?= bison
+
+# Compatibilidad Windows/Unix
+ifeq ($(OS),Windows_NT)
+	SHELL := cmd.exe
+	.SHELLFLAGS := /C
+	EXEEXT := .exe
+	# Autodetección (MSYS2 suele instalar flex/bison aquí)
+	ifneq ("$(wildcard C:/msys64/usr/bin/bison.exe)","")
+		BISON := C:/msys64/usr/bin/bison.exe
+	endif
+	ifneq ("$(wildcard C:/msys64/usr/bin/flex.exe)","")
+		FLEX := C:/msys64/usr/bin/flex.exe
+	endif
+else
+	EXEEXT :=
+endif
 
 # Carpetas
 SRC_DIR = src
-LEXER_DIR = $(SRC_DIR)/lexer
-PARSER_DIR = $(SRC_DIR)/parser
+AUTO_DIR = $(SRC_DIR)/automatizado
 INC_DIR = include
 BUILD_DIR = build
 BIN_DIR = bin
 
-# Archivos fuente
-MAIN_SRC = $(SRC_DIR)/main.c
-LEXER_SRC = $(wildcard $(LEXER_DIR)/*.c)
-PARSER_SRC = $(wildcard $(PARSER_DIR)/*.c)
-ALL_SRC = $(MAIN_SRC) $(LEXER_SRC) $(PARSER_SRC)
+# Entradas automatizadas
+LEXER_L = $(AUTO_DIR)/lexer/lexer.l
+PARSER_Y = $(AUTO_DIR)/parser/parser.y
 
-# Archivos objeto
+# Salidas generadas
+LEXER_GEN_C = $(BUILD_DIR)/lexer.yy.c
+PARSER_GEN_C = $(BUILD_DIR)/parser.tab.c
+PARSER_GEN_H = $(BUILD_DIR)/parser.tab.h
+
+# Fuentes
+MAIN_SRC = $(SRC_DIR)/main.c
+
+# Objetos
 MAIN_OBJ = $(BUILD_DIR)/main.o
-LEXER_OBJ = $(patsubst $(LEXER_DIR)/%.c, $(BUILD_DIR)/lexer/%.o, $(LEXER_SRC))
-PARSER_OBJ = $(patsubst $(PARSER_DIR)/%.c, $(BUILD_DIR)/parser/%.o, $(PARSER_SRC))
+LEXER_OBJ = $(BUILD_DIR)/lexer.yy.o
+PARSER_OBJ = $(BUILD_DIR)/parser.tab.o
 ALL_OBJ = $(MAIN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ)
 
 # Ejecutables
-TARGET = $(BIN_DIR)/compilador
-LEXER_TEST = $(BIN_DIR)/lexer-test
+TARGET = $(BIN_DIR)/compilador$(EXEEXT)
+LEXER_RUNNER = $(BIN_DIR)/flex-runner$(EXEEXT)
 
-# Archivos de prueba
-TEST_FILE = src/lexer/test.txt
-EXAMPLES_DIR = docs/Analizador-Lexico/examples
+# Pruebas
+LEX_EXAMPLES_DIR = docs/Analizador-Lexico/examples-flex
+PARSER_EXAMPLES_DIR = docs/Analizador-sintactico/examples/examples-bison
 
 # ==============================
 # Reglas principales
 # ==============================
 
 # Regla por defecto
-all: directories $(TARGET)
+all: directories generate $(TARGET)
 
 # Crear directorios necesarios
 directories:
-	@mkdir -p $(BUILD_DIR)/lexer $(BUILD_DIR)/parser $(BIN_DIR)
+	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
+	@if not exist "$(BIN_DIR)" mkdir "$(BIN_DIR)"
 
-# Compilar ejecutable principal
 $(TARGET): $(ALL_OBJ) | directories
-	@echo "Enlazando ejecutable principal..."
+	@echo "Enlazando ejecutable principal (Flex+Bison)..."
 	$(CC) $(CFLAGS) -o $@ $(ALL_OBJ)
 	@echo "✓ Compilado: $(TARGET)"
 
-# Compilar solo el lexer para pruebas
-$(LEXER_TEST): $(BUILD_DIR)/lexer/lexer.o $(BUILD_DIR)/lexer/keywords.o | directories
-	@echo "Enlazando test del lexer..."
-	$(CC) $(CFLAGS) -DLEXER_STANDALONE -o $@ $^
-	@echo "✓ Compilado: $(LEXER_TEST)"
+$(LEXER_RUNNER): $(LEXER_OBJ) $(BUILD_DIR)/flex_runner.o | directories
+	@echo "Enlazando runner del lexer (Flex standalone)..."
+	$(CC) $(CFLAGS) -o $@ $^
+	@echo "✓ Compilado: $(LEXER_RUNNER)"
 
 # ==============================
 # Reglas de compilación
 # ==============================
 
-# Compilar main.c
-$(BUILD_DIR)/main.o: $(SRC_DIR)/main.c | directories
-	@echo "Compilando main.c..."
+$(MAIN_OBJ): $(MAIN_SRC) $(PARSER_GEN_H) | directories
+	@echo "Compilando main.c (driver Bison)..."
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Compilar archivos del lexer
-$(BUILD_DIR)/lexer/%.o: $(LEXER_DIR)/%.c | directories
-	@echo "Compilando lexer: $<"
+$(PARSER_OBJ): $(PARSER_GEN_C) | directories
+	@echo "Compilando parser generado: $<"
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Compilar archivos del parser
-$(BUILD_DIR)/parser/%.o: $(PARSER_DIR)/%.c | directories
-	@echo "Compilando parser: $<"
+$(LEXER_OBJ): $(LEXER_GEN_C) $(PARSER_GEN_H) | directories
+	@echo "Compilando lexer generado: $<"
 	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/flex_runner.o: $(AUTO_DIR)/lexer/flex_runner.c | directories
+	@echo "Compilando flex_runner.c..."
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# ==============================
+# Generación (Flex/Bison)
+# ==============================
+
+generate: $(PARSER_GEN_C) $(LEXER_GEN_C)
+
+$(PARSER_GEN_C) $(PARSER_GEN_H): $(PARSER_Y) | directories
+	@echo "Generando parser con Bison..."
+	$(BISON) -d -o $(PARSER_GEN_C) $(PARSER_Y)
+
+$(LEXER_GEN_C): $(LEXER_L) $(PARSER_GEN_H) | directories
+	@echo "Generando lexer con Flex..."
+	$(FLEX) -o $(LEXER_GEN_C) $(LEXER_L)
 
 # ==============================
 # Reglas de limpieza
@@ -83,83 +122,38 @@ $(BUILD_DIR)/parser/%.o: $(PARSER_DIR)/%.c | directories
 # Limpiar todo
 clean:
 	@echo "Limpiando archivos compilados..."
-	rm -rf $(BUILD_DIR) $(BIN_DIR)
+	@if exist "$(BUILD_DIR)" rmdir /S /Q "$(BUILD_DIR)"
+	@if exist "$(BIN_DIR)" rmdir /S /Q "$(BIN_DIR)"
 	@echo "✓ Limpieza completa"
 
 # Limpiar solo objetos
 clean-obj:
 	@echo "Limpiando archivos objeto..."
-	rm -rf $(BUILD_DIR)
+	@if exist "$(BUILD_DIR)" rmdir /S /Q "$(BUILD_DIR)"
 	@echo "✓ Archivos objeto eliminados"
 
 # ==============================
 # Reglas de ejecución
 # ==============================
 
-# Ejecutar con análisis léxico
-run-lex: $(TARGET)
-	@echo "=== Ejecutando análisis léxico ==="
-	./$(TARGET) -l $(TEST_FILE)
-
-# Ejecutar con análisis léxico y sintáctico
-run-parse: $(TARGET)
-	@echo "=== Ejecutando análisis léxico y sintáctico ==="
-	./$(TARGET) -p $(TEST_FILE)
-
-# Ejecutar compilación completa
 run: $(TARGET)
-	@echo "=== Ejecutando compilación completa ==="
-	./$(TARGET) $(TEST_FILE)
+	@echo "=== Ejecutando parse (automático) ==="
+	@if "$(FILE)"=="" (echo Error: Especifica un archivo con FILE=archivo.txt & exit /b 1)
+	"$(TARGET)" "$(FILE)"
 
-# Ejecutar con archivo personalizado
 run-file: $(TARGET)
-	@if [ -z "$(FILE)" ]; then \
-		echo "Error: Especifica un archivo con FILE=archivo.txt"; \
-		exit 1; \
-	fi
-	./$(TARGET) $(FILE)
+	@if "$(FILE)"=="" (echo Error: Especifica un archivo con FILE=archivo.txt & exit /b 1)
+	"$(TARGET)" "$(FILE)"
 
-# Generar archivo de tokens
-tokens: $(TARGET)
-	@echo "=== Generando archivo de tokens ==="
-	./$(TARGET) -t $(TEST_FILE)
-
-# Generar tokens con archivo personalizado
-tokens-file: $(TARGET)
-	@if [ -z "$(FILE)" ]; then \
-		echo "Error: Especifica un archivo con FILE=archivo.txt"; \
-		exit 1; \
-	fi
-	./$(TARGET) -t $(FILE)
+lex-runner: $(LEXER_RUNNER)
+	@echo "=== Ejecutando runner del lexer (Flex standalone) ==="
+	"$(LEXER_RUNNER)" --check-all "$(LEX_EXAMPLES_DIR)"
 
 # ==============================
 # Reglas de pruebas
 # ==============================
 
-# Probar con todos los ejemplos de éxito
-test-examples: $(TARGET)
-	@echo "=== Probando ejemplos de éxito ==="
-	@for file in $(EXAMPLES_DIR)/exito-*.txt; do \
-		if [ -f "$$file" ]; then \
-			echo "Probando: $$file"; \
-			./$(TARGET) -l "$$file" || true; \
-			echo ""; \
-		fi \
-	done
-
-# Probar con ejemplos de error
-test-errors: $(TARGET)
-	@echo "=== Probando ejemplos de error ==="
-	@for file in $(EXAMPLES_DIR)/error-*.txt; do \
-		if [ -f "$$file" ]; then \
-			echo "Probando: $$file"; \
-			./$(TARGET) -l "$$file" || true; \
-			echo ""; \
-		fi \
-	done
-
-# Ejecutar todas las pruebas
-test: test-examples test-errors
+test-lexer: lex-runner
 
 # ==============================
 # Reglas de información
@@ -167,11 +161,9 @@ test: test-examples test-errors
 
 # Mostrar información del proyecto
 info:
-	@echo "=== Información del Compilador ==="
-	@echo "Archivos fuente: $(words $(ALL_SRC))"
-	@echo "  - Main: $(MAIN_SRC)"
-	@echo "  - Lexer: $(words $(LEXER_SRC)) archivos"
-	@echo "  - Parser: $(words $(PARSER_SRC)) archivos"
+	@echo "=== Información del Compilador (Automatizado) ==="
+	@echo "  - Lexer Flex: $(LEXER_L)"
+	@echo "  - Parser Bison: $(PARSER_Y)"
 
 
 # Mostrar ayuda
@@ -179,36 +171,28 @@ help:
 	@echo "=== Makefile del Compilador - Ayuda ==="
 	@echo ""
 	@echo "Reglas principales:"
-	@echo "  all          - Compilar el proyecto completo"
+	@echo "  all          - Generar (Flex/Bison) y compilar"
+	@echo "  generate     - Solo generar lexer/parser"
 	@echo "  clean        - Limpiar archivos compilados"
 	@echo ""
 	@echo "Ejecución:"
-	@echo "  run          - Ejecutar compilación completa"
-	@echo "  run-lex      - Ejecutar solo análisis léxico"
-	@echo "  run-parse    - Ejecutar análisis léxico y sintáctico"
 	@echo "  run-file FILE=archivo.txt - Ejecutar con archivo específico"
-	@echo "  tokens       - Generar archivo de tokens del archivo de prueba"
-	@echo "  tokens-file FILE=archivo.txt - Generar tokens de archivo específico"
+	@echo "  test-lexer   - Ejecuta el runner del lexer en examples-flex"
 	@echo ""
 	@echo "Pruebas:"
-	@echo "  test         - Ejecutar todas las pruebas"
-	@echo "  test-examples - Probar ejemplos de éxito"
-	@echo "  test-errors  - Probar ejemplos de error"
+	@echo "  test-lexer   - Pruebas del lexer Flex (standalone)"
 	@echo ""
 	@echo "Información:"
 	@echo "  info         - Mostrar información del proyecto"
 	@echo "  help         - Mostrar esta ayuda"
 	@echo ""
 	@echo "Ejemplos:"
-	@echo "  make all              # Compilar todo"
-	@echo "  make run-lex          # Solo análisis léxico"
-	@echo "  make tokens           # Generar archivo de tokens"
-	@echo "  make run-file FILE=mi_programa.lang"
-	@echo "  make tokens-file FILE=mi_programa.lang"
+	@echo "  mingw32-make all"
+	@echo "  mingw32-make test-lexer"
+	@echo "  mingw32-make run-file FILE=docs/Analizador-sintactico/archivos_parser/exito-01.txt"
 
 # ==============================
 # Reglas que no son archivos
 # ==============================
 
-.PHONY: all clean clean-obj run run-lex run-parse run-file tokens tokens-file \
-        test test-examples test-errors info help directories
+.PHONY: all clean clean-obj generate run run-file lex-runner test-lexer info help directories
