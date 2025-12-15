@@ -65,12 +65,12 @@ make all
 
 Ejemplos de entrada (programas) para el parser:
 
-- `docs/Analizador-sintactico/archivos_parser/`
+- `docs/Analizador-sintactico/examples-bison/`
 
 Ejecutar:
 
 ```powershell
-mingw32-make run-file FILE=docs/Analizador-sintactico/archivos_parser/exito-01.txt
+mingw32-make run-file FILE=docs/Analizador-sintactico/examples-bison/parse-exito-01.txt
 ```
 
 ## Pruebas del parser

@@ -5,28 +5,15 @@
 /*
  * Lexer Flex para el lenguaje reducido.
  * - Alineado con docs/Analizador-Lexico/docs/reglas.md y tokens.md
- * - Diseñado para integrarse con Bison (parser.tab.h) cuando exista.
- * - En ausencia de Bison, retorna los TokenType definidos en include/lexer.h.
+ * - Integrado con Bison mediante parser.tab.h (tokens y YYSTYPE).
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* Intentar incluir tokens de Bison si están disponibles. */
-#if defined(__has_include)
-#  if __has_include("parser.tab.h")
-#    include "parser.tab.h"
-#    define HAVE_BISON_HEADER 1
-#  endif
-#endif
-
-#ifndef HAVE_BISON_HEADER
-#  include "lexer.h"
-   /* Definición mínima para permitir compilar el lexer sin el parser de Bison. */
-   typedef struct { char *lexeme; } YYSTYPE;
-   YYSTYPE yylval;
-#endif
+/* En esta rama automatizada, el lexer depende del header generado por Bison. */
+#include "parser.tab.h"
 
 int yycolumn = 1;
 int yylineno = 1;

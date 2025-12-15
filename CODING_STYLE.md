@@ -150,7 +150,7 @@ bool insert_symbol(SymbolTable *table, const char *name);
 ## 🔹 9. Organización del proyecto
 
 * Código fuente en `/src`.
-* Headers en `/include`.
+* Archivos generados (Flex/Bison) en `/build` durante la compilación.
 * Pruebas en `/tests`.
 * Documentación en `/docs`.
 
@@ -159,8 +159,10 @@ bool insert_symbol(SymbolTable *table, const char *name);
 ## 🔹 10. Ejemplo completo
 
 ```c
-#include "lexer.h"
 #include <stdio.h>
+
+/* Ejemplo de plantilla: declara interfaces externas aquí si aplica. */
+extern int yyparse(void);
 
 /**
  * @brief Punto de entrada del compilador.
@@ -168,14 +170,7 @@ bool insert_symbol(SymbolTable *table, const char *name);
  * @return 0 si la ejecución fue exitosa, otro valor si hubo error.
  */
 int main(void) {
-  Lexer lexer;
-  init_lexer(&lexer, "program.txt");
-
-  Token token;
-  while ((token = scan_token(&lexer)).type != TOKEN_EOF) {
-    printf("Token: %s\n", token.lexeme);
-  }
-
+  (void)yyparse();
   return 0;
 }
 ```

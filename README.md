@@ -14,7 +14,6 @@ Este repositorio contiene la versión **automatizada** del compilador usando **F
 - Lexer (tests): `docs/Analizador-Lexico/examples-flex/`
 - Parser (gramática): `docs/Analizador-sintactico/docs/`
 - Parser (tests): `docs/Analizador-sintactico/examples-bison/`
-- Programas de entrada (parser): `docs/Analizador-sintactico/archivos_parser/`
 
 ## Compilar
 
@@ -39,7 +38,7 @@ make all
 El ejecutable parsea un archivo y reporta `PARSE_OK` o `PARSE_FAIL`.
 
 ```powershell
-mingw32-make run-file FILE=docs/Analizador-sintactico/archivos_parser/exito-01.txt
+mingw32-make run-file FILE=docs/Analizador-sintactico/examples-bison/parse-exito-01.txt
 ```
 
 ## Pruebas (lexer)

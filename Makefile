@@ -5,7 +5,7 @@
 
 # Toolchain
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -Iinclude -Ibuild
+CFLAGS = -Wall -Wextra -std=c11 -Ibuild
 
 FLEX ?= flex
 BISON ?= bison
@@ -29,7 +29,6 @@ endif
 # Carpetas
 SRC_DIR = src
 AUTO_DIR = $(SRC_DIR)/automatizado
-INC_DIR = include
 BUILD_DIR = build
 BIN_DIR = bin
 

@@ -4,7 +4,7 @@
  *
  * Compilación (ejemplo):
  *   flex -o build/lexer.yy.c src/lexer_flex/lexer.l
- *   gcc -Iinclude -o bin/flex-runner build/lexer.yy.c src/lexer_flex/flex_runner.c -lfl
+ *   gcc -Ibuild -o bin/flex-runner build/lexer.yy.c src/automatizado/lexer/flex_runner.c
  *
  * Uso:
  *   bin/flex-runner --lex <archivo>
@@ -16,7 +16,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lexer.h"
+/* Tokens/YYSTYPE generados por Bison (Makefile los genera en build/) */
+#include "parser.tab.h"
 
 /* Interfaz Flex */
 extern int yylex(void);
@@ -27,11 +28,10 @@ extern char *yytext;
 extern int yylineno;
 extern int yycolumn;
 
-/* yylval (solo en modo standalone; el lexer.l define este layout cuando no hay Bison) */
-typedef struct { char *lexeme; } YYSTYPE;
+/* yylval viene declarado por Bison (parser.tab.h) */
 extern YYSTYPE yylval;
 
-static const char *token_name(TokenType t) {
+static const char *token_name(int t) {
     switch (t) {
         case TOKEN_IDENTIFIER:     return "TOKEN_IDENTIFIER";
         case TOKEN_NUMBER:         return "TOKEN_NUMBER";
@@ -142,7 +142,7 @@ static char *lex_to_string(FILE *in) {
     size_t len = 0;
 
     for (;;) {
-        TokenType tok = (TokenType)yylex();
+        int tok = yylex();
         const char *name = token_name(tok);
         const char *lex = (tok == TOKEN_EOF) ? "" : yytext;
 

@@ -22,13 +22,13 @@ El ejecutable principal parsea un archivo y reporta `PARSE_OK` o `PARSE_FAIL`.
 En Windows (MinGW):
 
 ```powershell
-mingw32-make run-file FILE=docs/Analizador-sintactico/archivos_parser/exito-01.txt
+mingw32-make run-file FILE=docs/Analizador-sintactico/examples-bison/parse-exito-01.txt
 ```
 
 En Linux/macOS:
 
 ```bash
-make run-file FILE=docs/Analizador-sintactico/archivos_parser/exito-01.txt
+make run-file FILE=docs/Analizador-sintactico/examples-bison/parse-exito-01.txt
 ```
 
 ### 2. Árbol de Sintaxis Abstracta (AST)
@@ -79,35 +79,9 @@ Program
             └─ Return: x + 1
 ```
 
-## Archivos de Código
+## Nota
 
-```
-include/
-  parser.h              # Declaraciones del parser
-
-src/parser/
-  parser.c              # Implementación completa
-
-src/
-  main.c                # Integración con main
-
-Makefile                # Reglas de compilación
-```
-
-## Estadísticas
-
-El parser puede mostrar estadísticas de su ejecución:
-
-```
-    Estadísticas del Parser:
-   Desplazamientos (shift): 45
-   Reducciones (reduce):    23
-   Tamaño de pila:          1
-```
-
-## Características
-
-- [x] Parsing ascendente (bottom-up)
+El contenido anterior sobre implementación manual y estadísticas no aplica en esta rama automatizada.
 - [x] Pila dinámica con estados LR
 - [x] Construcción de AST
 - [x] Precedencia de operadores
