@@ -1,7 +1,0 @@
-# Tabla de Simbolos
-# Formato: lexema | tipo_token | tipo_dato | ambito | lineas
-# Total de simbolos: 3
-
-x | 0 | - | 0 | 2
-y | 0 | - | 0 | 3
-main | 0 | - | 0 | 1

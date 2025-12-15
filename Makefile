@@ -57,7 +57,7 @@ LEXER_RUNNER = $(BIN_DIR)/flex-runner$(EXEEXT)
 
 # Pruebas
 LEX_EXAMPLES_DIR = docs/Analizador-Lexico/examples-flex
-PARSER_EXAMPLES_DIR = docs/Analizador-sintactico/examples/examples-bison
+PARSER_EXAMPLES_DIR = docs/Analizador-sintactico/examples-bison
 
 # ==============================
 # Reglas principales

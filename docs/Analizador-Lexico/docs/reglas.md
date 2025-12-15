@@ -2,7 +2,7 @@ Este documento define las reglas léxicas del LENGUAJE REDUCIDO. Se consideran: 
 
 ## Modelo (DFA) usado por el lexer
 
-El lexer puede verse como un autómata determinista (DFA). En una implementación con Flex, el DFA se genera automáticamente a partir de expresiones regulares; en una implementación manual, puede representarse con tablas. Cada carácter de la entrada se clasifica primero en una de las siguientes categorías: `LETTER`, `DIGIT`, `_`, operadores individuales (`+ - * / %`), comparadores (`= ! < >`), conectores (`& |`), delimitadores (`( ) { } ; , :`), punto (`.`), espacios (` `, `\t`), saltos de línea (`\n`, `\r`) y fin de archivo.
+El lexer puede verse como un autómata determinista (DFA). En una implementación con Flex, el DFA se genera automáticamente a partir de expresiones regulares. Cada carácter de la entrada se clasifica primero en una de las siguientes categorías: `LETTER`, `DIGIT`, `_`, operadores individuales (`+ - * / %`), comparadores (`= ! < >`), conectores (`& |`), delimitadores (`( ) { } ; , :`), punto (`.`), espacios (` `, `\t`), saltos de línea (`\n`, `\r`) y fin de archivo.
 
 Con esa clasificación se consulta una tabla de transición explícita que cubre los estados principales:
 

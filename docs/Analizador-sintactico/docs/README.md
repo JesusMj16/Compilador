@@ -1,82 +1,35 @@
-# Parser Ascendente LR - Documentación
+ # Parser (versión automatizada con Bison)
 
-Este directorio contiene la documentación completa del **Parser Ascendente (Bottom-Up)** implementado para el compilador.
+Este directorio documenta el analizador sintáctico del proyecto en su versión **automatizada**, implementada con **Bison**.
 
-## Documentos Disponibles
+## Documentos disponibles
 
-### 1. [RESUMEN.md](RESUMEN.md) - **Empieza Aquí** 
-**Resumen ejecutivo de la implementación**
-- Lista de componentes implementados
-- Guía rápida de uso
-- Ejemplos prácticos
-- Checklist completo
+- [gramatica-ebnf.md](gramatica-ebnf.md): gramática EBNF del lenguaje.
+- [gramatica-bnf.md](gramatica-bnf.md): gramática en BNF (derivada).
 
-### 2. [parser-doc.md](parser-doc.md) - **Documentación Técnica Detallada**
-**Documentación completa del parser**
-- Arquitectura del parser
-- Descripción de la pila
-- Estructura del AST
-- Matriz de transiciones (ACTION y GOTO)
-- Algoritmo de parsing
-- API completa
+## Ejemplos
 
-### 3. [DIAGRAMAS.md](DIAGRAMAS.md) - **Visualizaciones**
-**Diagramas y ejemplos visuales**
-- Flujo del compilador
-- Estructura de la pila
-- Construcción del AST
-- Tablas de transición
-- Ejemplos paso a paso
-- Comparaciones de enfoques
+Los casos de prueba del parser están en:
 
-### 4. [gramatica.md](gramatica.md) - **Gramática del Lenguaje**
-**Gramática EBNF completa**
-- Definición de todas las producciones
-- Reglas de sintaxis
-- Estructura del lenguaje
+- `docs/Analizador-sintactico/examples-bison/`
 
-### 5. [tabla-pi-pd.md](tabla-pi-pd.md) - **Conjuntos FIRST y LAST**
-**Análisis de la gramática**
-- Conjuntos Primera Izquierda (PI/FIRST)
-- Conjuntos Primera Derecha (PD/LAST)
-- Análisis de no terminales
+Cada caso suele incluir el archivo `.txt` y su salida esperada `.expected.txt`.
 
-## Inicio Rápido
+## Ejecución
 
-### Compilar el Proyecto
-```bash
-cd /home/dante/Documents/Universidad/Compiladores/Compilador
-make clean && make all
+El ejecutable principal parsea un archivo y reporta `PARSE_OK` o `PARSE_FAIL`.
+
+En Windows (MinGW):
+
+```powershell
+mingw32-make run-file FILE=docs/Analizador-sintactico/archivos_parser/exito-01.txt
 ```
 
-### Ejecutar el Parser
+En Linux/macOS:
+
 ```bash
-# Solo análisis sintáctico
-./bin/compilador -p archivo.txt
-
-# Con estadísticas
-./bin/compilador -p -s archivo.txt
-
-# Análisis completo (léxico + sintáctico)
-./bin/compilador archivo.txt
+make run-file FILE=docs/Analizador-sintactico/archivos_parser/exito-01.txt
 ```
-
-## Orden de Lectura Recomendado
-
-Para entender completamente el parser, se recomienda leer en este orden:
-
-1. **RESUMEN.md** - Para obtener una visión general
-2. **DIAGRAMAS.md** - Para entender visualmente cómo funciona
-3. **parser-doc.md** - Para detalles técnicos
-4. **gramatica.md** - Para la gramática completa
-5. **tabla-pi-pd.md** - Para análisis formal
-
-## Componentes Principales
-
-### 1. Pila (Stack)
-- Mantiene estados LR
-- Almacena nodos parciales del AST
-- Implementación dinámica con crecimiento automático
 
 ### 2. Árbol de Sintaxis Abstracta (AST)
 - Representa la estructura del programa
